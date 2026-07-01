@@ -1,0 +1,339 @@
+openapi: 3.0.4
+info:
+  title: Cloud Pacs
+  description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.
+  version: 1.0.0
+
+servers:
+  - url: no_url_yet
+
+paths:
+  /users:
+    get:
+      summary: Returns a list of users.
+      responses:
+        "200": # status code
+          description: an array of user names
+
+  /users/{userId}:
+    get:
+      summary: Get unique user id
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200": # status code
+          description: user details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                  clients:
+                    type: array
+
+  /users/{userId}/clients:
+    get:
+      summary: Returns a list of clients.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200": # status code
+          description: an array of client names
+
+  /users/{userId}/clients/{clientId}:
+    get:
+      summary: Get unique client id
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200": # status code
+          description: client details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clientId:
+                    type: string
+                  studies:
+                    type: array
+
+  /users/{userId}/clients/{clientId}/patients:
+    get:
+      summary: Returns a list of patients.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200": # status code
+          description: an array of client patients.
+
+  /users/{userId}/clients/{clientId}/patients/{patientId}:
+    get:
+      summary: Get unique patient id
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200": # status code
+          description: patient details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patientId:
+                    type: string
+                  studies:
+                    type: array
+          
+
+  /users/{userId}/clients/{clientId}/patients/{patientId}/studies:
+    get:
+      summary: Returns a list of studies.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200": # status code
+          description: an array of client studies.
+
+  /users/{userId}/clients/{clientId}/patients/{patientId}/studies/{studyId}:
+    get:
+      summary: Get unique study id
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: studyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200": # status code
+          description: study details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  studyId:
+                    type: string
+                  series:
+                    type: array
+
+  /users/{userId}/clients/{clientId}/patients/{patientId}/studies/{studyId}/series:
+    get:
+      summary: Returns a list of series.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: studyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200": # status code
+          description: an array of client series.
+
+  /users/{userId}/clients/{clientId}/patients/{patientId}/studies/{studyId}/series/{seriesId}:
+    get:
+      summary: Get unique series id
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: studyId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: seriesId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200": # status code
+          description: series details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  seriesId:
+                    type: string
+                  instances:
+                    type: array
+
+  /users/{userId}/clients/{clientId}/patients/{patientId}/studies/{studyId}/series/{seriesId}/instances:
+    get:
+      summary: Returns a list of instances.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: studyId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: seriesId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200": # status code
+          description: an array of client instances.
+
+  /users/{userId}/clients/{clientId}/patients/{patientId}/studies/{studyId}/series/{seriesId}/instances/{instanceId}:
+    get:
+      summary: Get unique series id
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: studyId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: seriesId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200": # status code
+          description: instance details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  instanceId:
+                    type: string
+                  seriesId:
+                    type: string

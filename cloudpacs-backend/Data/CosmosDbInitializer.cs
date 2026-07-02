@@ -1,4 +1,4 @@
-namespace CloudPACS.Backend
+namespace CloudPACS.Backend.Data
 {
     using System;
     using System.Net.Http;

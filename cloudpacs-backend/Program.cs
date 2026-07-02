@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
+    using CloudPACS.Backend.Data;
     using DotNetEnv;
 
     public class Program

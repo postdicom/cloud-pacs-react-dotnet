@@ -6,7 +6,6 @@ import Query from "./queryClientProvider"
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {/* <Query /> */}
     <App />
   </StrictMode>,
 )

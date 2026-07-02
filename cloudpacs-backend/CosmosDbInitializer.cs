@@ -60,16 +60,8 @@ namespace CloudPACS.Backend
                     id: containerName,
                     partitionKeyPath: partitionKeyPath
                 );
-                
-                if(db.CreateContainerIfNotExistsAsync(containerProperties) != null)
-                {
-                    Console.WriteLine($"This {db.Id}/{containerName} container is already in the database.");
-                }
-                else
-                {
                     Container container = await db.CreateContainerIfNotExistsAsync(containerProperties);
-                    Console.WriteLine($"{db.Id}/{containerName} is created to the database");
-                }
+                    Console.WriteLine($"{db.Id}/{containerName} is created to the database or is already in the database");
             }
             catch (CosmosException cosmosEx)
             {

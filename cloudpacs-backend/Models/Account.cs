@@ -1,22 +1,32 @@
 namespace CloudPACS.Backend
 {
     using System;
+    using System.Text.Json.Serialization;
     public class Account
     {
-        public Guid AccountUuid { get; set; }
-        public Guid OwnerUserUuid { get; set; }
-        public string Role { get; set; }
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+        public string accountId { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        //public Guid AccountUuid { get; set; }
+        //public Guid OwnerUserUuid { get; set; }
+        //public string Role { get; set; }
         public AccountIdentityInformation IdentityInformation { get; set; }
-        public Account(Guid UserUuid, string username, string phoneNumber, string country)
+        public Account(Guid UserUuid, string username, /*string phoneNumber, string country,*/ string AccountID, string password)
         {
-            AccountUuid =  Guid.Empty;
-            OwnerUserUuid =  Guid.Empty;
+            //AccountUuid = Guid.NewGuid();
+            accountId = AccountID;
+            //OwnerUserUuid = UserUuid;
+            Username = username;
+            Password = password;
+            //Role = "Owner";
             IdentityInformation = new AccountIdentityInformation
             {
                 Name = username,
-                EmailAddress = $"{username}@example.com",
-                CountryName = country,
-                PhoneNumber = phoneNumber
+                EmailAddress = $"jane@hospital.org",
+                //CountryName = country,
+                //PhoneNumber = phoneNumber
             };
         }
     }

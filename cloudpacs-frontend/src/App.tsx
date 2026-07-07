@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from "react-router";
 import { Navigate, Outlet } from 'react-router'
 import './App.css'
-import Login from './login'
+import Login from './pages/login'
 
 function App() {
 
@@ -15,8 +15,6 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-    {/* Hello World  */}
-      
     </>
   )
 }

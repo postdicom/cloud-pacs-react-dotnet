@@ -5,20 +5,23 @@ namespace CloudPACS.Backend
     public class Account
     {
         [JsonProperty("id")]
-        public string Id => accountId;
-        public string accountId { get; set; }
+        public string Id => AccountId;
+        public string AccountId { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         //public Guid AccountUuid { get; set; }
         //public Guid OwnerUserUuid { get; set; }
         //public string Role { get; set; }
         public AccountIdentityInformation IdentityInformation { get; set; }
-        public Account(Guid UserUuid, string username, /*string phoneNumber, string country,*/ string AccountID, string password)
+        public Account(Guid UserUuid, string username, /*string phoneNumber, string country,*/ string accountId, string password)
         {
             //AccountUuid = Guid.NewGuid();
-            accountId = AccountID;
+            AccountId = accountId;
             //OwnerUserUuid = UserUuid;
-            Username = username;
+            Username = username; 
+            // TODO: Remove Username and Password from Account, they belong in User.cs
+            // TODO: Add a Type field to filter accounts.
+            // TODO: Add CreatedAt / UpdatedAt for sorting the accounts later.
             Password = password;
             //Role = "Owner";
             IdentityInformation = new AccountIdentityInformation

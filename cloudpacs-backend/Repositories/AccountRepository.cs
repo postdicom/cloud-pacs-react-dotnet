@@ -3,7 +3,7 @@ namespace CloudPACS.Backend
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos;
 
-    public class AccountRepository
+    public class AccountRepository : IAccountRepository
     {
         private readonly Container container;
 
@@ -14,7 +14,14 @@ namespace CloudPACS.Backend
 
         public async Task AddAccountAsync(Account account)
         {
-            await container.CreateItemAsync(account, new PartitionKey(account.accountId));
+            try
+            {
+                await container.CreateItemAsync(account, new PartitionKey(account.AccountId));
+            }
+            catch (CosmosException ex)
+            {
+                throw new System.Exception($"An error has occured while adding the account: {ex.Message}", ex);
+            }
         }
     }
 }

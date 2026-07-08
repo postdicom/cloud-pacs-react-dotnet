@@ -4,15 +4,13 @@ namespace CloudPACS.Backend.Controllers
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
 
-    public record RegisterRequest(string email, string password /*string Username, string PhoneNumber, string Country, string Brandname*/);
-
     [Route("api")]
     [ApiController]
     public class RegisterController : ControllerBase
     {
-        private readonly AccountRepository _accountRepo;
+        private readonly IAccountRepository _accountRepo;
 
-        public RegisterController(AccountRepository accountRepo)
+        public RegisterController(IAccountRepository accountRepo)
         {
             _accountRepo = accountRepo;
         }

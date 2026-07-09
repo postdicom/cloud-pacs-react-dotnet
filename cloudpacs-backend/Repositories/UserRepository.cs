@@ -78,5 +78,41 @@ namespace CloudPACS.Backend
                 throw;
             }
         }
+        public async Task<User> ReadUserAsync(string userId, string accountId)
+        {
+            try
+            {
+                ItemResponse<User> response = await container.ReadItemAsync<User>(userId, new PartitionKey(accountId));
+
+                return response.Resource;
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteLine("The user has not been found");
+                return null;
+            }
+            catch (CosmosException ex)
+            {
+                Console.WriteLine($"Cosmos error while reading user: {ex.StatusCode} — {ex.Message}");
+                throw;
+            }
+        }
+        public async Task DeleteUserAsync(string userId, string accountId)
+        {
+            try
+            {
+                await container.DeleteItemAsync<User>(userId, new PartitionKey(accountId));
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteLine("This user does not exist.");
+                return;
+            }
+            catch (CosmosException ex)
+            {
+                Console.WriteLine($"Cosmos error while deleting user: {ex.StatusCode} — {ex.Message}");
+                throw;
+            }
+        }
     }
 }

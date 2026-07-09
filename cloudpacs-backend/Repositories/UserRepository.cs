@@ -4,6 +4,7 @@ namespace CloudPACS.Backend
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos;
+    using Microsoft.Identity.Client;
 
     public class UserRepository : IUserRepository
     {
@@ -18,7 +19,7 @@ namespace CloudPACS.Backend
         {
             try
             {
-                bool exists = await IfEmailExistsAsync(user.Email, user.AccountId);
+                bool exists = await IsEmailExistsAsync(user.Email, user.AccountId);
                 if (exists)
                 {
                     throw new InvalidOperationException($"There is already an user with the email of '{user.Email}.'");
@@ -32,13 +33,13 @@ namespace CloudPACS.Backend
                 throw;
             }
         }
-        public async Task<bool> IfEmailExistsAsync(string email, string accountId)
+        public async Task<bool> IsEmailExistsAsync(string email, string accountId)
         {
             try
             {
                 var query = new QueryDefinition(
-                    "SELECT VALUE COUNT(1) FROM c WHERE c.email = @email AND c.AccountId = @accountId")
-                    .WithParameter("@email", email)
+                    "SELECT VALUE COUNT(1) FROM c WHERE c.Email = @email AND c.AccountId = @accountId")
+                    .WithParameter("@Email", email)
                     .WithParameter("@accountId", accountId);
 
                 using FeedIterator<int> iterator = container.GetItemQueryIterator<int>(
@@ -59,18 +60,15 @@ namespace CloudPACS.Backend
                 throw;
             }
         }
-        public async Task UpsertUserAsync(User user, UserRole newRole, string newEmail, string newUsername, string newPhoneNumber)
+        public async Task UpdateUserAsync(User user, UserRole newRole, string newEmail, string newUsername, string newPhoneNumber, string userId, string accountId)
         {
             try
             {
-                var patchOperations = new List<PatchOperation>
-                {
-                    PatchOperation.Replace("/Email", newEmail),
-                    PatchOperation.Replace("/Role", newRole),
-                    PatchOperation.Replace("/PhoneNumber", newPhoneNumber),
-                    PatchOperation.Replace("/Username", newUsername)
-                };
-                await container.PatchItemAsync<User>(user.UserId, new PartitionKey(user.AccountId), patchOperations);
+                user.Email = newEmail;
+                user.Name = newUsername;
+                user.Role = newRole;
+                user.PhoneNumber = newPhoneNumber;
+                await container.ReplaceItemAsync(user, userId, new PartitionKey(accountId));
             }
             catch (CosmosException ex)
             {

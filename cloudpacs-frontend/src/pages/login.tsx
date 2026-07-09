@@ -36,6 +36,7 @@ function Login(){
                         className="textFields"
                         placeholder="jane@hospital.org"
                         variant="outlined"
+                        type="email"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}/>

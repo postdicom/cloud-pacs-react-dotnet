@@ -1,4 +1,31 @@
-//account id burda olucak
-//swager
-//.http endpoint denemek için bu ikisi
-//to do commentleri lazım
+namespace CloudPACS.Backend
+{
+    using System;
+    using Newtonsoft.Json;
+
+    public enum UserRole
+    {
+        Admin,
+        Radiologist,
+        Viewer
+    }
+
+    public class User
+    {
+        [JsonProperty("id")]
+        public string UserId { get; set; } = Guid.NewGuid().ToString();
+        public string AccountId { get; set; } // partition key — links user to their clinic/account
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public UserRole Role { get; set; }
+        public DateTime? LastLoginAt { get; set; }
+
+        public User(string accountId, string name, string email, UserRole role)
+        {
+            AccountId = accountId;
+            Name = name;
+            Email = email;
+            Role = role;
+        }
+    }
+}

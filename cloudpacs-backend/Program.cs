@@ -44,6 +44,7 @@
 
             builder.Services.AddSingleton(new CosmosClient(endpoint, key, cosmosClientOptions));
             builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
 
             builder.Services.AddCors(options =>
             {

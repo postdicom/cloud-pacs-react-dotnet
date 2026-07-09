@@ -44,11 +44,12 @@
 
             builder.Services.AddSingleton(new CosmosClient(endpoint, key, cosmosClientOptions));
             builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
 
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
-                    policy.WithOrigins("http://localhost:3000")
+                    policy.WithOrigins("http://localhost:5071")
                           .AllowAnyHeader()
                           .AllowAnyMethod());
             });

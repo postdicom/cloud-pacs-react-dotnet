@@ -10,16 +10,17 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route element={<PrivateRoutes/>}>
-            <Route path="login" element={<Login />}></Route>
+          <Route element={<ProtectedRoute/>}>
+            
           </Route>
+            <Route path="login" element={<Login />}></Route>
         </Routes>
       </BrowserRouter>
     </>
   )
 }
 
-const PrivateRoutes = () => {
+const ProtectedRoute = () => {
   let auth = {'token':true}
   return (
     auth.token ? <Outlet/> : <Navigate to='/login'/>

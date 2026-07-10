@@ -56,7 +56,7 @@ namespace CloudPACS.Backend.Controllers
 
         [HttpPost]
         [Route("Login")]
-        public async Task<ActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
+        public async Task<User?> Login([FromBody] LoginRequestDto loginRequestDto)
         {
             try
             {
@@ -68,20 +68,16 @@ namespace CloudPACS.Backend.Controllers
                 {
                     if(await userRepository.CheckPasswordAsync(loginRequestDto))
                     {
-                        return Ok(new { success = true, message = "Account logged in."});
-                    }
-                    else
-                    {
-                        return NotFound("Wrong password");
+                        return user;
                     }
                 }
-                return NotFound("Account not found");             
+                return null; 
             }
 
             catch (Exception ex)
             {
                 Console.WriteLine($"DATABASE ERROR: {ex.Message}");
-                return BadRequest(new { success = false, message = ex.Message });
+                return null;
             }
         }
     }

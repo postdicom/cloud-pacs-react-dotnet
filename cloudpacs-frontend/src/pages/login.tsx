@@ -6,15 +6,17 @@ function Login(){
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    let handleSubmit = (e: React.ChangeEvent<any>) => {
+    let handleSubmit = async (e: React.ChangeEvent<any>) => {
         e.preventDefault();
         const details = {email, password};
 
-        fetch("http://localhost:5000/api/test",{
+        const response = await fetch("http://localhost:5000/api/test",{
             method: 'POST',
             headers: { "Content-type": "application/json"},
             body: JSON.stringify(details)
         })
+        const data = await response.json();
+        localStorage.setItem("token", data.token);
     }
 
     return <>

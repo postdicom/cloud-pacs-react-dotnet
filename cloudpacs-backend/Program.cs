@@ -21,8 +21,6 @@
 
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
 
             using (var dbInitializer = new CosmosDbInitializer(endpoint, key))
             {
@@ -49,7 +47,7 @@
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
-                    policy.WithOrigins("http://localhost:3000/api/Auth/")
+                    policy.WithOrigins("http://localhost:5071/")
                           .AllowAnyHeader()
                           .AllowAnyMethod());
             });
@@ -60,7 +58,7 @@
 
 
 
-            var app = builder.Build(); 
+            var app = builder.Build();
 
             app.UseSwagger();//swager test
             app.UseSwaggerUI();

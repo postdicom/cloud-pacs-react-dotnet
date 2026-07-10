@@ -1,6 +1,7 @@
 namespace CloudPACS.Backend.Controllers
 {
     using System;
+    using BCrypt.Net;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
 
@@ -8,29 +9,40 @@ namespace CloudPACS.Backend.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IAccountRepository accountRepo;
+        private readonly IAccountRepository accountRepository;
+        private IUserRepository userRepository;
 
-        public AuthController(IAccountRepository accountRepo)
+        public AuthController(IAccountRepository accountRepository, IUserRepository userRepository)
         {
-            this.accountRepo = accountRepo;
+            this.accountRepository = accountRepository;
+            this.userRepository = userRepository;
         }
         [HttpPost]
         [Route("Register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestDto req)
+        public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
         {
             try
             {
                 Console.WriteLine("Attempting to save user to Database...");
                 var account = new Account(
                     Guid.NewGuid(),
-                    req.Email,
+                    registerRequestDto.Email,
                     Guid.NewGuid().ToString(),
-                    req.Password
+                    BCrypt.HashPassword(registerRequestDto.Password)
                 //req.PhoneNumber, 
                 //req.Country,     
                 );
 
-                await accountRepo.AddAccountAsync(account);
+                var user = new User(
+                    account.AccountId,
+                    registerRequestDto.Name,
+                    registerRequestDto.Email,
+                    registerRequestDto.Role,
+                    registerRequestDto.Password
+                );
+
+                await accountRepository.AddAccountAsync(account);
+                await userRepository.AddUserAsync(user);
                 Console.WriteLine("Successfully saved!");
 
                 return Ok(new { success = true, message = "Account created." });
@@ -50,14 +62,20 @@ namespace CloudPACS.Backend.Controllers
             {
                 Console.WriteLine("Attempting to get user from Database...");
 
-                var account = await accountRepo.LoginAsync(loginRequestDto);
+                var user = await userRepository.FindUserAsync(loginRequestDto.Email);
 
-                if (account != null)
+                if (user != null)
                 {
-                    return Ok(new { success = true, message = "Account logged in."});
+                    if(await userRepository.CheckPasswordAsync(loginRequestDto))
+                    {
+                        return Ok(new { success = true, message = "Account logged in."});
+                    }
+                    else
+                    {
+                        return NotFound("Wrong password");
+                    }
                 }
-
-                return NotFound("Account not found");
+                return NotFound("Account not found");             
             }
 
             catch (Exception ex)

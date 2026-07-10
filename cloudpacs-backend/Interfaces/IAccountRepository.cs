@@ -4,6 +4,5 @@ namespace CloudPACS.Backend
     public interface IAccountRepository
     {
         Task AddAccountAsync(Account account);
-        Task<Account?> LoginAsync(LoginRequestDto loginRequestDto);
     }
 }

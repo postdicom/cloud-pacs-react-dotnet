@@ -27,28 +27,27 @@ function Login(){
                     </div>
 
                     <div>
-                        <div className="section">Welcome Back</div>
+                        <div className="section">Welcome back</div>
                         <div className="body">Enter your credentials to access the viewer.</div>
                     </div>
 
                     <div className="textbox-header">Email address</div>
-                    <TextField
+                    <input
                         className="textFields"
                         placeholder="jane@hospital.org"
-                        variant="outlined"
                         type="email"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}/>
                     <div className="textbox-header">Password</div>
-                    <TextField
+                    <input
                         className="textFields"
-                        placeholder="------"
-                        variant="outlined"
+                        placeholder="••••••••"
                         type="password"
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}/>
+                    <div id="forgotPassword">Forgot Password?</div>
                     <button id="signInButton">Sign in</button>
                 </div>
             </div>

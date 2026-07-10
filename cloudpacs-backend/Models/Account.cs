@@ -6,6 +6,7 @@ namespace CloudPACS.Backend
     {
         [JsonProperty("id")]
         public string Id => AccountId;
+        [JsonProperty("accountId")]
         public string AccountId { get; set; }
         public string AccountName { get; set; }
         public string AccountPassword { get; set; }

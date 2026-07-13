@@ -1,6 +1,5 @@
 namespace CloudPACS.Backend
 {
-    using BCrypt.Net;
     using System;
     using Newtonsoft.Json;
 

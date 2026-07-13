@@ -10,7 +10,7 @@ function Login(){
         e.preventDefault();
         const details = {email, password};
 
-        const response = await fetch("http://localhost:5000/api/test",{
+        const response = await fetch("http://localhost:5000/api/Auth/Login",{
             method: 'POST',
             headers: { "Content-type": "application/json"},
             body: JSON.stringify(details)

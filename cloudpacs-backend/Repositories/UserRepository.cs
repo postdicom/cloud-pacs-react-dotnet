@@ -139,9 +139,8 @@ namespace CloudPACS.Backend
             }
         }
 
-        public async Task<bool> CheckPasswordAsync(LoginRequestDto loginRequestDto)
+        public async Task<bool> CheckPasswordAsync(LoginRequestDto loginRequestDto, User user)
         {
-            User? user = await FindUserAsync(loginRequestDto.Email);
             if (user == null)
             {
                 return false;

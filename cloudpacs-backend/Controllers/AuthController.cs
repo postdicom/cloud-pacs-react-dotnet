@@ -4,6 +4,12 @@ namespace CloudPACS.Backend.Controllers
     using BCrypt.Net;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.IdentityModel.Tokens;
+    using System.IdentityModel.Tokens.Jwt;
+    using System.Security.Claims;
+    using System.Text;
+    using DotNetEnv;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -11,11 +17,13 @@ namespace CloudPACS.Backend.Controllers
     {
         private readonly IAccountRepository accountRepository;
         private IUserRepository userRepository;
+        private readonly IConfiguration config;
 
-        public AuthController(IAccountRepository accountRepository, IUserRepository userRepository)
+        public AuthController(IAccountRepository accountRepository, IUserRepository userRepository, IConfiguration config)
         {
             this.accountRepository = accountRepository;
             this.userRepository = userRepository;
+            this.config = config;
         }
         [HttpPost]
         [Route("Register")]
@@ -26,7 +34,7 @@ namespace CloudPACS.Backend.Controllers
                 Console.WriteLine("Attempting to save user to Database...");
                 var account = new Account(
                     Guid.NewGuid(),
-                    registerRequestDto.Email,
+                    registerRequestDto.Name,
                     Guid.NewGuid().ToString(),
                     BCrypt.HashPassword(registerRequestDto.Password)
                 //req.PhoneNumber, 
@@ -37,15 +45,15 @@ namespace CloudPACS.Backend.Controllers
                     account.AccountId,
                     registerRequestDto.Name,
                     registerRequestDto.Email,
-                    registerRequestDto.Role,
-                    registerRequestDto.Password
+                    UserRole.Viewer, // default
+                    BCrypt.HashPassword(registerRequestDto.Password)
                 );
 
                 await accountRepository.AddAccountAsync(account);
                 await userRepository.AddUserAsync(user);
                 Console.WriteLine("Successfully saved!");
 
-                return Ok(new { success = true, message = "Account created." });
+                return Ok(new { success = true, message = "Account created."});
             }
             catch (Exception ex)
             {
@@ -56,7 +64,7 @@ namespace CloudPACS.Backend.Controllers
 
         [HttpPost]
         [Route("Login")]
-        public async Task<User?> Login([FromBody] LoginRequestDto loginRequestDto)
+        public async Task<ActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
         {
             try
             {
@@ -66,19 +74,61 @@ namespace CloudPACS.Backend.Controllers
 
                 if (user != null)
                 {
-                    if(await userRepository.CheckPasswordAsync(loginRequestDto))
+                    if (await userRepository.CheckPasswordAsync(loginRequestDto, user))
                     {
-                        return user;
+                        var token = await GenerateToken(user);
+                        return Ok("User has logged in");
+                    }
+                    else
+                    {
+                        return NotFound("The password doesn't match.");
                     }
                 }
-                return null; 
+                return NotFound("The account doesn't exist.");
             }
 
             catch (Exception ex)
             {
                 Console.WriteLine($"DATABASE ERROR: {ex.Message}");
-                return null;
+                return BadRequest();
             }
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("Jwt")]
+        public async Task<ActionResult> Validate(User user)
+        {
+            if (user != null)
+            {
+                var token = await GenerateToken(user);
+                return Ok(token);
+            }
+
+            return Unauthorized("User not found");
+        }
+
+
+        private async Task<string> GenerateToken(User user)
+        {
+            Env.Load("keys.env");
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT")));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            List<Claim> claims =
+            [
+                new (JwtRegisteredClaimNames.Sub, user.UserId),
+                new (JwtRegisteredClaimNames.Email, user.Email),
+                new(ClaimTypes.Role, user.Role.ToString())
+            ];
+
+            var token = new JwtSecurityToken(config["Jwt:Issuer"],
+                config["Jwt:Audience"],
+                claims,
+                expires: DateTime.UtcNow.AddMinutes(480),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

@@ -4,7 +4,7 @@ import { Navigate, Outlet } from 'react-router'
 import './App.css'
 import Login from './pages/login'
 import Register from './pages/register'
-import Navbar from './pages/navbar'
+import Navbar from './components/navbar.tsx'
 
 function App() {
 

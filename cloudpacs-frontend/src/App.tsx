@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import { Navigate, Outlet } from 'react-router'
 import './App.css'
 import Login from './pages/login'
+import Register from './pages/register'
+import Navbar from './components/navbar.tsx'
 
 function App() {
 
@@ -12,6 +14,8 @@ function App() {
         <Routes>
           <Route element={<PrivateRoutes/>}>
             <Route path="login" element={<Login />}></Route>
+            <Route path="Register" element={<Register />}></Route>
+            <Route path="Navbar" element={<Navbar />}></Route>
           </Route>
         </Routes>
       </BrowserRouter>

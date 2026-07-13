@@ -76,12 +76,14 @@
                         ValidIssuer = builder.Configuration["Jwt:Issuer"],
                         ValidAudience = builder.Configuration["Jwt:Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["JWT"]))
+                        Encoding.UTF8.GetBytes(builder.Configuration["JWT"])),
                     };
                 });
 
             var app = builder.Build();
 
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseSwagger();//swager test
             app.UseSwaggerUI();
             app.UseDeveloperExceptionPage();

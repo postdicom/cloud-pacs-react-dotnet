@@ -74,10 +74,10 @@ namespace CloudPACS.Backend.Controllers
 
                 if (user != null)
                 {
-                    if (await userRepository.CheckPasswordAsync(loginRequestDto, user))
+                    if (await userRepository.IsPasswordValid(loginRequestDto, user.Password))
                     {
                         var token = await GenerateToken(user);
-                        return Ok("User has logged in");
+                        return Ok(user); //loginReponseDto
                     }
                     else
                     {
@@ -93,21 +93,6 @@ namespace CloudPACS.Backend.Controllers
                 return BadRequest();
             }
         }
-
-        [AllowAnonymous]
-        [HttpPost]
-        [Route("Jwt")]
-        public async Task<ActionResult> Validate(User user)
-        {
-            if (user != null)
-            {
-                var token = await GenerateToken(user);
-                return Ok(token);
-            }
-
-            return Unauthorized("User not found");
-        }
-
 
         private async Task<string> GenerateToken(User user)
         {

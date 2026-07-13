@@ -139,14 +139,9 @@ namespace CloudPACS.Backend
             }
         }
 
-        public async Task<bool> CheckPasswordAsync(LoginRequestDto loginRequestDto, User user)
+        public async Task<bool> IsPasswordValid(LoginRequestDto loginRequestDto, string password)
         {
-            if (user == null)
-            {
-                return false;
-            }
-
-            return BCrypt.Verify(loginRequestDto.Password, user.Password);
+            return BCrypt.Verify(loginRequestDto.Password, password);
         }
     }
 }

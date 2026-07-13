@@ -1,42 +1,14 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import type { ReactNode } from 'react';
-
-interface User {
-    accountId: string;
-    name: string;
-    email: string;
-    userRole: string;
-    password: string;
-}
-
-interface LoginCredentials {
-    email: string;
-    password: string;
-}
-
-interface AuthContextType {
-    user: User | null;
-    loading: boolean;
-    login: (credentials: LoginCredentials) => Promise<void>;
-    logout: () => void;
-}
-
-interface AuthProviderProps {
-    children: ReactNode;
-}
+import type { User } from './interfaces/User';
+import type { LoginCredentials } from './interfaces/LoginCredentials';
+import type { AuthContextType } from './interfaces/AuthContextType';
+import type { AuthProviderProps } from './interfaces/AuthProviderProps';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-
-    useEffect(() => {
-        checkAuth()
-            .then((u: User | null) => setUser(u))
-            .finally(() => setLoading(false));
-    }, []);
 
     const login = async (credentials: LoginCredentials): Promise<void> => {
         const response = await fetch('/login', {
@@ -72,24 +44,4 @@ export function useAuth(): AuthContextType {
         throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;
-}
-
-async function checkAuth(): Promise<User | null> {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-
-    try {
-        const response = await fetch('/api/auth/verify', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-        });
-        if (!response.ok) throw new Error();
-        const user = await response.json();
-        return user;
-
-    } catch (e) {
-        localStorage.removeItem('token');
-        return null;
-    }
 }

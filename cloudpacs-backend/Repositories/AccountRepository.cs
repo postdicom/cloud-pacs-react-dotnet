@@ -1,11 +1,13 @@
 namespace CloudPACS.Backend
 {
     using System.Threading.Tasks;
+    using BCrypt.Net;
     using Microsoft.Azure.Cosmos;
 
     public class AccountRepository : IAccountRepository
     {
         private readonly Container container;
+        private readonly UserRepository userRepository;
 
         public AccountRepository(CosmosClient client)
         {

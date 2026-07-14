@@ -6,6 +6,9 @@
     using DotNetEnv;
     using CloudPACS.Backend;
     using Microsoft.Azure.Cosmos;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.IdentityModel.Tokens;
+    using System.Text;
 
     public class Program
     {
@@ -21,8 +24,6 @@
 
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
 
             using (var dbInitializer = new CosmosDbInitializer(endpoint, key))
             {
@@ -49,7 +50,7 @@
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
-                    policy.WithOrigins("http://localhost:5071")
+                    policy.WithOrigins("http://localhost:5173")
                           .AllowAnyHeader()
                           .AllowAnyMethod());
             });
@@ -58,13 +59,36 @@
 
             builder.Services.AddControllers();
 
-
+            builder.Services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(builder.Configuration["JWT"])),
+                    };
+                });
 
             var app = builder.Build();
 
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseSwagger();//swager test
             app.UseSwaggerUI();
+            app.UseDeveloperExceptionPage();
 
+            app.UseRouting();
             app.UseCors("AllowFrontend");
             app.MapControllers();
 

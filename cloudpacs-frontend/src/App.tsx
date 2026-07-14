@@ -17,13 +17,14 @@ function App() {
             <Route path="Register" element={<Register />}></Route>
             <Route path="Navbar" element={<Navbar />}></Route>
           </Route>
+            <Route path="login" element={<Login />}></Route>
         </Routes>
       </BrowserRouter>
     </>
   )
 }
 
-const PrivateRoutes = () => {
+const ProtectedRoute = () => {
   let auth = {'token':true}
   return (
     auth.token ? <Outlet/> : <Navigate to='/login'/>

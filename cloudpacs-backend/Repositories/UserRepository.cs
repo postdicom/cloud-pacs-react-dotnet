@@ -5,6 +5,7 @@ namespace CloudPACS.Backend
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos;
     using Microsoft.Identity.Client;
+    using BCrypt.Net;
 
     public class UserRepository : IUserRepository
     {
@@ -111,6 +112,36 @@ namespace CloudPACS.Backend
                 Console.WriteLine($"Cosmos error while deleting user: {ex.StatusCode} — {ex.Message}");
                 throw;
             }
+        }
+
+        public async Task<User?> FindUserAsync(string email)
+        {
+            try
+            {
+                var query = new QueryDefinition(
+                    "SELECT VALUE c FROM c WHERE c.Email = @email")
+                    .WithParameter("@email", email);
+
+                using FeedIterator<User> iterator = container.GetItemQueryIterator<User>(query);
+
+                if (iterator.HasMoreResults)
+                {
+                    var response = await iterator.ReadNextAsync();
+                    return response.FirstOrDefault();
+                }
+                return null;
+            }
+
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteLine("This user does not exist.");
+                return null;
+            }
+        }
+
+        public async Task<bool> IsPasswordValid(LoginRequestDto loginRequestDto, string password)
+        {
+            return BCrypt.Verify(loginRequestDto.Password, password);
         }
     }
 }

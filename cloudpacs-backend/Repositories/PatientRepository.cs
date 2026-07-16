@@ -109,11 +109,11 @@ namespace CloudPACS.Backend
             }
         }
 
-        public async Task DeletePatientAsync(string mrn, string userId)
+        public async Task DeletePatientAsync(PatientListDto patientListDto)
         {
             try
             {
-                await container.DeleteItemAsync<User>(mrn, new PartitionKey(userId));
+                await container.DeleteItemAsync<User>(patientListDto.mrn, new PartitionKey(patientListDto.userId));
             }
             catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
@@ -153,13 +153,13 @@ namespace CloudPACS.Backend
             }
         }
 
-        public async Task<Patient> getPatientByMrn(string mrn)
+        public async Task<Patient> GetPatientByMrn(PatientListDto patientListDto)
         {
             try
             {
                 var query = new QueryDefinition(
                         "SELECT VALUE (1) c FROM c WHERE c.Mrn = @mrn")
-                        .WithParameter("@mrn", mrn);
+                        .WithParameter("@mrn", patientListDto.mrn);
                 using FeedIterator<Patient> iterator = container.GetItemQueryIterator<Patient>(query);
 
                 if (iterator.HasMoreResults)

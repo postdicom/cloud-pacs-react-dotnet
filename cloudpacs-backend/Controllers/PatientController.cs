@@ -29,11 +29,11 @@ namespace CloudPACS.Backend.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<IActionResult> GetPatientDetails(string id)
+        public async Task<IActionResult> GetPatientDetails([FromBody] PatientListDto patientListDto)
         {
             try
             {
-                Patient patient = await patientRepository.getPatientByMrn(id);
+                Patient patient = await patientRepository.GetPatientByMrn(patientListDto);
                 return Ok(patient);
             }
 

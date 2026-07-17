@@ -1,0 +1,134 @@
+.patientListContainer {
+    display: flex;
+    flex-flow: row wrap;
+    position: fixed;
+    width: 100%;
+    left: 0;
+    top: 0;
+    background-color: rgb(248, 250, 252);
+}
+
+.mainPage {
+    display: flex;
+    flex-flow: column wrap;
+    margin: 40px;
+    width: 70%;
+}
+
+#patientListHeader {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: rgb(33, 48, 93);
+}
+
+#patientTable {
+    font-family: "Inter", sans-serif;
+}
+
+#searchBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: center;
+    margin-bottom: 10px;
+}
+
+.patientTableButton {
+    width: 16%;
+    height: 39px;
+    border-radius: 7px;
+    padding: 4px;
+    font-size: 0.9rem;
+}
+
+#filtersButton {
+    background-color: white;
+    border: 2px solid rgb(227, 232, 239);
+}
+
+#searchButton {
+    background-color: #0ea5e9;
+    border: none;
+    color: white;
+    font-weight: 800;
+}
+
+#input {
+    width: 60%;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 7px;
+    border: 2px solid rgb(227, 232, 239);
+    color: rgb(168, 168, 168);
+    padding-left: 0.7rem;
+}
+
+#input::placeholder {
+    color: rgb(168, 168, 168);
+}
+
+
+table {
+    font-family: sans-serif;
+    letter-spacing: 1px;
+    width: 100%;
+    text-justify: center;
+    text-align: left;
+    border-collapse: collapse;
+}
+
+thead {
+    background-color: rgb(242 245 249);
+    font-weight: 900;
+    white-space: normal;
+    line-height: 1.4;
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+th,
+td {
+    border-bottom: 1px solid #e2e8f0;
+    height: 50px;
+    padding-left: 1rem;
+}
+
+.mrnRow {
+    color: #64748b;
+}
+
+td {
+    color: #475569;
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+
+.patientName {
+    color: rgb(33, 48, 93);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+tbody {
+    background-color: rgb(248, 250, 252);
+}
+
+tfoot th {
+    text-align: right;
+}
+
+#patientListPagination {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    
+}
+
+#pageSelection{
+    font-size: 0.9rem !important;
+    font-weight: 500;
+    color: #94a3b8;
+}

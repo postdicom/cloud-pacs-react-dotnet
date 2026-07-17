@@ -1,7 +1,7 @@
-import { NotRendered } from "@mui/x-data-grid/internals";
 import "../stylesheets/login.css"
 import { useState } from "react";
 import Alert from "@mui/material/Alert";
+import { usePatients } from "../hooks/usePatients";
 
 function Login() {
     const [email, setEmail] = useState('');
@@ -21,12 +21,10 @@ function Login() {
             })
             const data = await response.json();
             localStorage.setItem("token", data.token);
-            console.log(isCreditentialsValid);
         }
 
         catch {
             setCreditentialValidity(false);
-            console.log(isCreditentialsValid);
         }
     }
 

@@ -4,6 +4,7 @@ import { Navigate, Outlet } from 'react-router'
 import './App.css'
 import Login from './pages/login'
 import Register from './pages/register'
+import PatientList from './pages/patientList'
 import Navbar from './components/navbar.tsx'
 
 function App() {
@@ -12,12 +13,12 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route element={<PrivateRoutes/>}>
-            <Route path="login" element={<Login />}></Route>
-            <Route path="Register" element={<Register />}></Route>
+          <Route element={<ProtectedRoute />}>
             <Route path="Navbar" element={<Navbar />}></Route>
+            <Route path="PatientList" element={<PatientList />}></Route>
           </Route>
-            <Route path="login" element={<Login />}></Route>
+          <Route path="Register" element={<Register />}></Route>
+          <Route path="Login" element={<Login />}></Route>
         </Routes>
       </BrowserRouter>
     </>
@@ -25,9 +26,9 @@ function App() {
 }
 
 const ProtectedRoute = () => {
-  let auth = {'token':true}
+  let auth = { 'token': true }
   return (
-    auth.token ? <Outlet/> : <Navigate to='/login'/>
+    auth.token ? <Outlet /> : <Navigate to='/Login' />
   )
 }
 

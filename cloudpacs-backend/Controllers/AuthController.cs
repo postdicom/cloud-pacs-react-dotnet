@@ -69,7 +69,7 @@ namespace CloudPACS.Backend.Controllers
             try
             {
                 Console.WriteLine("Attempting to get user from Database...");
-
+                Console.WriteLine(loginRequestDto);
                 var user = await userRepository.FindUserAsync(loginRequestDto.Email);
 
                 if (user != null)

@@ -19,6 +19,8 @@
                 ?? throw new InvalidOperationException("COSMOS_ENDPOINT not set");
             string key = Environment.GetEnvironmentVariable("COSMOS_KEY")
                 ?? throw new InvalidOperationException("COSMOS_KEY not set");
+            string jwt = Environment.GetEnvironmentVariable("Jwt__SecretKey")
+                ?? throw new InvalidOperationException("Couldnt read JWT key");
 
             Console.WriteLine("Connecting to database");
 
@@ -58,7 +60,6 @@
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddControllers();
-
             builder.Services
                 .AddAuthentication(options =>
                 {
@@ -73,10 +74,10 @@
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        ValidIssuer = "cloudpacs-backend",
+                        ValidAudience = "cloudpacs-frontend",
                         IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["JWT"])),
+                        Encoding.UTF8.GetBytes(jwt)),
                     };
                 });
 

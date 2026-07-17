@@ -15,10 +15,10 @@ function App() {
         <Routes>
           <Route element={<ProtectedRoute />}>
             <Route path="Navbar" element={<Navbar />}></Route>
-            <Route path="patientList" element={<PatientList />}></Route>
+            <Route path="PatientList" element={<PatientList />}></Route>
           </Route>
           <Route path="Register" element={<Register />}></Route>
-          <Route path="login" element={<Login />}></Route>
+          <Route path="Login" element={<Login />}></Route>
         </Routes>
       </BrowserRouter>
     </>
@@ -28,7 +28,7 @@ function App() {
 const ProtectedRoute = () => {
   let auth = { 'token': true }
   return (
-    auth.token ? <Outlet /> : <Navigate to='/login' />
+    auth.token ? <Outlet /> : <Navigate to='/Login' />
   )
 }
 

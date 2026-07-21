@@ -4,21 +4,25 @@ import { Navigate, Outlet } from 'react-router'
 import './App.css'
 import Login from './pages/login'
 import Register from './pages/register'
+import DicomViewer from './pages/dicomViever'
+import StudyList from './pages/studyList';
 import PatientList from './pages/patientList'
-import Navbar from './components/navbar.tsx'
 
 function App() {
 
   return (
     <>
       <BrowserRouter>
-        <Routes>
-          <Route element={<ProtectedRoute />}>
-            <Route path="Navbar" element={<Navbar />}></Route>
+          <Routes>
+          <Route element={<ProtectedRoute/>}>
+            <Route path="login" element={<Login />}></Route>
+            <Route path="Register" element={<Register />}></Route>
+            <Route path="StudyList" element={<StudyList />}></Route>
+            <Route path="DicomViewer" element={<DicomViewer />}></Route>
             <Route path="PatientList" element={<PatientList />}></Route>
           </Route>
-          <Route path="Register" element={<Register />}></Route>
-          <Route path="Login" element={<Login />}></Route>
+            <Route path="Register" element={<Register />}></Route>
+            <Route path="Login" element={<Login />}></Route>
         </Routes>
       </BrowserRouter>
     </>

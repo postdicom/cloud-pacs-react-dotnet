@@ -1,0 +1,227 @@
+.register-layout, .register-layout * {
+  box-sizing: border-box;
+}
+
+.register-layout button {
+  font: inherit;
+  appearance: none;
+  cursor: pointer;
+}
+
+.register-layout table {
+  border-spacing: 0;
+}
+
+.register-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: 100vh;
+  width: 100%;
+  background: #eef1f5;
+}
+
+.register-layout .main-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 40px;
+  min-width: 0;
+}
+
+.register-layout .patient-header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  background: #ffffff;
+  border-radius: 12px 12px 0 0;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid #e6e9ee;
+  width: 100%;
+}
+
+.register-layout .PatientNameContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.register-layout .patient-name-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #14213d;
+  line-height: 1.2;
+}
+
+.register-layout .patient-info-text {
+  font-size: 14px;
+  color: #8a94a6;
+}
+
+.register-layout .all-patients-btn {
+  background: none;
+  border: none;
+  color: #2f7de1;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.register-layout .all-patients-btn:hover {
+  color: #1a5cb0;
+  text-decoration: underline;
+}
+
+.register-layout .tabs-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 28px;
+  background: #ffffff;
+  padding: 0 28px;
+  border-bottom: 1px solid #e6e9ee;
+  width: 100%;
+}
+
+.register-layout .tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 14px 2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #9aa3b2;
+  margin-bottom: -1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.register-layout .tab-btn:hover {
+  color: #5b6577;
+}
+
+.register-layout .tab-btn.active {
+  color: #2f7de1;
+  border-bottom-color: #2f7de1;
+}
+
+.register-layout .studies-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(20, 33, 61, 0.06);
+}
+
+.register-layout .studies-table thead th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #9aa3b2;
+  background: #f7f8fa;
+  padding: 14px 20px;
+  border-bottom: 1px solid #e6e9ee;
+  height: auto;
+}
+
+.register-layout .studies-table tbody tr {
+  border-bottom: 1px solid #eef0f4;
+  transition: background-color 0.15s ease;
+  height: auto;
+}
+
+.register-layout .studies-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.register-layout .studies-table tbody tr:hover {
+  background-color: #f5f8fd;
+}
+
+.register-layout .studies-table tbody tr.selected {
+  background-color: #e8f1fd;
+}
+
+.register-layout .studies-table td {
+  padding: 16px 20px;
+  vertical-align: middle;
+  font-size: 15px;
+  color: #1c2437;
+  height: auto;
+  line-height: 1.4;
+}
+
+.register-layout .date-cell {
+  font-weight: 700;
+  color: #14213d;
+  line-height: 1.35;
+  white-space: nowrap;
+  width: 90px;
+}
+
+.register-layout .desc-cell {
+  font-weight: 600;
+  color: #1c2437;
+}
+
+.register-layout .number-cell {
+  color: #5b6577;
+  text-align: left;
+}
+
+.register-layout .mod-chip {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+}
+
+.register-layout .open-btn {
+  background: #2f7de1;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  transition: background-color 0.15s ease;
+}
+
+.register-layout .open-btn:hover {
+  background: #1a5cb0;
+}
+
+@media (max-width: 720px) {
+  .register-layout .main-content {
+    padding: 20px;
+  }
+
+  .register-layout .patient-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .register-layout .studies-table {
+    display: block;
+    overflow-x: auto;
+  }
+  .studySort
+  {
+    font-family:'Inter',sans-serif;
+    font-size:0.68rem;
+    border:1.5px solid var(--border);
+    border-radius:5px;
+    padding:0.2rem 0.45rem;
+    color:var(--text-primary);
+    background:white;
+    cursor:pointer;
+  }
+}

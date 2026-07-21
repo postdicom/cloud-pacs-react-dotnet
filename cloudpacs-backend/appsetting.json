@@ -1,7 +1,0 @@
-{
-    "Jwt": {
-        "Issuer": "http://localhost:5000/",
-        "Audience": "http://localhost:5000/",
-        "SecretKey": ""
-    }
-}

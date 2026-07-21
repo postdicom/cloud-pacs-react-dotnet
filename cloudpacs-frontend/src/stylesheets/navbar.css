@@ -23,8 +23,6 @@ body {
   justify-content: space-between;
   transition: width 0.2s ease-in-out;
   flex-shrink: 0;
-  border-top-right-radius: 12px;
-  border-bottom-right-radius: 12px;
 }
 
 .sidebar-top {

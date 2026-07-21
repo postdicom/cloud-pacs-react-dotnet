@@ -15,15 +15,15 @@ namespace CloudPACS.Backend.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IAccountRepository accountRepository;
-        private IUserRepository userRepository;
-        private readonly IConfiguration config;
+        private readonly IAccountRepository _accountRepository;
+        private IUserRepository _userRepository;
+        private readonly IConfiguration _config;
 
         public AuthController(IAccountRepository accountRepository, IUserRepository userRepository, IConfiguration config)
         {
-            this.accountRepository = accountRepository;
-            this.userRepository = userRepository;
-            this.config = config;
+            _accountRepository = accountRepository;
+            _userRepository = userRepository;
+            _config = config;
         }
         [HttpPost]
         [Route("Register")]
@@ -49,8 +49,8 @@ namespace CloudPACS.Backend.Controllers
                     BCrypt.HashPassword(registerRequestDto.Password)
                 );
 
-                await accountRepository.AddAccountAsync(account);
-                await userRepository.AddUserAsync(user);
+                await _accountRepository.AddAccountAsync(account);
+                await _userRepository.AddUserAsync(user);
                 Console.WriteLine("Successfully saved!");
 
                 return Ok(new { success = true, message = "Account created."});
@@ -70,11 +70,11 @@ namespace CloudPACS.Backend.Controllers
             {
                 Console.WriteLine("Attempting to get user from Database...");
                 Console.WriteLine(loginRequestDto);
-                var user = await userRepository.FindUserAsync(loginRequestDto.Email);
+                var user = await _userRepository.FindUserAsync(loginRequestDto.Email);
 
                 if (user != null)
                 {
-                    if (await userRepository.IsPasswordValid(loginRequestDto, user.Password))
+                    if (await _userRepository.IsPasswordValid(loginRequestDto, user.Password))
                     {
                         var token = await GenerateToken(user);
                         return Ok(user); //loginReponseDto
@@ -96,9 +96,9 @@ namespace CloudPACS.Backend.Controllers
 
         private async Task<string> GenerateToken(User user)
         {
-            Env.Load("keys.env");
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT")));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("Jwt__SecretKey")));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var jwtSettings = _config.GetSection("JwtSettings");
 
             List<Claim> claims =
             [
@@ -107,12 +107,16 @@ namespace CloudPACS.Backend.Controllers
                 new(ClaimTypes.Role, user.Role.ToString())
             ];
 
-            var token = new JwtSecurityToken(config["Jwt:Issuer"],
-                config["Jwt:Audience"],
-                claims,
+            var issuer = jwtSettings["Issuer"];
+            var audience = jwtSettings["Audience"];
+
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(480),
                 signingCredentials: credentials);
-
+                
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

@@ -58,8 +58,12 @@
             });
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddControllers();
+
+            builder.Services.AddSingleton<AuditLogService>();
+
             builder.Services
                 .AddAuthentication(options =>
                 {

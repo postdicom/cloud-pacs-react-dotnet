@@ -16,14 +16,16 @@ namespace CloudPACS.Backend.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAccountRepository _accountRepository;
+        private AuditLogService auditLogService;
         private IUserRepository _userRepository;
         private readonly IConfiguration _config;
 
-        public AuthController(IAccountRepository accountRepository, IUserRepository userRepository, IConfiguration config)
+        public AuthController(IAccountRepository accountRepository, IUserRepository userRepository, IConfiguration config, AuditLogService auditLogService)
         {
             _accountRepository = accountRepository;
             _userRepository = userRepository;
             _config = config;
+            this.auditLogService = auditLogService;
         }
         [HttpPost]
         [Route("Register")]
@@ -77,6 +79,7 @@ namespace CloudPACS.Backend.Controllers
                     if (await _userRepository.IsPasswordValid(loginRequestDto, user.Password))
                     {
                         var token = await GenerateToken(user);
+                        auditLogService.LogAsync(user.UserId, AuditActions.Login, ResourceType.Session, "User logged in");
                         return Ok(user); //loginReponseDto
                     }
                     else
@@ -89,7 +92,7 @@ namespace CloudPACS.Backend.Controllers
 
             catch (Exception ex)
             {
-                Console.WriteLine($"DATABASE ERROR: {ex.Message}");
+                Console.WriteLine($"DATABASE ERROR: {ex}");
                 return BadRequest();
             }
         }

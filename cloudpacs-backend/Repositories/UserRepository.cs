@@ -4,7 +4,6 @@ namespace CloudPACS.Backend
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos;
-    using Microsoft.Identity.Client;
     using BCrypt.Net;
 
     public class UserRepository : IUserRepository

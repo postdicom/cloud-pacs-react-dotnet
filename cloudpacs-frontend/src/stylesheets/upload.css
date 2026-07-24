@@ -1,0 +1,80 @@
+.uploadContainer {
+    display: flex;
+    flex-flow: row wrap;
+    position: fixed;
+    left: 0;
+    top: 0;
+}
+
+.uploadPage{
+    display: flex;
+    flex-flow: column wrap;
+    padding: 1.25rem;
+}
+
+#uploadTitle{
+    font-size: 1.5rem;
+    color: rgb(33, 48, 93);
+    margin-bottom: 20px;
+}
+
+#dragAndDropArea {
+    display: flex;
+    flex-flow: column wrap;
+    width: 100%;
+    padding: 1.5rem;
+    border: 2px dashed #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.dragAndDropHeader{
+    display: flex;
+    flex-flow: column wrap;
+    align-items: center;
+}
+
+#dragAndDropAreaSymbol{
+    height: 18px;
+    width: 18px;
+    fill: none;
+    stroke: #0ea5e9;
+    stroke-width: 2px;
+}
+
+.filesBeingUploaded{
+    display: flex;
+    flex-direction: column;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background-color: white;
+    padding: 0.9rem;
+
+}
+
+.fileDetails{
+    display: flex;
+    flex-direction: row;
+}
+
+.progressBar{
+    width: 100%;
+    height: 10px;
+    background: #0ea5e9;
+    border-radius: 30px;
+}
+
+progress::-webkit-progress-value {
+  background: #0ea5e9;
+  border-radius:100px;
+}
+
+progress::-webkit-progress-bar{
+    border-radius:100px;
+}
+
+#fileDragAndDropInstruction{
+    color: rgb(33, 48, 93);
+    font-weight: 700;
+    font-size: 1.1rem;
+}

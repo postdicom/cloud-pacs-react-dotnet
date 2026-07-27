@@ -2,17 +2,24 @@ namespace CloudPACS.Backend
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using FellowOakDicom;
+
     public class DicomParser
     {
-        public Dictionary<string, string> ExtractMetadataDictionary(string filePath)
+        public Dictionary<string, string> ExtractMetadataDictionary(Stream stream)
         {
-            var dicomFile = DicomFile.Open(filePath);
+            var dicomFile = DicomFile.Open(stream);
             var metadata = new Dictionary<string, string>();
 
             ExtractDataset(dicomFile.Dataset, metadata, string.Empty);
 
             return metadata;
+        }
+
+        internal Dictionary<string, string> ExtractMetadataDictionary(string filePath)
+        {
+            throw new NotImplementedException();
         }
 
         private void ExtractDataset(DicomDataset dataset, Dictionary<string, string> metadata, string prefix)
@@ -37,7 +44,7 @@ namespace CloudPACS.Backend
                     }
                 }
                 else if (item.ValueRepresentation == DicomVR.OB || item.ValueRepresentation == DicomVR.OW ||
-                         item.ValueRepresentation == DicomVR.UN || item.Tag == DicomTag.PixelData)
+                          item.ValueRepresentation == DicomVR.UN || item.Tag == DicomTag.PixelData)
                 {
                     if (item is DicomElement element)
                     {

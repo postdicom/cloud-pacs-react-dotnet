@@ -9,6 +9,7 @@
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.IdentityModel.Tokens;
     using System.Text;
+    using Azure.Storage.Blobs;
 
     public class Program
     {
@@ -48,6 +49,7 @@
             builder.Services.AddSingleton(new CosmosClient(endpoint, key, cosmosClientOptions));
             builder.Services.AddScoped<IAccountRepository, AccountRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddSingleton(x => new BlobServiceClient("UseDevelopmentStorage=true"));
 
             builder.Services.AddCors(options =>
             {
@@ -85,7 +87,7 @@
                     };
                 });
             
-            DicomParserTest.TestExtractMetadata(@"/Users/ibrahim/Desktop/DicomTest/827694963.dcm"); //Dicom Tester.
+            //DicomParserTest.TestExtractMetadata(@"/Users/ibrahim/Desktop/DicomTest/827694963.dcm"); //Dicom Tester.
             var app = builder.Build();
 
             app.UseAuthentication();

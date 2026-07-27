@@ -29,8 +29,9 @@ namespace CloudPACS.Backend
         }
 
         [HttpPost("upload")]
-        [RequestSizeLimit(104857600)] // 100 MB limit
-        public async Task<IActionResult> UploadDicomFiles([FromForm] List<IFormFile> files)
+        [DisableRequestSizeLimit] 
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
+        public async Task<IActionResult> UploadDicomFiles(IFormFileCollection files)
         {
             if (files == null || files.Count == 0)
             {
@@ -47,7 +48,7 @@ namespace CloudPACS.Backend
                 if (!string.Equals(extension, ".dcm", StringComparison.OrdinalIgnoreCase))
                 {
                     errors.Add($"File '{file.FileName}' rejected: You can only upload .dcm files");
-                    continue;
+                    continue; 
                 }
 
                 if (file.Length == 0)
@@ -69,12 +70,17 @@ namespace CloudPACS.Backend
                     Dictionary<string, string> extractedMetadata = new Dictionary<string, string>();
                     try
                     {
-                        extractedMetadata = parser.ExtractMetadataDictionary(filePath);
+                        using (var readStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                        {
+                            extractedMetadata = parser.ExtractMetadataDictionary(readStream);
+                        }
                     }
                     catch (Exception parseEx)
                     {
                         errors.Add($"Metadata extraction failed for '{file.FileName}': {parseEx.Message}");
+                        continue;
                     }
+
                     string patientId = "UNKNOWN";
                     string studyUid = "UNKNOWN";
                     string seriesUid = "UNKNOWN";
@@ -83,16 +89,16 @@ namespace CloudPACS.Backend
                     try
                     {
                         if (!extractedMetadata.TryGetValue("(0010,0020) Patient ID", out patientId))
-                            errors.Add($"'{file.FileName}': key '(0010,0020) Patient ID' not found in extracted metadata.");
+                            errors.Add($"'{file.FileName}': key '(0010,0020) Patient ID' not found.");
 
                         if (!extractedMetadata.TryGetValue("(0020,000D) Study Instance UID", out studyUid))
-                            errors.Add($"'{file.FileName}': key '(0020,000D) Study Instance UID' not found in extracted metadata.");
+                            errors.Add($"'{file.FileName}': key '(0020,000D) Study Instance UID' not found.");
 
                         if (!extractedMetadata.TryGetValue("(0020,000E) Series Instance UID", out seriesUid))
-                            errors.Add($"'{file.FileName}': key '(0020,000E) Series Instance UID' not found in extracted metadata.");
+                            errors.Add($"'{file.FileName}': key '(0020,000E) Series Instance UID' not found.");
 
                         if (!extractedMetadata.TryGetValue("(0008,0018) SOP Instance UID", out sopInstanceUid))
-                            errors.Add($"'{file.FileName}': key '(0008,0018) SOP Instance UID' not found in extracted metadata.");
+                            errors.Add($"'{file.FileName}': key '(0008,0018) SOP Instance UID' not found.");
                     }
                     catch (Exception lookupEx)
                     {
@@ -100,12 +106,12 @@ namespace CloudPACS.Backend
                     }
 
                     string documentId = !string.IsNullOrWhiteSpace(sopInstanceUid) ? sopInstanceUid : Guid.NewGuid().ToString();
-                    string safePatientId = patientId ?? "UNKNOWN";
+                    patientId = patientId ?? "UNKNOWN";
 
                     var instanceDoc = new Instance
                     {
                         Id = documentId,
-                        PatientId = safePatientId,
+                        patientId = patientId,
                         StudyInstanceUid = studyUid ?? "UNKNOWN",
                         SeriesInstanceUid = seriesUid ?? "UNKNOWN",
                         SopInstanceUid = documentId,
@@ -113,16 +119,17 @@ namespace CloudPACS.Backend
                         UploadDate = DateTime.UtcNow,
                         Metadata = extractedMetadata
                     };
+
                     await _instanceContainer.UpsertItemAsync(
                         instanceDoc,
-                        new PartitionKey(safePatientId)
+                        new PartitionKey(patientId)
                     );
 
                     uploadedFilesData.Add(new
                     {
                         originalFileName = file.FileName,
                         instanceId = instanceDoc.Id,
-                        patientId = instanceDoc.PatientId,
+                        patientId = instanceDoc.patientId,
                         status = "Saved to Disk and Cosmos DB"
                     });
                 }
@@ -134,7 +141,7 @@ namespace CloudPACS.Backend
 
             if (!uploadedFilesData.Any())
             {
-                return BadRequest(new { message = "Upload failed.", errors });
+                return BadRequest(new { message = "Upload failed for all files.", errors });
             }
 
             return Ok(new

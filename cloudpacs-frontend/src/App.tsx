@@ -9,6 +9,7 @@ import DicomViewer from './pages/dicomViever'
 import StudyList from './pages/studyList'
 import PatientList from './pages/patientList'
 import Upload from './pages/upload'
+import Cornerstone from './pages/cornerstone';
 
 function App() {
   const [files, setFiles] = useState<File[]>([]);
@@ -23,6 +24,8 @@ function App() {
             <Route path="DicomViewer" element={<DicomViewer />}></Route>
             <Route path="PatientList" element={<PatientList />}></Route>
             <Route path="Upload" element={<Upload onFileChange={setFiles}/>}></Route>
+            <Route path="Cornerstone" element={<Cornerstone />}></Route>
+            
           </Route>
           <Route path="Register" element={<Register />}></Route>
           <Route path="Login" element={<Login />}></Route>

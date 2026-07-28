@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloudPACS Screen Specifications</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0f2d5e; --navy-light: #1a3f7a;
+  --sky: #0ea5e9; --sky-light: #38bdf8; --sky-pale: #e0f2fe;
+  --surface-0: #ffffff; --surface-1: #f8fafc; --surface-2: #f1f5f9; --surface-3: #e2e8f0;
+  --dark-0: #090e1a; --dark-1: #111827; --dark-2: #1f2937; --dark-3: #374151;
+  --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #94a3b8;
+  --success: #10b981; --warning: #f59e0b; --error: #ef4444;
+  --border: #e2e8f0;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+  --r-sm: 6px; --r-md: 10px; --r-lg: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--surface-1); color: var(--text-primary); line-height: 1.6; display: flex; }
+
+.sidebar {
+  width: 240px; min-height: 100vh; background: var(--navy);
+  padding: 1.5rem 0; position: sticky; top: 0; flex-shrink: 0; overflow-y: auto;
+}
+.sidebar-brand { padding: 0 1.25rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 1rem; }
+.sidebar-brand-name { color: var(--sky); font-size: 1rem; font-weight: 800; }
+.sidebar-brand-sub  { color: #64748b; font-size: 0.72rem; margin-top: 2px; }
+.sidebar-section { padding: 0.5rem 1.25rem 0.25rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; }
+.sidebar a { display: block; padding: 0.45rem 1.25rem; color: #94a3b8; text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: all 0.15s; border-left: 2px solid transparent; }
+.sidebar a:hover { color: white; background: rgba(255,255,255,0.06); border-left-color: var(--sky); }
+.sidebar-back { padding: 0 1.25rem; margin-top: 1.5rem; }
+.sidebar-back a { display: block; background: rgba(14,165,233,0.15); border: 1px solid rgba(14,165,233,0.3); border-radius: 8px; padding: 0.6rem 0.85rem; color: var(--sky); font-size: 0.79rem; font-weight: 600; text-decoration: none; border-left: none; }
+
+.main { flex: 1; padding: 3rem; }
+.page-title { font-size: 2rem; font-weight: 800; color: var(--navy); margin-bottom: 0.25rem; }
+.page-sub   { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 3rem; }
+section { margin-bottom: 5rem; scroll-margin-top: 2rem; }
+.section-title { font-size: 1.15rem; font-weight: 700; color: var(--navy); padding-bottom: 0.75rem; border-bottom: 2px solid var(--surface-3); margin-bottom: 1.75rem; }
+.screen-num { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sky); margin-bottom: 0.3rem; }
+
+/* ANNOTATION */
+.anno-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+.anno-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+.anno-list li { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.65; padding-left: 1rem; border-left: 2px solid var(--border); }
+.anno-list li strong { color: var(--text-primary); display: block; font-size: 0.8rem; margin-bottom: 0.1rem; }
+.anno-list li.key { border-left-color: var(--sky); }
+.anno-list li.warn { border-left-color: var(--warning); }
+.anno-list li.rule { border-left-color: var(--success); }
+
+/* MOCKUP WRAPPERS */
+.mockup { border: 2px solid var(--border); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-md); background: white; font-size: 0.78rem; }
+.mockup-dark { border-color: var(--dark-3); background: var(--dark-0); }
+
+/* ─── LANDING PAGE ─── */
+/* ── Landing page — light theme ── */
+.lp-nav { background: rgba(255,255,255,0.97); padding: 0.55rem 1.25rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; }
+.lp-nav-brand { color: #0ea5e9; font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; gap: 0.3rem; }
+.lp-nav-brand-dot { width: 7px; height: 7px; border-radius: 100%; background: #0ea5e9; }
+.lp-nav-brand-sub { color: #94a3b8; font-weight: 400; font-size: 0.62rem; }
+.lp-nav-links { display: flex; gap: 0.85rem; }
+.lp-nav-links a { color: #475569; text-decoration: none; font-size: 0.68rem; font-weight: 500; }
+.lp-nav-github { background: #0f172a; color: white; border: none; padding: 0.26rem 0.7rem; border-radius: 5px; font-size: 0.66rem; font-weight: 600; cursor: pointer; }
+.lp-hero { background: linear-gradient(180deg, rgba(14,165,233,0.07) 0%, transparent 55%), white; padding: 1.75rem 1.25rem 1.25rem; text-align: center; }
+.lp-hero-badge { display: inline-block; background: #f0f9ff; border: 1px solid #e0f2fe; color: #0284c7; font-size: 0.58rem; font-weight: 700; padding: 0.2rem 0.65rem; border-radius: 100px; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.lp-hero h1 { font-size: 1.4rem; font-weight: 900; color: #0f172a; line-height: 1.12; margin-bottom: 0.45rem; letter-spacing: -0.5px; }
+.lp-hero h1 em { font-style: normal; color: #0ea5e9; }
+.lp-hero p { font-size: 0.68rem; color: #475569; max-width: 360px; margin: 0 auto 0.75rem; line-height: 1.65; }
+.lp-authors { display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.lp-author-pill { display: flex; align-items: center; gap: 0.35rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 100px; padding: 0.2rem 0.6rem 0.2rem 0.2rem; }
+.lp-author-avatar { width: 22px; height: 22px; border-radius: 100%; background: #f0f9ff; border: 1.5px solid #e0f2fe; display: flex; align-items: center; justify-content: center; font-size: 0.44rem; font-weight: 900; color: #0284c7; flex-shrink: 0; }
+.lp-author-name { font-size: 0.6rem; font-weight: 700; color: #0f172a; line-height: 1.2; }
+.lp-author-uni  { font-size: 0.5rem; color: #94a3b8; }
+.lp-hero-btns { display: flex; gap: 0.45rem; justify-content: center; margin-bottom: 1rem; }
+.lp-btn-primary { background: #0ea5e9; color: white; border: none; padding: 0.38rem 0.9rem; border-radius: 6px; font-size: 0.68rem; font-weight: 700; cursor: pointer; }
+.lp-btn-secondary { background: white; color: #0f172a; border: 1px solid #e2e8f0; padding: 0.38rem 0.9rem; border-radius: 6px; font-size: 0.68rem; font-weight: 600; cursor: pointer; }
+/* carousel preview */
+.lp-carousel { border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.lp-car-chrome { background: #1a1f2e; padding: 0.4rem 0.65rem; display: flex; align-items: center; gap: 0.28rem; }
+.lp-car-dot { width: 7px; height: 7px; border-radius: 100%; }
+.lp-car-url { flex: 1; background: rgba(255,255,255,0.05); border-radius: 3px; padding: 0.15rem 0.5rem; font-size: 0.52rem; color: #4b5563; margin: 0 0.5rem; border: 1px solid rgba(255,255,255,0.06); font-family: monospace; }
+.lp-car-body { background: #0c1524; height: 110px; display: flex; gap: 0.5rem; padding: 0.6rem; }
+.lp-car-series { width: 36px; display: flex; flex-direction: column; gap: 0.2rem; }
+.lp-car-thumb { background: #1f2a3d; border-radius: 3px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.42rem; color: #4b5563; border: 1px solid transparent; }
+.lp-car-thumb.active { border-color: #0ea5e9; color: #0ea5e9; }
+.lp-car-canvas { flex: 1; background: #060a14; border-radius: 3px; display: flex; align-items: center; justify-content: center; }
+.lp-car-scan { width: 72px; height: 72px; background: radial-gradient(ellipse at 50% 45%, #1a2535 0%, #0c1220 60%, #060a14 100%); border-radius: 3px; }
+.lp-car-info { width: 62px; background: #141a2a; border-radius: 3px; padding: 0.35rem; display: flex; flex-direction: column; gap: 0.1rem; }
+.lp-car-info-row { font-size: 0.42rem; color: #4b5563; display: flex; justify-content: space-between; }
+.lp-car-info-row span:last-child { color: #9ca3af; }
+.lp-car-nav { display: flex; align-items: center; justify-content: center; gap: 0.3rem; padding: 0.4rem; background: white; border-top: 1px solid #e2e8f0; }
+.lp-car-nav-dot { width: 5px; height: 5px; border-radius: 100%; background: #cbd5e1; }
+.lp-car-nav-dot.active { background: #0ea5e9; width: 14px; border-radius: 3px; }
+/* stack strip */
+.lp-stack { display: flex; flex-wrap: wrap; gap: 0.25rem; padding: 0.55rem 0.85rem; background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+.lp-stack-badge { background: white; border: 1px solid #e2e8f0; color: #64748b; font-size: 0.54rem; padding: 0.1rem 0.4rem; border-radius: 100px; font-family: monospace; }
+/* features 2×2 */
+.lp-features { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; padding: 0.75rem; background: white; }
+.lp-feat { background: #f8fafc; border-radius: 8px; padding: 0.65rem; border: 1px solid #e2e8f0; }
+.lp-feat-icon { width: 22px; height: 22px; background: #f0f9ff; border: 1px solid #e0f2fe; border-radius: 5px; margin-bottom: 0.35rem; display: flex; align-items: center; justify-content: center; }
+.lp-feat h3 { font-size: 0.68rem; font-weight: 700; color: #0f172a; margin-bottom: 0.15rem; }
+.lp-feat p  { font-size: 0.6rem; color: #475569; line-height: 1.5; }
+/* stats 4-up */
+.lp-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.45rem; padding: 0.75rem; background: white; border-top: 1px solid #e2e8f0; }
+.lp-stat { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.6rem; text-align: center; }
+.lp-stat-num { font-size: 1.3rem; font-weight: 900; color: #0ea5e9; letter-spacing: -0.5px; line-height: 1; }
+.lp-stat-lbl { font-size: 0.52rem; font-weight: 600; color: #0f172a; margin-top: 0.18rem; line-height: 1.3; }
+.lp-stat-sub { font-size: 0.45rem; color: #94a3b8; margin-top: 0.1rem; }
+/* footer */
+.lp-footer { background: #f8fafc; padding: 0.55rem 1rem; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #e2e8f0; }
+.lp-footer-brand { font-size: 0.62rem; font-weight: 700; color: #0ea5e9; }
+.lp-footer-names { font-size: 0.55rem; color: #94a3b8; }
+
+/* ─── AUTH SCREENS ─── */
+.auth-wrapper { background: var(--surface-1); min-height: 220px; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+.auth-card { background: white; border-radius: 16px; box-shadow: var(--shadow-md); padding: 1.75rem; width: 280px; border: 1px solid var(--border); }
+.auth-logo { text-align: center; margin-bottom: 1.25rem; }
+.auth-logo-name { font-size: 1.1rem; font-weight: 800; color: var(--sky); }
+.auth-logo-sub  { font-size: 0.68rem; color: var(--text-muted); }
+.auth-title { font-size: 0.95rem; font-weight: 700; color: var(--navy); margin-bottom: 0.25rem; }
+.auth-sub   { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 1.1rem; }
+.auth-field { margin-bottom: 0.75rem; }
+.auth-label { font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.25rem; display: block; }
+.auth-input { width: 100%; padding: 0.45rem 0.75rem; border: 1.5px solid var(--border); border-radius: 6px; font-size: 0.8rem; font-family: 'Inter', sans-serif; outline: none; color: var(--text-primary); }
+.auth-input:focus { border-color: var(--sky); }
+.auth-btn { width: 100%; background: var(--sky); color: white; border: none; padding: 0.55rem; border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer; margin-top: 0.25rem; }
+.auth-link { text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.75rem; }
+.auth-link a { color: var(--sky); text-decoration: none; font-weight: 600; }
+.auth-divider { height: 1px; background: var(--border); margin: 1rem 0; }
+
+/* ─── APP SHELL ─── */
+.app-shell { display: flex; min-height: 460px; background: var(--surface-1); }
+.app-sidebar { width: 200px; background: var(--navy); padding: 1rem 0; display: flex; flex-direction: column; flex-shrink: 0; align-self: stretch; }
+.app-brand { padding: 0 1rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.5rem; }
+.app-brand-name { font-size: 0.85rem; font-weight: 800; color: var(--sky); }
+.app-nav-item { padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; color: #cbd5e1; cursor: pointer; border-left: 2px solid transparent; }
+.app-nav-item:hover { color: white; background: rgba(255,255,255,0.07); }
+.app-nav-item.active { color: white; background: rgba(14,165,233,0.18); border-left-color: var(--sky); font-weight: 600; }
+.app-nav-icon { width: 16px; height: 16px; background: rgba(255,255,255,0.25); border-radius: 3px; flex-shrink: 0; }
+.app-nav-icon.active-icon { background: var(--sky); }
+.app-user { margin-top: auto; padding: 0.75rem 1rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 0.5rem; }
+.app-avatar { width: 24px; height: 24px; background: var(--sky); border-radius: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.6rem; font-weight: 700; flex-shrink: 0; }
+.app-user-name { font-size: 0.72rem; color: #e2e8f0; }
+.app-content { flex: 1; padding: 1.25rem; overflow: hidden; }
+
+/* ─── PATIENT SEARCH ─── */
+.ps-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.ps-title  { font-size: 0.95rem; font-weight: 700; color: var(--navy); }
+.ps-search { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+.ps-input  { flex: 1; padding: 0.4rem 0.75rem; border: 1.5px solid var(--border); border-radius: 6px; font-size: 0.75rem; font-family: 'Inter', sans-serif; outline: none; background: white; }
+.ps-btn    { background: var(--sky); color: white; border: none; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+.ps-btn-sec { background: white; color: var(--text-secondary); border: 1.5px solid var(--border); padding: 0.4rem 0.75rem; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
+.ps-table  { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+.ps-table th { text-align: left; padding: 0.4rem 0.6rem; background: var(--surface-2); color: var(--text-muted); font-weight: 600; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.ps-table td { padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+.ps-table tr:hover td { background: var(--sky-pale); cursor: pointer; }
+.ps-table td:first-child { color: var(--navy); font-weight: 600; }
+.badge-sm { display: inline-flex; align-items: center; padding: 0.1rem 0.45rem; border-radius: 100px; font-size: 0.62rem; font-weight: 600; }
+.badge-ct { background: #dbeafe; color: #1e40af; }
+.badge-mr { background: #ede9fe; color: #5b21b6; }
+.badge-cr { background: #d1fae5; color: #065f46; }
+
+/* ─── UPLOAD ─── */
+.upload-zone { border: 2px dashed var(--border); border-radius: 12px; background: var(--surface-1); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; transition: all 0.15s; cursor: pointer; }
+.upload-zone:hover { border-color: var(--sky); background: var(--sky-pale); }
+.upload-icon { width: 40px; height: 40px; background: var(--sky-pale); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.6rem; }
+.upload-zone h3 { font-size: 0.85rem; font-weight: 700; color: var(--navy); margin-bottom: 0.2rem; }
+.upload-zone p  { font-size: 0.72rem; color: var(--text-muted); }
+.batch-summary { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 0.8rem 1rem; margin-top: 0.85rem; }
+.batch-stats { display: flex; gap: 1.25rem; margin-bottom: 0.65rem; flex-wrap: wrap; }
+.batch-stat-num { font-size: 1.05rem; font-weight: 800; color: var(--navy); line-height: 1; }
+.batch-stat-label { font-size: 0.62rem; color: var(--text-muted); margin-top: 0.1rem; }
+.batch-overall { display: flex; align-items: center; gap: 0.6rem; }
+.batch-bar { flex: 1; height: 6px; background: var(--surface-3); border-radius: 100px; overflow: hidden; }
+.batch-bar-fill { height: 100%; background: var(--sky); border-radius: 100px; transition: width 0.3s; }
+.batch-pct { font-size: 0.72rem; font-weight: 700; color: var(--sky); min-width: 2.5rem; text-align: right; }
+.batch-status-label { font-size: 0.65rem; color: var(--text-muted); white-space: nowrap; }
+.patient-rows { margin-top: 0.65rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.patient-upload-row { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 0.55rem 0.75rem; }
+.patient-row-top { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.3rem; }
+.patient-row-name { font-weight: 600; color: var(--text-primary); font-size: 0.75rem; }
+.patient-row-meta { font-size: 0.63rem; color: var(--text-muted); flex: 1; }
+.patient-row-pct { font-size: 0.65rem; font-weight: 700; color: var(--sky); white-space: nowrap; }
+.patient-row-done { font-size: 0.65rem; font-weight: 700; color: var(--success); white-space: nowrap; }
+.patient-row-bar { height: 4px; background: var(--surface-2); border-radius: 100px; overflow: hidden; }
+.patient-row-fill { height: 100%; border-radius: 100px; }
+.prb-done { background: var(--success); }
+.prb-active { background: var(--sky); }
+
+/* ─── VIEWER ─── */
+.viewer-full { background: var(--dark-0); border-radius: var(--r-lg); overflow: hidden; border: 2px solid var(--dark-3); }
+.viewer-topbar { background: var(--dark-2); padding: 0.5rem 0.85rem; display: flex; align-items: center; gap: 0.4rem; border-bottom: 1px solid var(--dark-3); }
+.vt-btn { background: rgba(255,255,255,0.08); color: #d1d5db; border: none; padding: 0.28rem 0.6rem; border-radius: 4px; font-size: 0.68rem; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500; }
+.vt-btn.active { background: var(--sky); color: white; }
+.vt-btn.preset { background: rgba(239,68,68,0.12); color: #fca5a5; }
+.vt-sep { width: 1px; height: 18px; background: var(--dark-3); margin: 0 0.2rem; }
+.vt-back { margin-left: auto; background: rgba(255,255,255,0.06); color: #94a3b8; border: none; padding: 0.28rem 0.6rem; border-radius: 4px; font-size: 0.68rem; cursor: pointer; font-family: 'Inter', sans-serif; }
+.viewer-body-full { display: flex; height: 380px; }
+.viewer-series-panel { width: 72px; background: var(--dark-2); border-right: 1px solid var(--dark-3); padding: 0.5rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.vsp-label { font-size: 0.58rem; font-weight: 700; color: #4b5563; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.1rem; }
+.vsp-thumb { background: var(--dark-3); border-radius: 4px; height: 52px; display: flex; align-items: center; justify-content: center; color: #4b5563; font-size: 0.6rem; border: 1.5px solid transparent; cursor: pointer; }
+.vsp-thumb.active { border-color: var(--sky); }
+.viewer-main { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+.viewer-overlay-tl { position: absolute; top: 0.5rem; left: 0.5rem; font-size: 0.6rem; color: rgba(255,255,255,0.35); line-height: 1.8; font-family: 'JetBrains Mono', monospace; }
+.viewer-overlay-br { position: absolute; bottom: 0.5rem; right: 0.5rem; font-size: 0.6rem; color: rgba(255,255,255,0.35); text-align: right; line-height: 1.8; font-family: 'JetBrains Mono', monospace; }
+.viewer-canvas-placeholder { color: #1f2937; font-size: 0.75rem; text-align: center; }
+.viewer-info-panel { width: 168px; background: var(--dark-2); border-left: 1px solid var(--dark-3); padding: 0.75rem; overflow-y: auto; }
+.vip-section-title { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #4b5563; margin-bottom: 0.4rem; }
+.vip-row { display: flex; justify-content: space-between; font-size: 0.67rem; color: #6b7280; margin-bottom: 0.2rem; }
+.vip-row span:last-child { color: #9ca3af; text-align: right; }
+.vip-divider { height: 1px; background: var(--dark-3); margin: 0.6rem 0; }
+.vip-ai-btn { width: 100%; background: rgba(14,165,233,0.15); border: 1px solid rgba(14,165,233,0.3); color: var(--sky); border-radius: 5px; padding: 0.35rem; font-size: 0.68rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; margin-bottom: 0.4rem; }
+.vip-ai-text { font-size: 0.65rem; color: #6b7280; line-height: 1.6; font-style: italic; }
+
+/* ─── ADMIN ─── */
+.admin-shell { display: flex; min-height: 460px; }
+.admin-subnav { width: 140px; background: var(--surface-2); border-right: 1px solid var(--border); padding: 0.75rem 0; }
+.admin-subnav-title { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); padding: 0 0.85rem 0.4rem; }
+.admin-nav-item { padding: 0.4rem 0.85rem; font-size: 0.75rem; color: var(--text-secondary); cursor: pointer; border-left: 2px solid transparent; }
+.admin-nav-item.active { color: var(--sky); background: var(--sky-pale); border-left-color: var(--sky); font-weight: 600; }
+.admin-content { flex: 1; padding: 1rem; overflow: hidden; }
+.admin-section-title { font-size: 0.85rem; font-weight: 700; color: var(--navy); margin-bottom: 0.75rem; }
+.admin-card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: 0.6rem; }
+.admin-field-label { font-size: 0.7rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.2rem; }
+.admin-input { width: 180px; padding: 0.35rem 0.6rem; border: 1.5px solid var(--border); border-radius: 5px; font-size: 0.75rem; font-family: 'Inter', sans-serif; outline: none; }
+.admin-quota-label { font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 0.3rem; display: flex; justify-content: space-between; }
+.admin-quota-bar { height: 8px; background: var(--surface-2); border-radius: 100px; overflow: hidden; }
+.admin-quota-fill { height: 100%; background: var(--sky); border-radius: 100px; }
+.admin-btn { background: var(--sky); color: white; border: none; padding: 0.35rem 0.85rem; border-radius: 5px; font-size: 0.72rem; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
+.admin-btn-danger { background: white; color: var(--error); border: 1.5px solid var(--error); padding: 0.35rem 0.85rem; border-radius: 5px; font-size: 0.72rem; font-weight: 600; cursor: pointer; margin-top: 0.5rem; margin-left: 0.4rem; }
+
+/* ─── ROUTE TABLE ─── */
+.route-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; background: white; border-radius: var(--r-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+.route-table th { text-align: left; padding: 0.5rem 0.85rem; background: var(--surface-2); color: var(--text-secondary); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.route-table td { padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.route-table tr:last-child td { border-bottom: none; }
+.mono { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--sky); }
+.chip { display: inline-flex; align-items: center; padding: 0.15rem 0.55rem; border-radius: 100px; font-size: 0.65rem; font-weight: 600; }
+.chip-public  { background: #d1fae5; color: #065f46; }
+.chip-private { background: #dbeafe; color: #1e40af; }
+.chip-admin   { background: #fef3c7; color: #92400e; }
+
+/* ─── PATIENT DETAIL ─── */
+.pd-patient-bar { background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 0.65rem 1rem; display: flex; align-items: center; gap: 1.5rem; }
+.pd-name { font-size: 0.88rem; font-weight: 700; color: var(--navy); }
+.pd-meta { font-size: 0.67rem; color: var(--text-secondary); margin-top: 0.1rem; line-height: 1.5; }
+.pd-tabs { display: flex; border-bottom: 1.5px solid var(--border); margin: 0.6rem 0 0.65rem; }
+.pd-tab { padding: 0.35rem 0.85rem; font-size: 0.73rem; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px; }
+.pd-tab.active { color: var(--sky); border-bottom-color: var(--sky); }
+.study-open-btn { background: var(--sky); color: white; border: none; padding: 0.22rem 0.6rem; border-radius: 4px; font-size: 0.66rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.al-table { width: 100%; border-collapse: collapse; font-size: 0.69rem; }
+.al-table th { text-align: left; padding: 0.35rem 0.55rem; background: var(--surface-2); color: var(--text-muted); font-weight: 600; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.al-table td { padding: 0.38rem 0.55rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+.al-table tr:last-child td { border-bottom: none; }
+
+/* ─── VIEWER BREADCRUMB ─── */
+.vt-breadcrumb { display: flex; align-items: center; gap: 0.35rem; margin-left: auto; font-size: 0.68rem; }
+.vt-bc-link { color: var(--sky); cursor: pointer; }
+.vt-bc-sep { color: #4b5563; }
+.vt-bc-current { color: #9ca3af; }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-name">CloudPACS</div>
+    <div class="sidebar-brand-sub">Screen Specifications</div>
+  </div>
+  <div class="sidebar-section">Public</div>
+  <a href="#landing">1 · Landing Page</a>
+  <a href="#invite">2 · Invitation Acceptance</a>
+  <a href="#login">3 · Login</a>
+  <div class="sidebar-section">App</div>
+  <a href="#app-shell">4 · App Shell</a>
+  <a href="#patients">5 · Patient Search</a>
+  <a href="#patient-detail">5b · Patient Detail</a>
+  <a href="#upload">6 · Upload</a>
+  <a href="#viewer">7 · DICOM Viewer</a>
+  <a href="#settings">8 · Settings</a>
+  <div class="sidebar-section">Reference</div>
+  <a href="#routes">Route Map</a>
+  <div class="sidebar-back">
+    <a href="design-system.html">← Design System</a>
+  </div>
+  <div class="sidebar-back" style="margin-top:0.5rem;">
+    <a href="console.html">PostDICOM Console →</a>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="page-title">Screen Specifications</div>
+  <div class="page-sub">Visual mockups and layout rules for every screen in CloudPACS. Each mockup is representative — exact spacing and text sizes are defined in the Design System. Build using MUI components with the project theme.</div>
+
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <!-- 1. LANDING PAGE -->
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <section id="landing">
+    <div class="screen-num">Screen 01</div>
+    <div class="section-title">Landing Page</div>
+    <div class="anno-grid">
+      <div>
+        <div class="mockup">
+          <!-- Nav -->
+          <div class="lp-nav">
+            <div class="lp-nav-brand"><span class="lp-nav-brand-dot"></span> CloudPACS <span class="lp-nav-brand-sub">by PostDICOM B.V.</span></div>
+            <div class="lp-nav-links"><a href="#">Features</a><a href="#">Architecture</a><a href="#">Skills</a></div>
+            <button class="lp-nav-github">GitHub ↗</button>
+          </div>
+          <!-- Hero -->
+          <div class="lp-hero">
+            <div class="lp-hero-badge">PostDICOM Internship · Summer 2026</div>
+            <h1>From DICOM to diagnosis.<br><em>Built for the cloud.</em></h1>
+            <p>A production-grade cloud PACS — DICOM viewing, local AI reporting, RBAC, and CI/CD on Azure. Built in 12 weeks.</p>
+            <div class="lp-authors">
+              <div class="lp-author-pill">
+                <div class="lp-author-avatar">AO</div>
+                <div><div class="lp-author-name">Acelya Ecem Oksuz</div><div class="lp-author-uni">King's College London</div></div>
+              </div>
+              <div class="lp-author-pill">
+                <div class="lp-author-avatar">IO</div>
+                <div><div class="lp-author-name">Ibrahim Cem Oksuz</div><div class="lp-author-uni">Univ. of Birmingham</div></div>
+              </div>
+            </div>
+            <div class="lp-hero-btns">
+              <button class="lp-btn-primary">View on GitHub</button>
+              <button class="lp-btn-secondary">Online demo →</button>
+            </div>
+            <!-- Carousel (representative — viewer slide shown) -->
+            <div class="lp-carousel">
+              <div class="lp-car-chrome">
+                <span class="lp-car-dot" style="background:#ff5f57"></span>
+                <span class="lp-car-dot" style="background:#febc2e"></span>
+                <span class="lp-car-dot" style="background:#28c840"></span>
+                <div class="lp-car-url">app.postdicom.com/viewer/study_8f3a2c</div>
+              </div>
+              <div class="lp-car-body">
+                <div class="lp-car-series">
+                  <div class="lp-car-thumb active">1</div>
+                  <div class="lp-car-thumb">2</div>
+                  <div class="lp-car-thumb">3</div>
+                </div>
+                <div class="lp-car-canvas"><div class="lp-car-scan"></div></div>
+                <div class="lp-car-info">
+                  <div class="lp-car-info-row"><span>Patient</span><span>Smith, J.</span></div>
+                  <div class="lp-car-info-row"><span>Modality</span><span>MR</span></div>
+                  <div class="lp-car-info-row"><span>Series</span><span>3</span></div>
+                  <div class="lp-car-info-row"><span>Instances</span><span>66</span></div>
+                </div>
+              </div>
+              <div class="lp-car-nav">
+                <div class="lp-car-nav-dot active"></div>
+                <div class="lp-car-nav-dot"></div>
+                <div class="lp-car-nav-dot"></div>
+                <div class="lp-car-nav-dot"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Stack strip -->
+          <div class="lp-stack">
+            <span class="lp-stack-badge">React 18</span><span class="lp-stack-badge">.NET Core 8</span>
+            <span class="lp-stack-badge">Cornerstone3D</span><span class="lp-stack-badge">Azure CosmosDB</span>
+            <span class="lp-stack-badge">Semantic Kernel</span><span class="lp-stack-badge">Ollama</span>
+            <span class="lp-stack-badge">Docker</span><span class="lp-stack-badge">GitHub Actions</span>
+          </div>
+          <!-- Features 2×2 -->
+          <div class="lp-features">
+            <div class="lp-feat">
+              <div class="lp-feat-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+              <h3>DICOM Viewer</h3><p>Cornerstone3D + WebAssembly. CT, MR, CR, DX. W/L, Zoom, Pan, multi-series.</p>
+            </div>
+            <div class="lp-feat">
+              <div class="lp-feat-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3"/></svg></div>
+              <h3>AI Reporting</h3><p>Local Ollama + Semantic Kernel. Structured drafts. Zero egress. GDPR by design.</p>
+            </div>
+            <div class="lp-feat">
+              <div class="lp-feat-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/></svg></div>
+              <h3>Cloud Backend</h3><p>.NET Core 8, CosmosDB, Blob Storage, Azure Container Apps, GitHub Actions.</p>
+            </div>
+            <div class="lp-feat">
+              <div class="lp-feat-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+              <h3>Security &amp; RBAC</h3><p>JWT, 4 user roles, per-patient audit log, invite-only. IEC 62304 thinking.</p>
+            </div>
+          </div>
+          <!-- Stats -->
+          <div class="lp-stats">
+            <div class="lp-stat"><div class="lp-stat-num">12</div><div class="lp-stat-lbl">Weeks of development</div><div class="lp-stat-sub">Jun–Sep 2026</div></div>
+            <div class="lp-stat"><div class="lp-stat-num">4</div><div class="lp-stat-lbl">Azure services</div><div class="lp-stat-sub">CosmosDB · Blob · Apps · Registry</div></div>
+            <div class="lp-stat"><div class="lp-stat-num">2</div><div class="lp-stat-lbl">Apps built</div><div class="lp-stat-sub">CloudPACS · Console</div></div>
+            <div class="lp-stat"><div class="lp-stat-num">4</div><div class="lp-stat-lbl">User roles</div><div class="lp-stat-sub">Admin · Radiologist · Uploader · Viewer</div></div>
+          </div>
+          <!-- Footer -->
+          <div class="lp-footer">
+            <div class="lp-footer-brand">CloudPACS · PostDICOM B.V.</div>
+            <div class="lp-footer-names">Acelya Ecem Oksuz &amp; Ibrahim Cem Oksuz · Summer 2026</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <ul class="anno-list">
+          <li class="key"><strong>Full light theme throughout</strong>White body, <code>#f8fafc</code> subtle sections, <code>#f1f5f9</code> alternating backgrounds. No dark sections except the DICOM viewer mockup inside the carousel — which is correct, that is what a real viewer looks like.</li>
+          <li class="key"><strong>Top nav — white + backdrop blur</strong>Logo dot + "CloudPACS" + "by PostDICOM B.V." sub-text. Nav links: Features, Architecture, Skills. CTA: "GitHub ↗" (dark button). No Sign In — this is a recruiter-facing portfolio, not a product login page.</li>
+          <li class="key"><strong>Author pills — Acelya left, Ibrahim right (alphabetical)</strong>Each pill shows a circular headshot photo (or initials fallback), name, LinkedIn icon link, and university. Placed between hero description and CTA buttons. Photos loaded from <code>design/images/acelya.jpg</code> and <code>design/images/ibrahim.jpg</code>.</li>
+          <li class="key"><strong>Carousel — 4 slides, auto-advancing every 4.5 s</strong>Slide 1: DICOM Viewer (Cornerstone3D, dark, breadcrumb, AI panel). Slide 2: Patient List (app shell, modality badges, Open buttons). Slide 3: Batch Upload (summary card + per-patient progress bars). Slide 4: PostDICOM Console (indigo theme, client account table, quota bars). Dot indicators stretch to pill on active. Pauses on hover.</li>
+          <li><strong>Tech stack strip</strong>Light gray background. 13 technology badges in monospace font. Hover turns badge sky-blue.</li>
+          <li><strong>Features 2×2 grid</strong>DICOM Viewer · AI Reporting · Cloud Backend · Security &amp; RBAC. Light cards on white, SVG icons, sky-blue top gradient on hover.</li>
+          <li><strong>Architecture section</strong>Light <code>#f1f5f9</code> background. Layer diagram (FE→BE→DB→AI→CI) with colour-coded borders + 4 explanatory bullet points. Section sub-text spans full width (<code>max-width: none</code> override).</li>
+          <li><strong>Stats 4-up</strong>12 weeks · 4 Azure services · 2 apps built · 4 user roles. Sky-blue numbers. Cards have top accent border that intensifies on hover.</li>
+          <li><strong>Skills 3-column</strong>Backend · Frontend · DevOps. White cards with sky top accent. All bullets describe real deliverables on a CV.</li>
+          <li class="warn"><strong>No Sign In CTA anywhere</strong>This is a portfolio page for recruiters. "GitHub ↗" is the only persistent action. No public registration exists.</li>
+          <li class="rule"><strong>Mobile: single column</strong>Features, architecture, and skills stack to 1 column. Stats grid becomes 2×2. Hero authors stack vertically. Nav links hidden.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <!-- 2. INVITATION ACCEPTANCE -->
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <section id="invite">
+    <div class="screen-num">Screen 02</div>
+    <div class="section-title">Invitation Acceptance</div>
+    <div class="anno-grid">
+      <div>
+        <div class="mockup">
+          <div class="auth-wrapper">
+            <div class="auth-card">
+              <div class="auth-logo">
+                <div class="auth-logo-name">CloudPACS</div>
+                <div class="auth-logo-sub">You have been invited</div>
+              </div>
+              <div class="auth-title">Accept invitation</div>
+              <div class="auth-sub">You've been invited to join <strong style="color:var(--navy);">Brighton Radiology Clinic</strong> as a <strong style="color:var(--sky);">Radiologist</strong>.</div>
+              <div class="auth-divider"></div>
+              <div class="auth-field">
+                <label class="auth-label">Your email <span style="color:var(--text-muted); font-weight:400;">(pre-filled, read-only)</span></label>
+                <input class="auth-input" type="email" value="jane.smith@brighton-rad.com" disabled style="background:var(--surface-2); color:var(--text-muted);">
+              </div>
+              <div class="auth-field">
+                <label class="auth-label">Your name</label>
+                <input class="auth-input" type="text" placeholder="Jane Smith">
+              </div>
+              <div class="auth-field">
+                <label class="auth-label">Set a password</label>
+                <input class="auth-input" type="password" placeholder="Min. 8 characters">
+              </div>
+              <div class="auth-field">
+                <label class="auth-label">Confirm password</label>
+                <input class="auth-input" type="password" placeholder="Repeat password">
+              </div>
+              <button class="auth-btn">Accept &amp; Sign in</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <ul class="anno-list">
+          <li class="key"><strong>Invitation-only — no public registration</strong>This screen is only reachable via an invitation link sent by a client account admin. The URL contains a one-time token: <code>/invite/:token</code>. If the token is invalid or expired, show an error page.</li>
+          <li class="key"><strong>Email and role are pre-filled from the invitation token</strong>The invitee cannot change their email or role. The account admin set both when sending the invitation. This enforces RBAC from the moment of account creation.</li>
+          <li><strong>Fields</strong>Name (free text) + Password + Confirm password. That is all. The email is shown read-only so the user knows which account they are activating.</li>
+          <li><strong>Account name and role displayed prominently</strong>"You've been invited to join <em>Brighton Radiology Clinic</em> as a <em>Radiologist</em>." The user must see what they are accepting before setting a password.</li>
+          <li class="warn"><strong>Token expiry — 48 hours</strong>If the link has expired, show: "This invitation has expired. Ask your account administrator to send a new invitation." No resend functionality in the internship scope.</li>
+          <li class="rule"><strong>On submit: activate account, log in, redirect to /patients</strong>No separate "activation pending" state. Accepting the invitation immediately activates the account and logs the user in.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <!-- 3. LOGIN -->
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <section id="login">
+    <div class="screen-num">Screen 03</div>
+    <div class="section-title">Login</div>
+    <div class="anno-grid">
+      <div>
+        <div class="mockup">
+          <div class="auth-wrapper">
+            <div class="auth-card">
+              <div class="auth-logo">
+                <div class="auth-logo-name">CloudPACS</div>
+                <div class="auth-logo-sub">Sign in to continue</div>
+              </div>
+              <div class="auth-title">Welcome back</div>
+              <div class="auth-sub" style="margin-bottom:0.85rem;">Enter your credentials to access the viewer.</div>
+              <div class="auth-field">
+                <label class="auth-label">Email address</label>
+                <input class="auth-input" type="email" placeholder="jane@hospital.org">
+              </div>
+              <div class="auth-field">
+                <label class="auth-label">Password</label>
+                <input class="auth-input" type="password" placeholder="••••••••">
+              </div>
+              <div style="text-align:right; font-size:0.7rem; margin-bottom:0.5rem;"><a href="#" style="color:var(--sky); text-decoration:none;">Forgot password?</a></div>
+              <button class="auth-btn">Sign in</button>
+              <div class="auth-divider"></div>
+              <div style="background:#fef3c7; border:1px solid #fde047; border-radius:6px; padding:0.5rem 0.7rem; font-size:0.68rem; color:#92400e; line-height:1.5;">
+                <strong>Wrong credentials (error state):</strong> "Invalid email or password." — shown as a MUI Alert above the form, not inline on individual fields (prevents username enumeration).
+              </div>
+              <div class="auth-link" style="margin-top:0.75rem;">No account? <a href="#">Request access</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <ul class="anno-list">
+          <li class="key"><strong>Identical card design to Register</strong>Same card, same colours, same width. Consistency between auth screens reduces cognitive load.</li>
+          <li><strong>On success</strong>Store JWT in <code>localStorage</code> (or <code>httpOnly</code> cookie — discuss with Omer). Redirect to <code>/patients</code>.</li>
+          <li class="warn"><strong>Error message must be generic</strong>"Invalid email or password" — never "User not found" or "Wrong password." Generic errors prevent account enumeration attacks.</li>
+          <li><strong>Forgot password</strong>Out of scope for the internship build — link can show a "Contact your administrator" tooltip.</li>
+          <li class="rule"><strong>JWT expiry handling</strong>When the token expires and the user makes a request, redirect to <code>/login</code> with a query param: <code>?reason=session_expired</code>. Show a brief info banner on the login page: "Your session expired. Please sign in again."</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <!-- 4. APP SHELL -->
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <section id="app-shell">
+    <div class="screen-num">Screen 04</div>
+    <div class="section-title">App Shell (Post-Login)</div>
+    <div class="anno-grid">
+      <div>
+        <div class="mockup">
+          <div class="app-shell">
+            <div class="app-sidebar">
+              <div class="app-brand"><div class="app-brand-name">CloudPACS</div></div>
+              <div class="app-nav-item active"><div class="app-nav-icon active-icon"></div> Patients</div>
+              <div class="app-nav-item"><div class="app-nav-icon"></div> Upload</div>
+              <div class="app-nav-item"><div class="app-nav-icon"></div> Settings</div>
+              <div class="app-user">
+                <div class="app-avatar">JD</div>
+                <div>
+                  <div class="app-user-name" style="font-weight:600;">John Doe</div>
+                  <div class="app-user-name" style="font-size:0.62rem; color:#94a3b8;">Radiologist</div>
+                </div>
+              </div>
+            </div>
+            <div class="app-content" style="display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.75rem; text-align:center;">
+              <div>
+                <div style="font-weight:600; color:var(--text-secondary); margin-bottom:0.25rem;">Active screen renders here</div>
+                <div style="font-size:0.7rem;">Patients · Upload · Admin</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <ul class="anno-list">
+          <li class="key"><strong>Persistent left sidebar — 240px</strong>Never a top nav inside the app. The sidebar gives maximum vertical space to the DataGrid and viewer canvas.</li>
+          <li><strong>3 navigation items only</strong>Patients · Upload · Admin. Admin link is hidden entirely for Viewer and Radiologist roles (not just disabled — hidden). Only Admins see it.</li>
+          <li><strong>User block pinned to sidebar bottom</strong>Shows avatar initials, name, role badge. Hover reveals "Sign out" option (MUI Tooltip or small popover).</li>
+          <li class="warn"><strong>No top app bar</strong>No duplicate header bar inside the authenticated app. The sidebar is the sole navigation. Adding a top bar wastes 60px of vertical space on every screen.</li>
+          <li class="rule"><strong>Collapse to icon-only below 1024px</strong>On tablet widths: sidebar collapses to 64px, showing only icon. Tooltip on hover shows the label. Content area expands to fill the space.</li>
+          <li><strong>Active state</strong>Sky blue left border + sky tint background + sky text. Only one item can be active at a time.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <!-- 5. PATIENT SEARCH -->
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <section id="patients">
+    <div class="screen-num">Screen 05</div>
+    <div class="section-title">Patient Search</div>
+    <div class="anno-grid">
+      <div>
+        <div class="mockup">
+          <div class="app-shell">
+            <div class="app-sidebar">
+              <div class="app-brand"><div class="app-brand-name">CloudPACS</div></div>
+              <div class="app-nav-item active"><div class="app-nav-icon active-icon"></div> Patients</div>
+              <div class="app-nav-item"><div class="app-nav-icon"></div> Upload</div>
+              <div class="app-nav-item"><div class="app-nav-icon"></div> Settings</div>
+              <div class="app-user"><div class="app-avatar">JD</div><div class="app-user-name">John Doe</div></div>
+            </div>
+            <div class="app-content">
+              <div class="ps-header">
+                <div class="ps-title">Patients</div>
+              </div>
+              <div class="ps-search">
+                <input class="ps-input" type="text" placeholder="Search by name, MRN, or date of birth…">
+                <button class="ps-btn-sec">Filters</button>
+                <button class="ps-btn">Search</button>
+              </div>
+              <table class="ps-table">
+                <thead><tr><th>Patient Name</th><th>MRN</th><th>DOB</th><th>Last Study</th><th>Studies</th></tr></thead>
+                <tbody>
+                  <tr><td>Smith, Jane A.</td><td style="font-family:'JetBrains Mono',monospace; color:#64748b; font-size:0.68rem;">MRN-00421</td><td>1974-03-22</td><td>14 Jul 2026 <span class="badge-sm badge-ct">CT</span></td><td style="text-align:center;">3</td></tr>
+                  <tr><td>Johnson, Robert</td><td style="font-family:'JetBrains Mono',monospace; color:#64748b; font-size:0.68rem;">MRN-00389</td><td>1958-11-07</td><td>02 Jul 2026 <span class="badge-sm badge-mr">MR</span></td><td style="text-align:center;">7</td></tr>
+                  <tr><td>Patel, Anika</td><td style="font-family:'JetBrains Mono',monospace; color:#64748b; font-size:0.68rem;">MRN-00512</td><td>1991-06-14</td><td>28 Jun 2026 <span class="badge-sm badge-cr">CR</span></td><td style="text-align:center;">1</td></tr>
+                </tbody>
+              </table>
+              <div style="font-size:0.65rem; color:var(--text-muted); padding:0.4rem 0; text-align:right;">Showing 3 of 124 patients</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <ul class="anno-list">
+          <li class="key"><strong>Search bar is the primary action — full width</strong>Positioned immediately below the page title. Searches by name, MRN, or date of birth. Search triggers on Enter or button click — not on every keystroke (debounced at 300ms for auto-search variant).</li>
+          <li><strong>MUI DataGrid with server-side pagination</strong>Never fetch all records. Backend returns 20 rows + totalCount. DataGrid shows correct page count. Sortable columns: Patient Name, Last Study Date.</li>
+          <li><strong>Modality badge on each row</strong>Shows the modality of the most recent study. Quick visual scan of the patient list.</li>
+          <li><strong>Click row → Patient Detail</strong>Navigates to <code>/patients/:id/studies</code> — the patient's study list. No modal — full-page navigation preserves browser back button.</li>
+          <li class="rule"><strong>No "New Patient" button</strong>Patient records are created automatically when a DICOM file is uploaded — the parser reads <code>PatientName</code>, <code>PatientID</code>, and <code>PatientBirthDate</code> from the DICOM header. There is no manual patient creation flow.</li>
+          <li class="rule"><strong>Empty state</strong>If search returns no results: centred illustration + "No patients found for '[query]'" + "Clear search" link. Never show a blank DataGrid.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <!-- 5b. PATIENT DETAIL -->
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <section id="patient-detail">
+    <div class="screen-num">Screen 05b</div>
+    <div class="section-title">Patient Detail — Study List &amp; Access Log</div>
+    <div class="anno-grid">
+      <div>
+        <div class="mockup">
+          <div class="app-shell">
+            <div class="app-sidebar">
+              <div class="app-brand"><div class="app-brand-name">CloudPACS</div></div>
+              <div class="app-nav-item active"><div class="app-nav-icon active-icon"></div> Patients</div>
+              <div class="app-nav-item"><div class="app-nav-icon"></div> Upload</div>
+              <div class="app-nav-item"><div class="app-nav-icon"></div> Settings</div>
+              <div class="app-user"><div class="app-avatar">JD</div><div class="app-user-name">John Doe</div></div>
+            </div>
+            <div class="app-content" style="padding:0; overflow:hidden; display:flex; flex-direction:column;">
+              <!-- patient header bar -->
+              <div class="pd-patient-bar">
+                <div>
+                  <div class="pd-name">Smith, Jane A.</div>
+                  <div class="pd-meta">MRN-00421 &nbsp;·&nbsp; DOB: 1974-03-22 &nbsp;·&nbsp; F &nbsp;·&nbsp; 4 studies</div>
+                </div>
+                <div style="margin-left:auto; font-size:0.68rem; color:var(--text-muted);">
+                  <a href="#" style="color:var(--sky); text-decoration:none; font-size:0.68rem; font-weight:600;">← All patients</a>
+                </div>
+              </div>
+              <!-- tab bar + content -->
+              <div style="padding:0 1rem 1rem;">
+                <div class="pd-tabs">
+                  <div class="pd-tab active">Studies</div>
+                  <div class="pd-tab">Access Log</div>
+                </div>
+                <!-- STUDIES TAB -->
+                <table class="ps-table">
+                  <thead><tr><th>Date</th><th>Description</th><th>Mod</th><th>Series</th><th>Images</th><th></th></tr></thead>
+                  <tbody>
+                    <tr>
+                      <td>14 Jul 2026</td>
+                      <td style="color:var(--text-primary); font-weight:500;">Brain MRI w/ contrast</td>
+                      <td><span class="badge-sm badge-mr">MR</span></td>
+                      <td style="text-align:center;">4</td>
+                      <td style="text-align:center;">320</td>
+                      <td><button class="study-open-btn">Open</button></td>
+                    </tr>
+                    <tr>
+                      <td>02 Jun 2026</td>
+                      <td style="color:var(--text-primary); font-weight:500;">Chest CT</td>
+                      <td><span class="badge-sm badge-ct">CT</span></td>
+                      <td style="text-align:center;">2</td>
+                      <td style="text-align:center;">180</td>
+                      <td><button class="study-open-btn">Open</button></td>
+                    </tr>
+                    <tr>
+                      <td>02 Jun 2026</td>
+                      <td style="color:var(--text-primary); font-weight:500;">Chest CT follow-up</td>
+                      <td><span class="badge-sm badge-ct">CT</span></td>
+                      <td style="text-align:center;">3</td>
+                      <td style="text-align:center;">220</td>
+                      <td><button class="study-open-btn">Open</button></td>
+                    </tr>
+                    <tr>
+                      <td>18 May 2026</td>
+                      <td style="color:var(--text-primary); font-weight:500;">Chest X-ray</td>
+                      <td><span class="badge-sm badge-cr" style="background:#fef3c7; color:#92400e;">CR</span></td>
+                      <td style="text-align:center;">1</td>
+                      <td style="text-align:center;">2</td>
+                      <td><button class="study-open-btn">Open</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ACCESS LOG tab mockup (shown separately below) -->
+        <div class="mockup" style="margin-top:1rem; padding:1rem;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.65rem;">
+            <div style="font-size:0.7rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.06em;">Access Log tab</div>
+            <div style="display:flex; align-items:center; gap:0.4rem; font-size:0.68rem; color:var(--text-secondary);">
+              <span>Filter by study:</span>
+              <select style="font-family:'Inter',sans-serif; font-size:0.68rem; border:1.5px solid var(--border); border-radius:5px; padding:0.2rem 0.45rem; color:var(--text-primary); background:white; cursor:pointer;">
+                <option>All studies</option>
+                <option>Brain MRI w/ contrast</option>
+                <option>Chest CT</option>
+                <option>Chest X-ray</option>
+              </select>
+            </div>
+          </div>
+          <table class="al-table">
+            <thead><tr><th>User</th><th>Study</th><th>Action</th><th>Timestamp</th></tr></thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:500; color:var(--text-primary);">John Doe</td>
+                <td>Brain MRI w/ contrast</td>
+                <td><span style="background:#dbeafe; color:#1e40af; font-size:0.62rem; font-weight:600; padding:0.1rem 0.4rem; border-radius:100px;">Viewed</span></td>
+                <td style="color:var(--text-muted);">14 Jul 2026, 09:14</td>
+              </tr>
+              <tr>
+                <td style="font-weight:500; color:var(--text-primary);">John Doe</td>
+                <td>Chest CT</td>
+                <td><span style="background:#dbeafe; color:#1e40af; font-size:0.62rem; font-weight:600; padding:0.1rem 0.4rem; border-radius:100px;">Viewed</span></td>
+                <td style="color:var(--text-muted);">03 Jun 2026, 11:32</td>
+              </tr>
+              <tr>
+                <td style="font-weight:500; color:var(--text-primary);">Sara Kim</td>
+                <td>Brain MRI w/ contrast</td>
+                <td><span style="background:#dbeafe; color:#1e40af; font-size:0.62rem; font-weight:600; padding:0.1rem 0.4rem; border-radius:100px;">Viewed</span></td>
+                <td style="color:var(--text-muted);">14 Jul 2026, 08:55</td>
+              </tr>
+              <tr>
+                <td style="font-weight:500; color:var(--text-primary);">James Wilson</td>
+                <td>Chest X-ray</td>
+                <td><span style="background:#d1fae5; color:#065f46; font-size:0.62rem; font-weight:600; padding:0.1rem 0.4rem; border-radius:100px;">Uploaded</span></td>
+                <td style="color:var(--text-muted);">18 May 2026, 16:05</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="font-size:0.63rem; color:var(--text-muted); padding:0.4rem 0; text-align:right;">4 events · append-only log</div>
+        </div>
+      </div>
+      <div>
+        <ul class="anno-list">
+          <li class="key"><strong>Patient header bar — always visible</strong>Shows name, MRN, DOB, sex, and study count. A "← All patients" link returns to Patient Search. The header never scrolls away — it is outside the scrollable content area.</li>
+          <li class="key"><strong>Two tabs: Studies | Access Log</strong>Studies is the default. Access Log is always present — clicking it shows who accessed this patient's records and when. No separate admin screen needed for patient-level audit.</li>
+          <li><strong>Studies table — click "Open" to enter viewer</strong>Navigates to <code>/viewer/:studyId</code>. "Open" button is on every row — no need to click the row itself (avoids accidental navigation). Each row shows date, description, modality badge, series count, and image count.</li>
+          <li><strong>Sorted newest first</strong>Most recent study at the top. No user action required — the natural order for clinical review.</li>
+          <li class="rule"><strong>Patient data is DICOM-derived, read-only</strong>Name, MRN, DOB, and sex come from DICOM tags at upload time. There is no edit button on the patient header — these fields mirror the source DICOM and must not be manually overridden.</li>
+          <li class="key"><strong>Access Log — 4 columns: User · Study · Action · Timestamp</strong>Study name is its own column — not embedded in the action text. This makes it immediately scannable. Action is a coloured badge: Viewed (blue) or Uploaded (green). More action types can be added later (e.g. Downloaded, AI Report Generated).</li>
+          <li><strong>Study filter dropdown</strong>Default: "All studies" — shows every event for this patient. Selecting a study filters the table to only that study's events. No extra page navigation needed — answers both "who accessed this patient?" and "who accessed this specific study?" from the same screen.</li>
+          <li class="warn"><strong>Append-only — no delete, no edit</strong>The backend never modifies or removes audit rows. The row count at the bottom ("4 events") confirms completeness. Read-only to all users including Account Admins.</li>
+          <li><strong>URL pattern</strong><code>/patients/:id/studies</code> for the Studies tab, <code>/patients/:id/access-log</code> for the Access Log tab. Study filter is a query param: <code>?study=studyId</code>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <!-- 6. UPLOAD -->
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <section id="upload">
+    <div class="screen-num">Screen 06</div>
+    <div class="section-title">Upload</div>
+    <div class="anno-grid">
+      <div>
+        <div class="mockup">
+          <div class="app-shell">
+            <div class="app-sidebar">
+              <div class="app-brand"><div class="app-brand-name">CloudPACS</div></div>
+              <div class="app-nav-item"><div class="app-nav-icon"></div> Patients</div>
+              <div class="app-nav-item active"><div class="app-nav-icon active-icon"></div> Upload</div>
+              <div class="app-nav-item"><div class="app-nav-icon"></div> Settings</div>
+              <div class="app-user"><div class="app-avatar">JD</div><div class="app-user-name">John Doe</div></div>
+            </div>
+            <div class="app-content">
+              <div class="ps-title" style="margin-bottom:0.75rem;">Upload DICOM Files</div>
+              <div class="upload-zone">
+                <div class="upload-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <h3>Drop .dcm files here</h3>
+                <p>or click to browse · Supports .dcm and .dicom · Multiple files accepted</p>
+              </div>
+              <!-- batch summary (shown after files are dropped) -->
+              <div class="batch-summary">
+                <div class="batch-stats">
+                  <div><div class="batch-stat-num">1,247</div><div class="batch-stat-label">Files</div></div>
+                  <div><div class="batch-stat-num">3.2 GB</div><div class="batch-stat-label">Total size</div></div>
+                  <div><div class="batch-stat-num">3</div><div class="batch-stat-label">Patients</div></div>
+                  <div><div class="batch-stat-num">6</div><div class="batch-stat-label">Studies</div></div>
+                </div>
+                <div class="batch-overall">
+                  <div class="batch-bar"><div class="batch-bar-fill" style="width:61%"></div></div>
+                  <div class="batch-pct">61%</div>
+                  <div class="batch-status-label">Uploading…</div>
+                </div>
+              </div>
+              <!-- per-patient progress rows -->
+              <div class="patient-rows">
+                <div class="patient-upload-row">
+                  <div class="patient-row-top">
+                    <div class="patient-row-name">Smith, Jane A.</div>
+                    <div class="patient-row-meta">2 studies · 450 files · 1.1 GB</div>
+                    <div class="patient-row-done">✓ Done</div>
+                  </div>
+                  <div class="patient-row-bar"><div class="patient-row-fill prb-done" style="width:100%"></div></div>
+                </div>
+                <div class="patient-upload-row">
+                  <div class="patient-row-top">
+                    <div class="patient-row-name">Johnson, Robert</div>
+                    <div class="patient-row-meta">3 studies · 620 files · 1.8 GB</div>
+                    <div class="patient-row-pct">72%</div>
+                  </div>
+                  <div class="patient-row-bar"><div class="patient-row-fill prb-active" style="width:72%"></div></div>
+                </div>
+                <div class="patient-upload-row">
+                  <div class="patient-row-top">
+                    <div class="patient-row-name">Patel, Anika</div>
+                    <div class="patient-row-meta">1 study · 177 files · 340 MB</div>
+                    <div class="patient-row-pct">18%</div>
+                  </div>
+                  <div class="patient-row-bar"><div class="patient-row-fill prb-active" style="width:18%"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <ul class="anno-list">
+          <li class="key"><strong>Drop zone is the primary interaction</strong>Large, centred, dashed border that turns sky blue on hover. Built with <code>react-dropzone</code>. Accepts any number of .dcm files in one drop — a radiologist may drop thousands at once.</li>
+          <li class="key"><strong>After drop: batch summary card — not a file list</strong>Show 4 numbers: total files, total size, patients detected, studies detected. These are parsed from DICOM headers client-side. No file names listed — irrelevant to the user and would flood the screen with 1,247 rows.</li>
+          <li class="key"><strong>Progress shown per patient — not per file</strong>One row per patient with a name, study/file/size summary, and a single progress bar. This is the level of granularity the user actually cares about. A per-file list is noise when uploading a large study batch.</li>
+          <li><strong>Overall progress bar in the summary card</strong>Aggregate across all patients. Shows overall % and "Uploading…" / "Done" status. The user can see at a glance how far along the batch is.</li>
+          <li class="warn"><strong>Quota check before upload starts</strong>Check <code>StorageUsedBytes + batchSize &gt; StorageQuota</code>. If over quota, show an error alert above the drop zone and block the upload. Never silently fail mid-batch.</li>
+          <li class="rule"><strong>On completion</strong>Show a MUI Snackbar: "Upload complete — 6 studies indexed across 3 patients." Each patient row shows ✓ Done. No auto-navigation — the user may want to upload another batch.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <!-- 7. VIEWER -->
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <section id="viewer">
+    <div class="screen-num">Screen 07</div>
+    <div class="section-title">DICOM Viewer — Full Dark Mode</div>
+    <div class="anno-grid">
+      <div>
+        <div class="viewer-full">
+          <div class="viewer-topbar">
+            <button class="vt-btn active">W/L</button>
+            <button class="vt-btn">Zoom</button>
+            <button class="vt-btn">Pan</button>
+            <button class="vt-btn">Scroll</button>
+            <div class="vt-sep"></div>
+            <button class="vt-btn preset">Brain</button>
+            <button class="vt-btn">Bone</button>
+            <button class="vt-btn">Lung</button>
+            <button class="vt-btn">Abd</button>
+            <div class="vt-sep"></div>
+            <button class="vt-btn">Invert</button>
+            <div class="vt-breadcrumb">
+              <span class="vt-bc-link">Patients</span>
+              <span class="vt-bc-sep">/</span>
+              <span class="vt-bc-link">Smith, Jane A.</span>
+              <span class="vt-bc-sep">/</span>
+              <span class="vt-bc-current">CT Chest — 14 Jul 2026</span>
+            </div>
+          </div>
+          <div class="viewer-body-full">
+            <div class="viewer-series-panel">
+              <div class="vsp-label">Series</div>
+              <div class="vsp-thumb active" title="Series 1">1<br><span style="font-size:0.52rem; color:#6b7280;">48 img</span></div>
+              <div class="vsp-thumb" title="Series 2">2<br><span style="font-size:0.52rem; color:#6b7280;">12 img</span></div>
+              <div class="vsp-thumb" title="Series 3">3<br><span style="font-size:0.52rem; color:#6b7280;">6 img</span></div>
+            </div>
+            <div class="viewer-main">
+              <div class="viewer-overlay-tl">Smith, Jane A.<br>CT Chest<br>14 Jul 2026<br>W:400 L:40</div>
+              <div class="viewer-canvas-placeholder">
+                <div style="color:#1f2937; font-size:1.5rem; margin-bottom:0.3rem;">⬛</div>
+                DICOM image renders here<br>
+                <span style="font-size:0.62rem; color:#1f2937;">Cornerstone3D canvas · WebAssembly decoder</span>
+              </div>
+              <div class="viewer-overlay-br">Instance 14/48<br>Slice: 7.5mm<br>FOV: 350mm</div>
+            </div>
+            <div class="viewer-info-panel">
+              <div class="vip-section-title">Study</div>
+              <div class="vip-row"><span>Patient</span><span>Smith, J.</span></div>
+              <div class="vip-row"><span>Modality</span><span>CT</span></div>
+              <div class="vip-row"><span>Date</span><span>14 Jul 2026</span></div>
+              <div class="vip-row"><span>Series</span><span>3</span></div>
+              <div class="vip-row"><span>Instances</span><span>66</span></div>
+              <div class="vip-divider"></div>
+              <div class="vip-section-title">AI Report</div>
+              <button class="vip-ai-btn">Generate AI draft</button>
+              <div class="vip-ai-text">Local LLM only. No patient data sent externally.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <ul class="anno-list">
+          <li class="key"><strong>Full window — no sidebar, no page chrome</strong>When a study opens, the app shell disappears entirely. The viewer takes 100vw × 100vh.</li>
+          <li class="key"><strong>Breadcrumb in the topbar — right-aligned</strong>Shows: <code>Patients / Smith, Jane A. / CT Chest — 14 Jul 2026</code>. "Patients" links to <code>/patients</code>. "Smith, Jane A." links to <code>/patients/:id/studies</code> (the study list). This is the only navigation out of the viewer — clicking the patient name returns to their study list, where you can open a different study.</li>
+          <li class="key"><strong>Toolbar: tools left, presets centre, back right</strong>Interactive tools (W/L, Zoom, Pan, Scroll) activate on click — only one active at a time. Window presets (Brain/Bone/Lung/Abdomen) set W/L values instantly. Back button is far right — not adjacent to tools to avoid accidental clicks.</li>
+          <li><strong>Series panel — left, collapsible</strong>Thumbnail strip showing each series. Click a thumbnail to switch series. Series count and instance count shown below each thumbnail.</li>
+          <li><strong>Canvas overlay text</strong>Patient name + study date (top-left), current window/level values. Instance number + slice thickness (bottom-right). All DICOM convention. Text is very low opacity — readable but never distracting.</li>
+          <li><strong>Info + AI panel — right, collapsible</strong>Study metadata above the divider. AI report section below. "Generate AI draft" triggers the Semantic Kernel + Ollama call. Result renders as editable text. Saveable.</li>
+          <li class="warn"><strong>GDPR notice in AI panel</strong>The "Local LLM only" note is always visible — not a tooltip. This is a compliance signal, not a footnote.</li>
+          <li class="rule"><strong>Keyboard shortcuts</strong>W/L: W · Zoom: Z · Pan: P · Scroll through series: ↑ ↓ · Next/prev image: ← →. Show shortcuts in a tooltip on toolbar buttons.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <!-- 8. SETTINGS -->
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <section id="settings">
+    <div class="screen-num">Screen 08</div>
+    <div class="section-title">Settings — two role variants</div>
+
+    <!-- VARIANT A: Account Admin -->
+    <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--sky); margin-bottom:0.6rem;">Variant A — Account Admin (sees all 3 tabs)</div>
+    <div class="anno-grid" style="margin-bottom:2.5rem;">
+      <div>
+        <div class="mockup">
+          <div class="app-shell">
+            <div class="app-sidebar">
+              <div class="app-brand"><div class="app-brand-name">CloudPACS</div></div>
+              <div class="app-nav-item"><div class="app-nav-icon"></div> Patients</div>
+              <div class="app-nav-item"><div class="app-nav-icon"></div> Upload</div>
+              <div class="app-nav-item active"><div class="app-nav-icon active-icon"></div> Settings</div>
+              <div class="app-user"><div class="app-avatar">JW</div><div class="app-user-name">James Wilson</div></div>
+            </div>
+            <div class="admin-shell">
+              <div class="admin-subnav">
+                <div class="admin-subnav-title">Settings</div>
+                <div class="admin-nav-item">Profile &amp; Security</div>
+                <div class="admin-nav-item">Account</div>
+                <div class="admin-nav-item active">Users</div>
+              </div>
+              <div class="admin-content">
+                <div class="admin-section-title">Users &amp; Invitations</div>
+                <!-- invite form -->
+                <div class="admin-card" style="margin-bottom:0.65rem;">
+                  <div style="font-size:0.72rem; font-weight:600; color:var(--text-primary); margin-bottom:0.5rem;">Invite a new user</div>
+                  <div style="display:flex; gap:0.4rem; align-items:flex-end; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:130px;">
+                      <div class="admin-field-label">Email address</div>
+                      <input class="admin-input" type="email" placeholder="jane@clinic.com">
+                    </div>
+                    <div>
+                      <div class="admin-field-label">Role</div>
+                      <select class="admin-input" style="cursor:pointer;">
+                        <option>Viewer</option>
+                        <option selected>Radiologist</option>
+                        <option>Uploader</option>
+                      </select>
+                    </div>
+                    <button class="admin-btn">Send invitation</button>
+                  </div>
+                </div>
+                <!-- users table -->
+                <div class="admin-card" style="padding:0; overflow:hidden;">
+                  <table style="width:100%; border-collapse:collapse; font-size:0.7rem;">
+                    <thead><tr style="background:var(--surface-2);">
+                      <th style="text-align:left; padding:0.38rem 0.7rem; color:var(--text-muted); font-size:0.62rem; text-transform:uppercase; letter-spacing:0.04em; font-weight:600;">Name</th>
+                      <th style="text-align:left; padding:0.38rem 0.7rem; color:var(--text-muted); font-size:0.62rem; text-transform:uppercase; letter-spacing:0.04em; font-weight:600;">Role</th>
+                      <th style="text-align:left; padding:0.38rem 0.7rem; color:var(--text-muted); font-size:0.62rem; text-transform:uppercase; letter-spacing:0.04em; font-weight:600;">Status</th>
+                      <th style="padding:0.38rem 0.7rem;"></th>
+                    </tr></thead>
+                    <tbody>
+                      <tr style="border-bottom:1px solid var(--border);">
+                        <td style="padding:0.4rem 0.7rem; font-weight:600; color:var(--text-primary);">John Doe</td>
+                        <td style="padding:0.4rem 0.7rem;"><span class="badge-sm badge-mr" style="font-size:0.62rem;">Radiologist</span></td>
+                        <td style="padding:0.4rem 0.7rem;"><span style="font-size:0.62rem; font-weight:600; color:var(--success);">Active</span></td>
+                        <td style="padding:0.4rem 0.7rem;"><button style="background:none; border:none; color:var(--text-muted); font-size:0.65rem; cursor:pointer;">Remove</button></td>
+                      </tr>
+                      <tr style="border-bottom:1px solid var(--border);">
+                        <td style="padding:0.4rem 0.7rem; font-weight:600; color:var(--text-primary);">Sara Kim</td>
+                        <td style="padding:0.4rem 0.7rem;"><span class="badge-sm badge-ct" style="font-size:0.62rem;">Viewer</span></td>
+                        <td style="padding:0.4rem 0.7rem;"><span style="font-size:0.62rem; font-weight:600; color:var(--success);">Active</span></td>
+                        <td style="padding:0.4rem 0.7rem;"><button style="background:none; border:none; color:var(--text-muted); font-size:0.65rem; cursor:pointer;">Remove</button></td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0.4rem 0.7rem; font-weight:600; color:var(--text-muted);">jane@newclinic.com</td>
+                        <td style="padding:0.4rem 0.7rem;"><span class="badge-sm badge-mr" style="font-size:0.62rem;">Radiologist</span></td>
+                        <td style="padding:0.4rem 0.7rem;"><span style="font-size:0.62rem; font-weight:600; color:var(--warning);">Invited</span></td>
+                        <td style="padding:0.4rem 0.7rem;"><button style="background:none; border:none; color:var(--text-muted); font-size:0.65rem; cursor:pointer;">Resend</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <ul class="anno-list">
+          <li class="key"><strong>Account Admin sees 3 tabs: Profile &amp; Security · Account · Users</strong>Sub-users only see Profile &amp; Security. The Account and Users tabs are hidden entirely — not disabled.</li>
+          <li class="key"><strong>Users tab — invitation flow, not registration</strong>Account admin enters an email + selects a role → clicks "Send invitation" → the invited user receives a link to <code>/invite/:token</code>. No public registration form exists anywhere.</li>
+          <li><strong>3 roles available to assign: Viewer · Radiologist · Uploader</strong>Viewer: read-only access to studies. Radiologist: view + generate AI reports. Uploader: upload only (e.g. a scanning technician who does not review images).</li>
+          <li><strong>Invited status</strong>Users who have been invited but not yet accepted show their email (not name), their assigned role, and an "Invited" status badge. Account admin can resend the invitation.</li>
+          <li class="rule"><strong>Account tab (not shown)</strong>Shows the account name, storage quota bar (used / total), and plan type. Read-only — these values are set by the PostDICOM Console admin, not the client.</li>
+          <li class="warn"><strong>Account admin cannot change their own role</strong>Prevents accidental self-demotion. Role changes for the account admin must go through PostDICOM Console.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- VARIANT B: Sub-user -->
+    <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--sky); margin-bottom:0.6rem;">Variant B — Sub-user (Profile &amp; Security only)</div>
+    <div class="anno-grid">
+      <div>
+        <div class="mockup">
+          <div class="app-shell">
+            <div class="app-sidebar">
+              <div class="app-brand"><div class="app-brand-name">CloudPACS</div></div>
+              <div class="app-nav-item"><div class="app-nav-icon"></div> Patients</div>
+              <div class="app-nav-item"><div class="app-nav-icon"></div> Upload</div>
+              <div class="app-nav-item active"><div class="app-nav-icon active-icon"></div> Settings</div>
+              <div class="app-user"><div class="app-avatar">JD</div><div class="app-user-name">John Doe</div></div>
+            </div>
+            <div class="admin-shell">
+              <div class="admin-subnav">
+                <div class="admin-subnav-title">Settings</div>
+                <div class="admin-nav-item active">Profile &amp; Security</div>
+              </div>
+              <div class="admin-content">
+                <div style="background:var(--surface-1); border:1px solid var(--border); border-radius:6px; padding:0.6rem 0.85rem; margin-bottom:0.75rem; font-size:0.72rem; color:var(--text-secondary);">
+                  <span style="font-weight:600; color:var(--text-primary);">Account:</span> Brighton Radiology Clinic &nbsp;·&nbsp;
+                  <span style="font-weight:600; color:var(--text-primary);">Role:</span> <span style="color:var(--sky); font-weight:600;">Radiologist</span>
+                </div>
+                <div class="admin-section-title">Profile</div>
+                <div class="admin-card" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:0.65rem;">
+                  <div>
+                    <div class="admin-field-label">Display name</div>
+                    <input class="admin-input" type="text" value="John Doe">
+                  </div>
+                  <div>
+                    <div class="admin-field-label">Email <span style="color:var(--text-muted); font-weight:400;">(read-only)</span></div>
+                    <input class="admin-input" type="email" value="john.doe@brighton-rad.com" disabled style="background:var(--surface-2); color:var(--text-muted);">
+                  </div>
+                  <button class="admin-btn" style="width:fit-content;">Save name</button>
+                </div>
+                <div class="admin-section-title">Change Password</div>
+                <div class="admin-card" style="display:flex; flex-direction:column; gap:0.5rem;">
+                  <div>
+                    <div class="admin-field-label">Current password</div>
+                    <input class="admin-input" type="password" placeholder="••••••••">
+                  </div>
+                  <div>
+                    <div class="admin-field-label">New password</div>
+                    <input class="admin-input" type="password" placeholder="Min. 8 characters">
+                  </div>
+                  <button class="admin-btn" style="width:fit-content;">Update password</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <ul class="anno-list">
+          <li class="key"><strong>Sub-users see only Profile &amp; Security</strong>No Account tab (they cannot see the quota). No Users tab (they cannot invite or manage others). The Settings sidebar has exactly one item.</li>
+          <li><strong>Account info shown as read-only banner</strong>A small info bar at the top shows the account name and the user's role. This confirms to the user which account they are connected to. Not editable.</li>
+          <li><strong>Profile: display name is editable, email is read-only</strong>Email was set by the invitation — it is their identifier and cannot change. Display name is cosmetic and free to edit.</li>
+          <li class="rule"><strong>Role is displayed but never editable by the sub-user</strong>Role changes are made by the account admin in the Users tab. The sub-user sees their role as a read-only badge.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <!-- ROUTE MAP -->
+  <!-- ──────────────────────────────────────────────────────────────── -->
+  <section id="routes">
+    <div class="section-title">Route Map — CloudPACS</div>
+    <table class="route-table">
+      <tr><th>Route</th><th>Screen</th><th>Access</th><th>Notes</th></tr>
+      <tr><td><span class="mono">/</span></td><td>Landing page</td><td><span class="chip chip-public">Public</span></td><td>Redirects to /patients if already logged in</td></tr>
+      <tr><td><span class="mono">/invite/:token</span></td><td>Invitation Acceptance</td><td><span class="chip chip-public">Public</span></td><td>One-time token; expires in 48 h; activates account on submit</td></tr>
+      <tr><td><span class="mono">/login</span></td><td>Login</td><td><span class="chip chip-public">Public</span></td><td>Redirects to /patients if already logged in</td></tr>
+      <tr><td><span class="mono">/patients</span></td><td>Patient Search</td><td><span class="chip chip-private">Auth</span></td><td>Default post-login destination</td></tr>
+      <tr><td><span class="mono">/patients/:id/studies</span></td><td>Patient Detail — Studies tab</td><td><span class="chip chip-private">Auth</span></td><td>All studies for one patient; sorted newest first</td></tr>
+      <tr><td><span class="mono">/patients/:id/access-log</span></td><td>Patient Detail — Access Log tab</td><td><span class="chip chip-private">Auth</span></td><td>Per-patient audit trail; all authenticated users</td></tr>
+      <tr><td><span class="mono">/viewer/:studyId</span></td><td>DICOM Viewer</td><td><span class="chip chip-private">Auth</span></td><td>Full-screen dark mode; breadcrumb navigation back</td></tr>
+      <tr><td><span class="mono">/upload</span></td><td>Upload</td><td><span class="chip chip-private">Auth</span></td><td>Radiologist + Account Admin only</td></tr>
+      <tr><td><span class="mono">/settings</span></td><td>Settings (redirects)</td><td><span class="chip chip-private">Auth</span></td><td>Redirects to /settings/profile</td></tr>
+      <tr><td><span class="mono">/settings/profile</span></td><td>Profile &amp; Security</td><td><span class="chip chip-private">Auth</span></td><td>All authenticated users</td></tr>
+      <tr><td><span class="mono">/settings/account</span></td><td>Account info &amp; quota</td><td><span class="chip chip-admin">Account Admin</span></td><td>Account name, plan type, storage quota (read-only)</td></tr>
+      <tr><td><span class="mono">/settings/users</span></td><td>Users &amp; Invitations</td><td><span class="chip chip-admin">Account Admin</span></td><td>Invite sub-users, assign roles, remove users</td></tr>
+    </table>
+  </section>
+
+</main>
+</body>
+</html>

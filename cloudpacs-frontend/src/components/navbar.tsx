@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import '../stylesheets/navbar.css';
 
 const IconPlaceholder = () => (
@@ -9,10 +10,15 @@ const IconPlaceholder = () => (
 
 const CloudPACS: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('Patients');
+  /* const navigate = useNavigate();
+
+    const changePage = (id: string) => {
+        navigate('/' + id);
+    } */
 
   const navItems = [
-    { id: 'Patients', label: 'Patients' },
-    { id: 'Upload', label: 'Upload' },
+    { id: 'patientList', label: 'Patients' },
+    { id: 'upload', label: 'Upload' },
     { id: 'Settings', label: 'Settings' },
   ];
 
@@ -30,7 +36,7 @@ const CloudPACS: React.FC = () => {
               <button
                 key={item.id}
                 className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => { setActiveTab(item.id); /* changePage(item.id); */ }}
                 title={item.label}
               >
                 <span className="icon">
@@ -38,6 +44,7 @@ const CloudPACS: React.FC = () => {
                 </span>
                 <span className="nav-text">{item.label}</span>
               </button>
+
             ))}
           </nav>
         </div>

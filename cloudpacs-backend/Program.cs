@@ -86,18 +86,20 @@
                         Encoding.UTF8.GetBytes(jwt)),
                     };
                 });
-            
-            //DicomParserTest.TestExtractMetadata(@"/Users/ibrahim/Desktop/DicomTest/827694963.dcm"); //Dicom Tester.
+                
             var app = builder.Build();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
             app.UseSwagger();//swager test
             app.UseSwaggerUI();
             app.UseDeveloperExceptionPage();
 
             app.UseRouting();
+
             app.UseCors("AllowFrontend");
+            
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.MapControllers();
 
             await app.RunAsync();

@@ -1,30 +1,24 @@
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Navbar from "../components/navbar";
 import "../stylesheets/upload.css";
-import { parseByteArray } from "../dicomParser"
+import { parseByteArrayForPatientName, parseByteArrayForStudyId, parseByteArrayForPatientId } from "../dicomParser"
+import { uploadToBlob } from "../services/blobService";
+import type { FileDetails } from "../interfaces/fileDetails";
+import type { PatientFileGroups } from "../interfaces/PatientFileGroups";
 
 interface UploadProps {
     onFileChange: (files: File[]) => void;
 }
 
-interface FileDetails {
-    selectedFile: File;
-    patientName: String;
-}
-
 function Upload({ onFileChange }: UploadProps) {
     const wrapperRef = useRef<HTMLDivElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const [fileList, setFileList] = useState<File[]>([]);
-    const [patientsAndFiles, setPatientsAndFiles] = useState<FileDetails[]>([]);
-    const [patientsShown, setPatientsShown] = useState<string[]>([]);
-    const [test, setTest] = useState<string>(" n");
+    const [patientFileGroups, setPatientFileGroups] = useState<PatientFileGroups[]>([]);
 
     const onDragEnter = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        wrapperRef.current?.classList.add('dragover');
     };
 
     const onDragOver = (e: React.DragEvent) => {
@@ -35,39 +29,127 @@ function Upload({ onFileChange }: UploadProps) {
     const onDragLeave = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        wrapperRef.current?.classList.remove('dragover');
     };
 
-    const onDrop = (e: React.DragEvent) => {
-        wrapperRef.current?.classList.remove('dragover');
+    const getAllFiles = async (e: React.DragEvent): Promise<File[]> => {
+        const items = Array.from(e.dataTransfer.items);
+        const entries = items
+            .map((item) => item.webkitGetAsEntry())
+            .filter((entry): entry is FileSystemEntry => entry !== null);
 
-        const droppedFiles = Array.from(e.dataTransfer.files);
+        const files: File[] = [];
+
+        while (entries.length > 0) {
+            const entry = entries.shift()!;
+
+            if (entry.isFile) {
+                const file = await new Promise<File>((resolve, reject) =>
+                    (entry as FileSystemFileEntry).file(resolve, reject)
+                );
+                files.push(file);
+
+            } else if (entry.isDirectory) {
+                const reader = (entry as FileSystemDirectoryEntry).createReader();
+                const dirEntries = await readAllDirectoryEntries(reader);
+                entries.push(...dirEntries);
+            }
+        }
+        return files;
+    };
+
+    const readAllDirectoryEntries = async (directoryReader: FileSystemDirectoryReader) => {
+        let entries: FileSystemEntry[] = [];
+        let readEntries = await readEntriesPromise(directoryReader);
+        while (readEntries && readEntries.length > 0) {
+            entries.push(...readEntries);
+            readEntries = await readEntriesPromise(directoryReader);
+        }
+        return entries;
+    };
+
+    const readEntriesPromise = async (directoryReader: FileSystemDirectoryReader) => {
+        try {
+            return await new Promise<FileSystemEntry[]>((resolve, reject) => {
+                directoryReader.readEntries(resolve, reject);
+            });
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    };
+
+    const onDrop = async (e: React.DragEvent) => {
+        console.log(e);
+        e.preventDefault();
+        e.stopPropagation();
+
+        const droppedFiles = await getAllFiles(e);
+        setFileList(droppedFiles);
 
         if (droppedFiles.length > 0) {
-            const updatedList = [...fileList, ...droppedFiles];
+            const updatedList = [...droppedFiles];
             updatedList.forEach(async (file: File) => {
                 const arrayBuffer = await file.arrayBuffer();
                 const byteArray = new Uint8Array(arrayBuffer);
-                setTest(file.name);
-                setTest(parseByteArray(byteArray));
-                const fDetails: FileDetails = {selectedFile: file, patientName:parseByteArray(byteArray)};
-                setPatientsAndFiles(prev => [...prev, fDetails]);
-            });
+                const fDetails: FileDetails = {
+                    patientName: parseByteArrayForPatientName(byteArray),
+                    patientId: parseByteArrayForPatientId(byteArray),
+                    selectedFile: file,
+                    studyId: parseByteArrayForStudyId(byteArray)
+                };
 
-            setFileList(updatedList);
+                if (fDetails.selectedFile.size / 102400 > 100) {
+                    return;
+                }
+
+                if (parseByteArrayForPatientId(byteArray) === "Invalid" || parseByteArrayForPatientId(byteArray) === "Element has no data") {
+                    return;
+                }
+
+                uploadToBlob(arrayBuffer, fDetails);
+
+                setPatientFileGroups((patientFileGroups) => {
+                    if (!patientFileGroups.some((p) => p.patientId === fDetails.patientId)) {
+                        const patientGroup: PatientFileGroups = {
+                            patientName: fDetails.patientName,
+                            patientId: fDetails.patientId,
+                            files: [fDetails.selectedFile],
+                            studies: [fDetails.studyId],
+                            totalFileSize: fDetails.selectedFile.size
+                        };
+                        return [...patientFileGroups, patientGroup];
+                    }
+                    else {
+                        const patientGroup = patientFileGroups.find((p) => p.patientId === fDetails.patientId);
+                        if (patientGroup) {
+                            const updatedGroup = {
+                                ...patientGroup,
+                                files: [...patientGroup.files, fDetails.selectedFile],
+                                totalFileSize: patientGroup.totalFileSize + fDetails.selectedFile.size,
+                            };
+                            let updatedStudies = patientGroup.studies;
+                            if (!patientGroup.studies.includes(fDetails.studyId)) {
+                                updatedStudies = [...patientGroup.studies, fDetails.studyId];
+                            }
+
+                            return patientFileGroups.map((p) =>
+                                p.patientId === fDetails.patientId ? updatedGroup : p
+                            );
+                        }
+                        return [...patientFileGroups];
+                    }
+                });
+            });
             onFileChange(updatedList);
         }
-
-        e.preventDefault();
-        e.stopPropagation();
     };
 
     const handleDivClick = () => {
         /* {
             wrapperRef.current?.classList.remove('dragover');
-
+     
             const droppedFiles = Array.from(e.target);
-
+     
             if (droppedFiles.length > 0) {
                 const updatedList = [...fileList, ...droppedFiles];
                 updatedList.forEach(async (file: File) => {
@@ -79,7 +161,7 @@ function Upload({ onFileChange }: UploadProps) {
                 setFileList(updatedList);
                 onFileChange(updatedList);
             }
-
+     
             e.preventDefault();
             e.stopPropagation();
         }; */
@@ -96,8 +178,8 @@ function Upload({ onFileChange }: UploadProps) {
 
     const fileRemove = (file: FileDetails) => {
         const updatedList = fileList.filter((f) => f !== file.selectedFile);
-        const fDetails = patientsAndFiles.filter((f) => f !== file)
-        setPatientsAndFiles(fDetails);
+        //const fDetails = patientsAndFiles.filter((f) => f !== file)
+        //setPatientsAndFiles(fDetails);
         setFileList(updatedList);
         onFileChange(updatedList);
     };
@@ -126,27 +208,29 @@ function Upload({ onFileChange }: UploadProps) {
                             </svg>
                             <div id="fileDragAndDropInstruction">Drop .dcm files here</div>
                             <div id="fileDragAndDropInfo">or click to browse · Supports .dcm and .dicom · Multiple files accepted</div>
-                            <input
+                            {/* <input
                                 type="file"
                                 ref={fileInputRef}
                                 onChange={onFileChangeSelection}
                                 multiple
                                 style={{ display: 'none' }}
                                 accept=".dcm"
-                            />
+                            /> */}
 
                         </div>
                     </div>
                     {fileList.length > 0 && (
                         <div className="drop-file-preview">
-                            {patientsAndFiles.map((item, index) => (
+                            {patientFileGroups.map((item, index) => (
                                 <div key={index} className="filesBeingUploaded">
                                     <div className="fileDetails">
                                         <p>{item.patientName}</p>
-                                        <p>{(item.selectedFile.size / 1024).toFixed(2)} KB</p>
+                                        <p>{item.studies.length} studies</p>
+                                        <p>{item.files.length} files</p>
+                                        <p>{(item.totalFileSize / 102400).toFixed(2)} MB</p>
                                     </div>
                                     <progress className="progressBar" value="70" max="100">70 %</progress>
-                                    <span className="drop-file-preview__item__del" onClick={() => fileRemove(item)}>x</span>
+                                    {/* <span className="drop-file-preview__item__del" onClick={() => fileRemove(item)}>x</span> */}
                                 </div>
                             ))}
                         </div>

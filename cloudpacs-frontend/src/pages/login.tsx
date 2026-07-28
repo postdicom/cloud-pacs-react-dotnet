@@ -19,18 +19,12 @@ function Login() {
                 headers: { "Content-type": "application/json" },
                 body: JSON.stringify(details)
             })
-            try {
-                const data = await response.json();
-                localStorage.setItem("token", data.token);
-            }
-            catch (error) {
-                console.error(error);
-            }
+            const data = await response.json();
+            localStorage.setItem("token", data.token);
         }
 
-        catch (error) {
+        catch {
             setCreditentialValidity(false);
-            console.error(error);
         }
     }
 
@@ -68,12 +62,12 @@ function Login() {
                     <button id="signInButton">Sign in</button>
                     <div>
                         {!isCreditentialsValid &&
-                            <div>
-                                <div className="auth-divider"></div>
-                                <Alert id="wrongCreditentialWarning" severity="error">
-                                    <div id="warningHeader"> Wrong credentials:</div>
-                                    <div id="warningBody">"Invalid email or password."</div>
-                                </Alert>
+                        <div>
+                            <div className="auth-divider"></div>
+                            <Alert id="wrongCreditentialWarning" severity="error">
+                                <div id="warningHeader"> Wrong credentials:</div>
+                                <div id="warningBody">"Invalid email or password."</div>
+                            </Alert>
                             </div>
                         }
                     </div>

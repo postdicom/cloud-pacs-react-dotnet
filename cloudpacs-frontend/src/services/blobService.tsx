@@ -1,5 +1,5 @@
 import { BlobServiceClient } from "@azure/storage-blob";
-import type { FileDetails } from "../interfaces/fileDetails";
+import type { FileDetails } from "../interfaces/FileDetails";
 
 export async function uploadToBlob (arrayBuffer: ArrayBuffer, fDetails: FileDetails) {
     const account = "cloudPACS";

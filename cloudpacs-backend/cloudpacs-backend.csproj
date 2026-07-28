@@ -21,11 +21,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <None Include="keys.env" CopyToOutputDirectory="PreserveNewest" />
     <PackageReference Include="DotNetEnv" Version="3.2.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
-    <PackageReference Include="coverlet.collector" Version="6.0.2">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3"/>
   </ItemGroup>
 
 </Project>

@@ -3,6 +3,8 @@ namespace CloudPACS.Backend
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.Cosmos;
+    using Azure.Storage.Blobs;
+    using Azure.Storage.Sas;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -15,6 +17,8 @@ namespace CloudPACS.Backend
     {
         private readonly string _uploadDirectory;
         private readonly Container _instanceContainer;
+        private readonly BlobServiceClient _blobServiceClient;
+        private readonly BlobContainerClient _dicomsContainerClient;
 
         public DicomUploadController(CosmosClient cosmosClient)
         {
@@ -28,12 +32,36 @@ namespace CloudPACS.Backend
             _instanceContainer = cosmosClient.GetContainer("CloudPACS", "Instance");
         }
 
-        [HttpPost("upload")]
-        [DisableRequestSizeLimit] 
-        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
-        public async Task<IActionResult> UploadDicomFiles(IFormFileCollection files)
+        [HttpGet("generate-sas")]
+        public IActionResult GenerateSasUrl([FromQuery] string fileName)
         {
-            if (files == null || files.Count == 0)
+
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return BadRequest(new { message = "File name is required." });
+            }
+
+            var blobClient = _dicomsContainerClient.GetBlobClient(fileName);
+
+            var sasBuilder = new BlobSasBuilder()
+            {
+                BlobContainerName = _dicomsContainerClient.Name,
+                BlobName = blobClient.Name,
+                Resource = "b",
+                StartsOn = DateTimeOffset.UtcNow,
+                ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(15)
+            };
+
+            sasBuilder.SetPermissions(BlobSasPermissions.Write | BlobSasPermissions.Create);
+
+            Uri sasUri = blobClient.GenerateSasUri(sasBuilder);
+
+            return Ok(new { sasUrl = sasUri.ToString() });
+        }
+        [HttpPost("upload")]
+        public async Task<IActionResult> UploadDicomFiles([FromBody] List<string> uploadedFileNames)
+        {
+            if (uploadedFileNames == null || uploadedFileNames.Count == 0)
             {
                 return BadRequest(new { message = "There are no files." });
             }
@@ -42,42 +70,38 @@ namespace CloudPACS.Backend
             var errors = new List<string>();
             var parser = new DicomParser();
 
-            foreach (var file in files)
+            foreach (var fileName in uploadedFileNames)
             {
-                var extension = Path.GetExtension(file.FileName);
+                var extension = Path.GetExtension(fileName);
                 if (!string.Equals(extension, ".dcm", StringComparison.OrdinalIgnoreCase))
                 {
-                    errors.Add($"File '{file.FileName}' rejected: You can only upload .dcm files");
-                    continue; 
-                }
-
-                if (file.Length == 0)
-                {
-                    errors.Add($"File '{file.FileName}' rejected: File is empty.");
+                    errors.Add($"File '{fileName}' rejected: You can only upload .dcm files");
                     continue;
                 }
 
                 try
                 {
-                    var uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
-                    var filePath = Path.Combine(_uploadDirectory, uniqueFileName);
+                    var blobClient = _dicomsContainerClient.GetBlobClient(fileName);
 
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    if (!await blobClient.ExistsAsync())
                     {
-                        await file.CopyToAsync(stream);
+                        errors.Add($"File '{fileName}' not found in Azure. Did the upload finish?");
+                        continue;
                     }
 
                     Dictionary<string, string> extractedMetadata = new Dictionary<string, string>();
                     try
                     {
-                        using (var readStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                        using (var memoryStream = new MemoryStream())
                         {
-                            extractedMetadata = parser.ExtractMetadataDictionary(readStream);
+                            await blobClient.DownloadToAsync(memoryStream);
+                            memoryStream.Position = 0;
+                            extractedMetadata = parser.ExtractMetadataDictionary(memoryStream);
                         }
                     }
                     catch (Exception parseEx)
                     {
-                        errors.Add($"Metadata extraction failed for '{file.FileName}': {parseEx.Message}");
+                        errors.Add($"Metadata extraction failed for '{fileName}': {parseEx.Message}");
                         continue;
                     }
 
@@ -89,20 +113,20 @@ namespace CloudPACS.Backend
                     try
                     {
                         if (!extractedMetadata.TryGetValue("(0010,0020) Patient ID", out patientId))
-                            errors.Add($"'{file.FileName}': key '(0010,0020) Patient ID' not found.");
+                            errors.Add($"'{fileName}': key '(0010,0020) Patient ID' not found.");
 
                         if (!extractedMetadata.TryGetValue("(0020,000D) Study Instance UID", out studyUid))
-                            errors.Add($"'{file.FileName}': key '(0020,000D) Study Instance UID' not found.");
+                            errors.Add($"'{fileName}': key '(0020,000D) Study Instance UID' not found.");
 
                         if (!extractedMetadata.TryGetValue("(0020,000E) Series Instance UID", out seriesUid))
-                            errors.Add($"'{file.FileName}': key '(0020,000E) Series Instance UID' not found.");
+                            errors.Add($"'{fileName}': key '(0020,000E) Series Instance UID' not found.");
 
                         if (!extractedMetadata.TryGetValue("(0008,0018) SOP Instance UID", out sopInstanceUid))
-                            errors.Add($"'{file.FileName}': key '(0008,0018) SOP Instance UID' not found.");
+                            errors.Add($"'{fileName}': key '(0008,0018) SOP Instance UID' not found.");
                     }
                     catch (Exception lookupEx)
                     {
-                        errors.Add($"Metadata lookup failed: '{file.FileName}': {lookupEx.Message}");
+                        errors.Add($"Metadata lookup failed: '{fileName}': {lookupEx.Message}");
                     }
 
                     string documentId = !string.IsNullOrWhiteSpace(sopInstanceUid) ? sopInstanceUid : Guid.NewGuid().ToString();
@@ -115,7 +139,7 @@ namespace CloudPACS.Backend
                         StudyInstanceUid = studyUid ?? "UNKNOWN",
                         SeriesInstanceUid = seriesUid ?? "UNKNOWN",
                         SopInstanceUid = documentId,
-                        FilePath = filePath,
+                        FilePath = blobClient.Uri.ToString(),
                         UploadDate = DateTime.UtcNow,
                         Metadata = extractedMetadata
                     };
@@ -127,15 +151,15 @@ namespace CloudPACS.Backend
 
                     uploadedFilesData.Add(new
                     {
-                        originalFileName = file.FileName,
+                        originalFileName = fileName,
                         instanceId = instanceDoc.Id,
                         patientId = instanceDoc.patientId,
-                        status = "Saved to Disk and Cosmos DB"
+                        status = "Saved to Azure and Cosmos DB"
                     });
                 }
                 catch (Exception ex)
                 {
-                    errors.Add($"Failed to process '{file.FileName}': {ex.Message}");
+                    errors.Add($"Failed to process '{fileName}': {ex.Message}");
                 }
             }
 

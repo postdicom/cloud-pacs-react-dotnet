@@ -20,7 +20,7 @@ namespace CloudPACS.Backend
         private readonly BlobServiceClient _blobServiceClient;
         private readonly BlobContainerClient _dicomsContainerClient;
 
-        public DicomUploadController(CosmosClient cosmosClient)
+        public DicomUploadController(CosmosClient cosmosClient, BlobServiceClient blobServiceClient)
         {
             _uploadDirectory = Path.Combine(Directory.GetCurrentDirectory(), "UploadedDicoms");
 
@@ -30,6 +30,10 @@ namespace CloudPACS.Backend
             }
 
             _instanceContainer = cosmosClient.GetContainer("CloudPACS", "Instance");
+
+            _blobServiceClient = blobServiceClient;
+
+            _dicomsContainerClient = _blobServiceClient.GetBlobContainerClient("dicom-uploads");//TO DO Ibrahim: When azurite container name is decided on this will be switched to that containers name.
         }
 
         [HttpGet("generate-sas")]
@@ -174,6 +178,37 @@ namespace CloudPACS.Backend
                 errors = errors.Any() ? errors : null,
                 data = uploadedFilesData
             });
+        }
+        [HttpGet("viewer/instance/{id}/metadata")]
+        public async Task<IActionResult> GetInstanceMetadata(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest(new { message = "Instance ID is required." });
+            }
+            try
+            {
+                var queryDef = new QueryDefinition("SELECT * FROM c WHERE c.id = @id")
+                    .WithParameter("@id", id);
+
+                using var iterator = _instanceContainer.GetItemQueryIterator<Instance>(queryDef);
+
+                if (iterator.HasMoreResults)
+                {
+                    var response = await iterator.ReadNextAsync();
+                    var instanceDoc = response.FirstOrDefault();
+
+                    if (instanceDoc != null)
+                    {
+                        return Ok(instanceDoc.Metadata);
+                    }
+                }
+                return NotFound(new { message = $"Metadata for instance '{id}' not found." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error fetching metadata: {ex.Message}" });
+            }
         }
     }
 }

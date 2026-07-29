@@ -4,7 +4,7 @@ import Navbar from "../components/navbar";
 import "../stylesheets/upload.css";
 import { parseByteArrayForPatientName, parseByteArrayForStudyId, parseByteArrayForPatientId } from "../dicomParser"
 import { uploadToBlob } from "../services/blobService";
-import type { FileDetails } from "../interfaces/fileDetails";
+import type { FileDetails } from "../interfaces/FileDetails";
 import type { PatientFileGroups } from "../interfaces/PatientFileGroups";
 
 interface UploadProps {

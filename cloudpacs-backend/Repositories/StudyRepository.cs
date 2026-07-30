@@ -58,26 +58,26 @@ namespace CloudPACS.Backend
 
         public async Task<Study> CreateStudyAsync(Study newStudy)
         {
-            if (string.IsNullOrWhiteSpace(newStudy.PatientGuid))
+            if (string.IsNullOrWhiteSpace(newStudy.patientGuid))
                 throw new ArgumentException("PatientGuid is required.", nameof(newStudy));
 
-            if (string.IsNullOrWhiteSpace(newStudy.Id))
-                newStudy.Id = Guid.NewGuid().ToString();
+            if (string.IsNullOrWhiteSpace(newStudy.id))
+                newStudy.id = Guid.NewGuid().ToString();
 
-            var response = await _container.CreateItemAsync(newStudy, new PartitionKey(newStudy.PatientGuid));
+            var response = await _container.CreateItemAsync(newStudy, new PartitionKey(newStudy.patientGuid));
             return response.Resource;
         }
 
         public async Task<bool> UpdateStudyAsync(string id, Study updatedStudy)
         {
-            if (string.IsNullOrWhiteSpace(updatedStudy.PatientGuid))
+            if (string.IsNullOrWhiteSpace(updatedStudy.patientGuid))
                 throw new ArgumentException("PatientGuid (partition key) is required.", nameof(updatedStudy));
 
-            updatedStudy.Id = id;
+            updatedStudy.id = id;
 
             try
             {
-                await _container.ReplaceItemAsync(updatedStudy, id, new PartitionKey(updatedStudy.PatientGuid));
+                await _container.ReplaceItemAsync(updatedStudy, id, new PartitionKey(updatedStudy.patientGuid));
                 return true;
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
@@ -95,7 +95,7 @@ namespace CloudPACS.Backend
             }
             try
             {
-                await _container.DeleteItemAsync<Study>(id, new PartitionKey(existing.PatientGuid));
+                await _container.DeleteItemAsync<Study>(id, new PartitionKey(existing.patientGuid));
                 return true;
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)

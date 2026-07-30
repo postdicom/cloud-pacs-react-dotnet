@@ -34,16 +34,19 @@ namespace CloudPACS.Backend
             _blobServiceClient = blobServiceClient;
 
             _dicomsContainerClient = _blobServiceClient.GetBlobContainerClient("dicom-uploads");//TO DO Ibrahim: When azurite container name is decided on this will be switched to that containers name.
+
+            
         }
 
         [HttpGet("generate-sas")]
-        public IActionResult GenerateSasUrl([FromQuery] string fileName)
+        public async Task<IActionResult> GenerateSasUrlAsync([FromQuery] string fileName)
         {
-
             if (string.IsNullOrEmpty(fileName))
             {
                 return BadRequest(new { message = "File name is required." });
             }
+
+            await _dicomsContainerClient.CreateIfNotExistsAsync();
 
             var blobClient = _dicomsContainerClient.GetBlobClient(fileName);
 
@@ -56,12 +59,13 @@ namespace CloudPACS.Backend
                 ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(15)
             };
 
-            sasBuilder.SetPermissions(BlobSasPermissions.Write | BlobSasPermissions.Create);
+            sasBuilder.SetPermissions(BlobContainerSasPermissions.Create | BlobContainerSasPermissions.Write | BlobContainerSasPermissions.List);
 
             Uri sasUri = blobClient.GenerateSasUri(sasBuilder);
 
             return Ok(new { sasUrl = sasUri.ToString() });
         }
+
         [HttpPost("upload")]
         public async Task<IActionResult> UploadDicomFiles([FromBody] List<string> uploadedFileNames)
         {
@@ -138,8 +142,8 @@ namespace CloudPACS.Backend
 
                     var instanceDoc = new Instance
                     {
-                        Id = documentId,
-                        patientId = patientId,
+                        id = documentId,
+                        seriesGuid = patientId,
                         StudyInstanceUid = studyUid ?? "UNKNOWN",
                         SeriesInstanceUid = seriesUid ?? "UNKNOWN",
                         SopInstanceUid = documentId,
@@ -156,8 +160,8 @@ namespace CloudPACS.Backend
                     uploadedFilesData.Add(new
                     {
                         originalFileName = fileName,
-                        instanceId = instanceDoc.Id,
-                        patientId = instanceDoc.patientId,
+                        instanceId = instanceDoc.id,
+                        patientId = instanceDoc.seriesGuid,
                         status = "Saved to Azure and Cosmos DB"
                     });
                 }

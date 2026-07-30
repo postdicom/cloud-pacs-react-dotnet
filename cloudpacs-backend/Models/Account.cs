@@ -5,15 +5,15 @@ namespace CloudPACS.Backend
     public class Account
     {
         [JsonProperty("id")]
-        public string Id => AccountId;
+        public string id => accountId;
         [JsonProperty("accountId")]
-        public string AccountId { get; set; }
+        public string accountId { get; set; }
         public string AccountName { get; set; }
         public string AccountPassword { get; set; }
         public AccountIdentityInformation IdentityInformation { get; set; }
         public Account(Guid UserUuid, string accountName, string accountId, string accountPassword)
         {
-            AccountId = accountId;
+            this.accountId = accountId;
             AccountName = accountName; 
             // TODO: Add a Type field to filter accounts.
             // TODO: Add CreatedAt / UpdatedAt for sorting the accounts later.

@@ -62,6 +62,7 @@
             builder.Services.AddSwaggerGen();
             builder.Services.AddHttpContextAccessor();
 
+
             builder.Services.AddControllers();
 
             builder.Services.AddSingleton<AuditLogService>();
@@ -86,8 +87,10 @@
                         Encoding.UTF8.GetBytes(jwt)),
                     };
                 });
-                
+
             var app = builder.Build();
+
+            app.UseCors("AllowFrontend");
 
             app.UseSwagger();//swager test
             app.UseSwaggerUI();
@@ -95,8 +98,8 @@
 
             app.UseRouting();
 
-            app.UseCors("AllowFrontend");
             
+
             app.UseAuthentication();
             app.UseAuthorization();
 

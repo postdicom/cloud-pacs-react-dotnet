@@ -8,7 +8,7 @@ namespace CloudPACS.Backend
         [JsonProperty("id")]
         public string Mrn { get; set; } = "MRN-" + Guid.NewGuid().ToString();
         [JsonProperty("userId")]
-        public string UserId { get; set; }
+        public string userId { get; set; }
         public string Name { get; set; }
         public DateOnly DoB { get; set; }
         public string LastStudy { get; set; }
@@ -16,7 +16,7 @@ namespace CloudPACS.Backend
         public Patient(string Mrn, string UserId, string Name, DateOnly DoB)
         {
             this.Mrn = Mrn;
-            this.UserId = UserId;
+            this.userId = UserId;
             this.Name = Name;
             this.DoB = DoB;
         }

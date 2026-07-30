@@ -150,7 +150,7 @@ function Upload({ onFileChange }: UploadProps) {
             await Promise.all(uploadPromises);
             //const newBlobNames = updatedList.map((file) => file.name);
             setBlobNameList((prev) => [...prev, ...validBlobNames]);
-            await sendToBackend(blobNameList);
+            await sendToBackend(validBlobNames);
             onFileChange(updatedList);
         }
     };

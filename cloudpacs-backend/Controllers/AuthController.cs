@@ -44,7 +44,7 @@ namespace CloudPACS.Backend.Controllers
                 );
 
                 var user = new User(
-                    account.AccountId,
+                    account.accountId,
                     registerRequestDto.Name,
                     registerRequestDto.Email,
                     UserRole.Viewer, // default

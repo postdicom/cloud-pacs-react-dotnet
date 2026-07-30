@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import Navbar from "../components/navbar";
 import "../stylesheets/upload.css";
 import { parseByteArrayForPatientName, parseByteArrayForStudyId, parseByteArrayForPatientId } from "../dicomParser"
-import { uploadToBlob } from "../services/blobService";
+import { sendToBackend, uploadToBlob } from "../services/blobService";
 import type { FileDetails } from "../interfaces/FileDetails";
 import type { PatientFileGroups } from "../interfaces/PatientFileGroups";
 
@@ -14,6 +14,9 @@ interface UploadProps {
 function Upload({ onFileChange }: UploadProps) {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const [fileList, setFileList] = useState<File[]>([]);
+    const uploadPromises: Promise<void>[] = [];
+    const validBlobNames: string[] = [];
+    const [blobNameList, setBlobNameList] = useState<string[]>([]);
     const [patientFileGroups, setPatientFileGroups] = useState<PatientFileGroups[]>([]);
 
     const onDragEnter = (e: React.DragEvent) => {
@@ -89,57 +92,65 @@ function Upload({ onFileChange }: UploadProps) {
         if (droppedFiles.length > 0) {
             const updatedList = [...droppedFiles];
             updatedList.forEach(async (file: File) => {
-                const arrayBuffer = await file.arrayBuffer();
-                const byteArray = new Uint8Array(arrayBuffer);
-                const fDetails: FileDetails = {
-                    patientName: parseByteArrayForPatientName(byteArray),
-                    patientId: parseByteArrayForPatientId(byteArray),
-                    selectedFile: file,
-                    studyId: parseByteArrayForStudyId(byteArray)
-                };
+                const promise = (async () => {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const byteArray = new Uint8Array(arrayBuffer);
+                    const fDetails: FileDetails = {
+                        patientName: parseByteArrayForPatientName(byteArray),
+                        patientId: parseByteArrayForPatientId(byteArray),
+                        selectedFile: file,
+                        studyId: parseByteArrayForStudyId(byteArray)
+                    };
 
-                if (fDetails.selectedFile.size / 102400 > 100) {
-                    return;
-                }
-
-                if (parseByteArrayForPatientId(byteArray) === "Invalid" || parseByteArrayForPatientId(byteArray) === "Element has no data") {
-                    return;
-                }
-
-                uploadToBlob(arrayBuffer, fDetails);
-
-                setPatientFileGroups((patientFileGroups) => {
-                    if (!patientFileGroups.some((p) => p.patientId === fDetails.patientId)) {
-                        const patientGroup: PatientFileGroups = {
-                            patientName: fDetails.patientName,
-                            patientId: fDetails.patientId,
-                            files: [fDetails.selectedFile],
-                            studies: [fDetails.studyId],
-                            totalFileSize: fDetails.selectedFile.size
-                        };
-                        return [...patientFileGroups, patientGroup];
+                    if (fDetails.selectedFile.size / 102400 > 100) {
+                        return;
                     }
-                    else {
-                        const patientGroup = patientFileGroups.find((p) => p.patientId === fDetails.patientId);
-                        if (patientGroup) {
-                            const updatedGroup = {
-                                ...patientGroup,
-                                files: [...patientGroup.files, fDetails.selectedFile],
-                                totalFileSize: patientGroup.totalFileSize + fDetails.selectedFile.size,
+
+                    if (parseByteArrayForPatientId(byteArray) === "Invalid" || parseByteArrayForPatientId(byteArray) === "Element has no data") {
+                        return;
+                    }
+
+                    uploadToBlob(arrayBuffer, fDetails);
+                    validBlobNames.push(file.name);
+
+                    setPatientFileGroups((patientFileGroups) => {
+                        if (!patientFileGroups.some((p) => p.patientId === fDetails.patientId)) {
+                            const patientGroup: PatientFileGroups = {
+                                patientName: fDetails.patientName,
+                                patientId: fDetails.patientId,
+                                files: [fDetails.selectedFile],
+                                studies: [fDetails.studyId],
+                                totalFileSize: fDetails.selectedFile.size
                             };
-                            let updatedStudies = patientGroup.studies;
-                            if (!patientGroup.studies.includes(fDetails.studyId)) {
-                                updatedStudies = [...patientGroup.studies, fDetails.studyId];
-                            }
-
-                            return patientFileGroups.map((p) =>
-                                p.patientId === fDetails.patientId ? updatedGroup : p
-                            );
+                            return [...patientFileGroups, patientGroup];
                         }
-                        return [...patientFileGroups];
-                    }
-                });
+                        else {
+                            const patientGroup = patientFileGroups.find((p) => p.patientId === fDetails.patientId);
+                            if (patientGroup) {
+                                const updatedGroup = {
+                                    ...patientGroup,
+                                    files: [...patientGroup.files, fDetails.selectedFile],
+                                    totalFileSize: patientGroup.totalFileSize + fDetails.selectedFile.size,
+                                };
+                                let updatedStudies = patientGroup.studies;
+                                if (!patientGroup.studies.includes(fDetails.studyId)) {
+                                    updatedStudies = [...patientGroup.studies, fDetails.studyId];
+                                }
+
+                                return patientFileGroups.map((p) =>
+                                    p.patientId === fDetails.patientId ? updatedGroup : p
+                                );
+                            }
+                            return [...patientFileGroups];
+                        }
+                    });
+                })()
+                uploadPromises.push(promise);
             });
+            await Promise.all(uploadPromises);
+            //const newBlobNames = updatedList.map((file) => file.name);
+            setBlobNameList((prev) => [...prev, ...validBlobNames]);
+            await sendToBackend(validBlobNames);
             onFileChange(updatedList);
         }
     };

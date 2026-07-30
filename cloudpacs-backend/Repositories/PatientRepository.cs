@@ -17,7 +17,7 @@ namespace CloudPACS.Backend
         {
             try
             {
-                bool exists = await IsPatientExistsAsync(patient.Mrn, patient.UserId);
+                bool exists = await IsPatientExistsAsync(patient.Mrn, patient.userId);
                 if (exists)
                 {
                     throw new InvalidOperationException($"There is already a patient '{patient.Name}' under this user");
@@ -65,7 +65,7 @@ namespace CloudPACS.Backend
             try
             {
                 patient.Mrn = Mrn;
-                patient.UserId = UserId;
+                patient.userId = UserId;
                 patient.Name = Name;
                 patient.DoB = DoB;
                 await container.ReplaceItemAsync(patient, Mrn, new PartitionKey(UserId));

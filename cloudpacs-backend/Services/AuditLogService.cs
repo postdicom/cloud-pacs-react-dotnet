@@ -19,14 +19,14 @@ namespace CloudPACS.Backend
                 var ipAddress = GetClientIpAddress();
                 var entry = new AuditLogEntry
                 {
-                    UserId = userId,
+                    userId = userId,
                     Action = action,
                     ResourceType = resourceType,
                     ResourceId = resourceId,
                     Timestamp = DateTimeOffset.UtcNow,
                     IpAddress = ipAddress
                 };
-                await container.CreateItemAsync(entry, new PartitionKey(entry.UserId));
+                await container.CreateItemAsync(entry, new PartitionKey(entry.userId));
             }
             catch (Exception ex)
             {

@@ -2,12 +2,13 @@ namespace CloudPACS.Backend
 {
     using System;
     using System.Collections.Generic;
-    using System.Text.Json.Serialization;
+    using Newtonsoft.Json;
     public class Instance
     {
-        [JsonPropertyName("id")]
-        public required string Id { get; set; }
-        public string patientId { get; set; }
+        [JsonProperty("id")]
+        public required string id { get; set; }
+        [JsonProperty("seriesGuid")]
+        public string seriesGuid { get; set; }
         public string StudyInstanceUid { get; set; }
         public string SeriesInstanceUid { get; set; }
         public string SopInstanceUid { get; set; }

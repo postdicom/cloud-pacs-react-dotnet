@@ -1,22 +1,17 @@
-import { BlobServiceClient } from "@azure/storage-blob";
+import { BlockBlobClient } from "@azure/storage-blob";
 import type { FileDetails } from "../interfaces/FileDetails";
+import React, { useState } from 'react';
 
 export async function uploadToBlob(arrayBuffer: ArrayBuffer, fDetails: FileDetails) {
-    const account = "cloudPACS";
-    const response = await fetch(`http://localhost:5000/generate-sas`);
-    if (!response.ok) throw new Error("Failed to fetch SAS token");
+    const fileName = fDetails.selectedFile.name;
 
-    let sas = await response.text();
+    const blobResponse = await fetch(`https://localhost:5001/api/v1/generate-sas?fileName=${encodeURIComponent(fileName)}`, {
+        method: "GET"
+    });
+    const blobData = await blobResponse.json();
+    const blobSasUrl = blobData.sasUrl;
 
-    const blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net?${sas}`);
-
-    const containerName = fDetails.patientId;
-    const containerClient = blobServiceClient.getContainerClient(containerName);
-
-    await containerClient.createIfNotExists();
-
-    const blobName = `New instances ${+new Date()}`;
-    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+    const blockBlobClient = new BlockBlobClient(blobSasUrl);
 
     const uploadBlobResponse = await blockBlobClient.uploadData(arrayBuffer, {
         blobHTTPHeaders: {
@@ -24,17 +19,22 @@ export async function uploadToBlob(arrayBuffer: ArrayBuffer, fDetails: FileDetai
             blobContentDisposition: "attachment",
         },
     });
+
     console.log(
-        `Upload block blob ${blobName} successfully with request ID: ${uploadBlobResponse.requestId}`,
+        `Upload block blob successfully with request ID: ${uploadBlobResponse.requestId}`,
     );
 
-    await fetch('/upload', {
+    return blockBlobClient.name;
+}
+
+export async function sendToBackend(fileList: string[]) {
+    const sendToBackendResponse = await fetch('https://localhost:5001/api/v1/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(blobName)
+        body: JSON.stringify(fileList)
     })
 
-    if (!response.ok) {
-        throw new Error('Login failed');
+    if (!sendToBackendResponse.ok) {
+        throw new Error('Blob name transfer failed');
     }
 }

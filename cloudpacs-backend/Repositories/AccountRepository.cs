@@ -18,7 +18,7 @@ namespace CloudPACS.Backend
         {
             try
             {
-                await container.CreateItemAsync(account, new PartitionKey(account.AccountId));
+                await container.CreateItemAsync(account, new PartitionKey(account.accountId));
             }
             catch (CosmosException ex)
             {

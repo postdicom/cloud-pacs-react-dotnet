@@ -9,3 +9,4 @@
 *.sln
 *.sw?
 __azurite_db_*__.json
+__blobstorage__/

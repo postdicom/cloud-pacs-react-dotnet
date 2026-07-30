@@ -2,34 +2,45 @@ namespace CloudPACS.Backend
 {
     using System;
     using Newtonsoft.Json;
-    public class Account
+
+    public class Account : Common
     {
-        [JsonProperty("id")]
-        public string Id {get; set;}
-        [JsonProperty("accountId")]
-        public string accountId { get; set; }
+        public enum AccountStatus
+        {
+            Active,
+            Passive,
+            Deleted
+        }
+
+        [JsonProperty("AccountId")]
+        public string AccountId { get; set; }
         public string AccountName { get; set; }
         public string AccountPassword { get; set; }
+        public AccountStatus Status { get; set; }
         public AccountIdentityInformation IdentityInformation { get; set; }
-        public Account(Guid UserUuid, string accountName, string accountId, string accountPassword)
+
+        public Account(Guid userUuid, string accountName, string accountId, string accountPassword, DateTime? createdAt, DateTime? updatedAt, Common.objectType objectType)
         {
-            this.accountId = accountId;
-            AccountName = accountName; 
-            // TODO: Add a Type field to filter accounts.
-            // TODO: Add CreatedAt / UpdatedAt for sorting the accounts later.
+            AccountId = accountId;
+            AccountName = accountName;
+            CreatedAt = createdAt ?? DateTime.UtcNow;
+            UpdatedAt = updatedAt;
             AccountPassword = accountPassword;
+            ObjectType = objectType;
+            Status = AccountStatus.Active;
+
             IdentityInformation = new AccountIdentityInformation
             {
                 Name = AccountName,
-                EmailAddress = $"jane@hospital.org",
+                EmailAddress = $"jane@hospital.org", //TO DO Ibrahim: This will be later changed to whatever Email adress we are inviting
             };
         }
     }
     public class AccountIdentityInformation
     {
-        public string Name { get; set; }
-        public string EmailAddress { get; set; }
-        public string CountryName { get; set; }
-        public string PhoneNumber { get; set; }
+        public string Name { get; set; } = String.Empty;
+        public string EmailAddress { get; set; } = String.Empty;
+        public string CountryName { get; set; } = String.Empty;
+        public string PhoneNumber { get; set; } = String.Empty;
     }
 }

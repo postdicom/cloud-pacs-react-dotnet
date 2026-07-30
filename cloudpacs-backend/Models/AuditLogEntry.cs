@@ -22,16 +22,16 @@ namespace CloudPACS.Backend
         Report
     }
 
-    public record class AuditLogEntry
+    public record class AuditLogEntry 
     {
         [JsonProperty("id")]
         public string id { get; init; } = Guid.NewGuid().ToString();
         [JsonProperty("userId")]
-        public string userId { get; init; }
+        public string userId { get; init; } = String.Empty;
         public AuditActions Action { get; init; }
         public ResourceType ResourceType { get; init; }
-        public string ResourceId { get; init; }
+        public string ResourceId { get; init; } = String.Empty;
         public DateTimeOffset Timestamp { get; init; }
-        public string IpAddress { get; init; }
+        public string IpAddress { get; init; } = String.Empty;
     }
 }

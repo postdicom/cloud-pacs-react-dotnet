@@ -9,7 +9,7 @@ namespace CloudPACS.Backend
         private readonly Container container;
         private readonly UserRepository userRepository;
 
-        public AccountRepository(CosmosClient client)
+        public AccountRepository(CosmosClient client) 
         {
             container = client.GetContainer("Console", "Client-Accounts");
         }
@@ -18,7 +18,7 @@ namespace CloudPACS.Backend
         {
             try
             {
-                await container.CreateItemAsync(account, new PartitionKey(account.accountId));
+                await container.CreateItemAsync(account, new PartitionKey(account.AccountId));
             }
             catch (CosmosException ex)
             {

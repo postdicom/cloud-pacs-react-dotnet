@@ -7,8 +7,8 @@ namespace CloudPACS.Backend
 
     public class BlobUploadResult
     {
-        public string BlobUri { get; set; }
-        public string BlobPath { get; set; }
+        public string BlobUri { get; set; } = String.Empty;
+        public string BlobPath { get; set; } = String.Empty;
         public long FileSizeBytes { get; set; }
     }
     public class BlobStorageService

@@ -3,10 +3,8 @@ namespace CloudPACS.Backend
     using System;
     using Newtonsoft.Json;
 
-    public class Patient
+    public class Patient : Common
     {
-        [JsonProperty("id")]
-        public string id { get; set; }
         [JsonProperty("userId")]
         public string userId { get; set; }
         public string Mrn { get; set; }
@@ -14,14 +12,15 @@ namespace CloudPACS.Backend
         public string DoB { get; set; }
         public string LastStudy { get; set; }
         public int NumOfStudies {get; set;}
-        public Patient(string Id, string userId, string Mrn, string Name, string DoB, int NumOfStudies)
+        public Patient(string Id, string userId, string Mrn, string Name, string DoB, int NumOfStudies, objectType objectType)
         {
-            this.id = Id;
+            this.Id = Id;
             this.userId = userId;
             this.Mrn = Mrn;
             this.Name = Name;
             this.DoB = DoB;
             this.NumOfStudies = NumOfStudies;
+            ObjectType = objectType;
         }
     }
 }

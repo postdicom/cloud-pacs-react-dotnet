@@ -110,7 +110,7 @@ function Upload({ onFileChange }: UploadProps) {
                         return;
                     }
 
-                    uploadToBlob(arrayBuffer, fDetails);
+                    await uploadToBlob(arrayBuffer, fDetails);
                     validBlobNames.push(file.name);
 
                     setPatientFileGroups((patientFileGroups) => {

@@ -81,7 +81,7 @@ namespace CloudPACS.Backend.Controllers
                     {
                         var token = await GenerateToken(user);
                         auditLogService.LogAsync(user.Id, AuditActions.Login, ResourceType.Session, "User logged in");
-                        return Ok(user); //loginReponseDto
+                        return Ok(token); //loginReponseDto
                     }
                     else
                     {

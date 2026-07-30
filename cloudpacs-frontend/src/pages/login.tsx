@@ -3,6 +3,7 @@ import { useState } from "react";
 import Alert from "@mui/material/Alert";
 import { usePatients } from "../hooks/usePatients";
 import { useNavigate } from "react-router-dom";
+import api from "../queryClientProvider";
 
 function Login() {
     const [email, setEmail] = useState('');
@@ -22,13 +23,13 @@ function Login() {
             e.preventDefault();
             const details = { email, password, role };
 
-            const response = await fetch("https://localhost:5001/api/Auth/Login", {
+            const response = await api.post("api/Auth/Login", {
                 method: 'POST',
                 headers: { "Content-type": "application/json" },
                 body: JSON.stringify(details)
             })
             try {
-                const data = await response.json();
+                const data = await response.data;
                 localStorage.setItem("token", data.token);
             }
             catch (error) {

@@ -80,7 +80,7 @@ namespace CloudPACS.Backend
         }
 
         [HttpPost("upload")]
-        public async Task<IActionResult> UploadDicomFiles([FromBody] List<string> uploadedFileNames, string jwtToken)
+        public async Task<IActionResult> UploadDicomFiles([FromBody] List<string> uploadedFileNames)
         {
             if (uploadedFileNames == null || uploadedFileNames.Count == 0)
             {

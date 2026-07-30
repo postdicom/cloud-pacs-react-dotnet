@@ -108,7 +108,7 @@ namespace CloudPACS.Backend.Controllers
             [
                 new (JwtRegisteredClaimNames.Sub, user.Id),
                 new (JwtRegisteredClaimNames.Email, user.Email),
-                new(ClaimTypes.Role, user.Role.ToString())
+                new (ClaimTypes.Role, user.Role.ToString())
             ];
 
             var issuer = jwtSettings["Issuer"];

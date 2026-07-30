@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import '../stylesheets/navbar.css';
 
 const IconPlaceholder = () => (
@@ -10,11 +10,15 @@ const IconPlaceholder = () => (
 
 const CloudPACS: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('Patients');
-  /* const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const changePage = (id: string) => {
-        navigate('/' + id);
-    } */
+  function handleClick(item) {
+    setActiveTab(item.id);
+    const home = () => {
+      navigate(`/${item.id}`);
+      window.location.reload();
+    };
+  }
 
   const navItems = [
     { id: 'patientList', label: 'Patients' },
@@ -33,18 +37,21 @@ const CloudPACS: React.FC = () => {
 
           <nav className="nav-menu">
             {navItems.map((item) => (
-              <button
-                key={item.id}
-                className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
-                onClick={() => { setActiveTab(item.id); /* changePage(item.id); */ }}
-                title={item.label}
-              >
-                <span className="icon">
-                  <IconPlaceholder />
-                </span>
-                <span className="nav-text">{item.label}</span>
-              </button>
-
+              <>
+                <Link to={`/${item.id}`}>
+                  <button
+                    key={item.id}
+                    className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
+                    onClick={() => { setActiveTab(item.id); }}
+                    title={item.label}
+                  >
+                    <span className="icon">
+                      <IconPlaceholder />
+                    </span>
+                    <span className="nav-text">{item.label}</span>
+                  </button>
+                </Link>
+              </>
             ))}
           </nav>
         </div>

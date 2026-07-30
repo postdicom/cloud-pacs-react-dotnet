@@ -28,10 +28,11 @@ export async function uploadToBlob(arrayBuffer: ArrayBuffer, fDetails: FileDetai
 }
 
 export async function sendToBackend(fileList: string[]) {
+    const token = localStorage.getItem('token');
     const sendToBackendResponse = await fetch('https://localhost:5001/api/v1/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(fileList)
+        body: JSON.stringify({ uploadedFileNames: fileList, jwtToken: token})
     })
 
     if (!sendToBackendResponse.ok) {

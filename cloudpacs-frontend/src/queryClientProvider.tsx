@@ -3,9 +3,9 @@ import axios from "axios";
 
 
 const api = axios.create({
-  baseURL: "http://localhost:5071/",
+  baseURL: "https://localhost:5001/",
   timeout: 5000,
-  headers: { "X-Custom-Header": "foobar" },
+  headers: { "Autherizaiton": `Bearer ${localStorage.getItem('token')}` },
 });
 
 const queryClient = new QueryClient()

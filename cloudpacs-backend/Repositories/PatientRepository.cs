@@ -60,7 +60,7 @@ namespace CloudPACS.Backend
             }
         }
 
-        public async Task UpdatePatientAsync(Patient patient, string Mrn, string UserId, string Name, DateOnly DoB)
+        public async Task UpdatePatientAsync(Patient patient, string Mrn, string UserId, string Name, string DoB)
         {
             try
             {

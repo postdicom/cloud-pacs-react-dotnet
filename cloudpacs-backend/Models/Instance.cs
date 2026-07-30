@@ -10,7 +10,6 @@ namespace CloudPACS.Backend
         [JsonProperty("seriesGuid")]
         public string seriesGuid { get; set; }
         public string StudyInstanceUid { get; set; }
-        public string SeriesInstanceUid { get; set; }
         public string SopInstanceUid { get; set; }
         public string FilePath { get; set; }
         public double FileSize {get; set;}

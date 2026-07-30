@@ -198,7 +198,6 @@ namespace CloudPACS.Backend
                         seriesGuid = patientId,
                         StudyInstanceUid = studyUid ?? "UNKNOWN",
                         SeriesInstanceUid = seriesUid ?? "UNKNOWN",
-                        seriesGuid = seriesUid ?? "UNKNOWN",
                         SopInstanceUid = documentId,
                         FilePath = blobClient.Uri.ToString(),
                         UploadDate = DateTime.UtcNow,

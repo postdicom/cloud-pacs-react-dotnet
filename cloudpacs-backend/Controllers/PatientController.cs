@@ -9,14 +9,19 @@ namespace CloudPACS.Backend.Controllers
     [ApiController]
     public class PatientsController : ControllerBase
     {
-        private readonly PatientRepository patientRepository;
+        private readonly IPatientRepository patientRepository;
+
+        public PatientsController(IPatientRepository patientRepository)
+        {
+            this.patientRepository = patientRepository;
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetPatients([FromBody] string userId)
         {
             try
             {
-                List<FeedResponse<Patient>> patientList = await patientRepository.FindPatientsAsync(userId);
+                List<Patient> patientList = await patientRepository.FindPatientsAsync(userId);
                 return Ok(patientList);
             }
             catch (Exception ex)

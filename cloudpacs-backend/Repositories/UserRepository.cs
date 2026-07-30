@@ -19,13 +19,13 @@ namespace CloudPACS.Backend
         {
             try
             {
-                bool exists = await IsEmailExistsAsync(user.Email, user.AccountId);
+                bool exists = await IsEmailExistsAsync(user.Email, user.accountId);
                 if (exists)
                 {
                     throw new InvalidOperationException($"There is already an user with the email of '{user.Email}.'");
                 }
 
-                await container.CreateItemAsync(user, new PartitionKey(user.AccountId));
+                await container.CreateItemAsync(user, new PartitionKey(user.accountId));
             }
             catch (CosmosException ex)
             {

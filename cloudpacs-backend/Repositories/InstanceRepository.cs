@@ -16,7 +16,7 @@ namespace CloudPACS.Backend
         {
             await _instanceContainer.UpsertItemAsync(
                 instance,
-                new PartitionKey(instance.patientId)
+                new PartitionKey(instance.seriesGuid)
             );
         }
     }

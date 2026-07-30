@@ -25,9 +25,9 @@ namespace CloudPACS.Backend
     public record class AuditLogEntry
     {
         [JsonProperty("id")]
-        public string Id { get; init; } = Guid.NewGuid().ToString();
+        public string id { get; init; } = Guid.NewGuid().ToString();
         [JsonProperty("userId")]
-        public string UserId { get; init; }
+        public string userId { get; init; }
         public AuditActions Action { get; init; }
         public ResourceType ResourceType { get; init; }
         public string ResourceId { get; init; }

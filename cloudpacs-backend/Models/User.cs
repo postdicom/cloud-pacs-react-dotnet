@@ -15,7 +15,7 @@ namespace CloudPACS.Backend
         [JsonProperty("id")]
         public string UserId { get; set; } = Guid.NewGuid().ToString();
         [JsonProperty("accountId")]
-        public string AccountId { get; set; } // partition key — links user to their clinic/account
+        public string accountId { get; set; } // partition key — links user to their clinic/account
         public string Name { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
@@ -25,7 +25,7 @@ namespace CloudPACS.Backend
 
         public User(string accountId, string name, string email, UserRole role, string password)
         {
-            AccountId = accountId;
+            this.accountId = accountId;
             Name = name;
             Email = email;
             Role = role;

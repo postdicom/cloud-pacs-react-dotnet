@@ -21,6 +21,7 @@ namespace CloudPACS.Backend
         private readonly Container _instanceContainer;
         private readonly Container _patientContainer;
         private readonly Container _studyContainer;
+        private readonly Container _seriesContainer;
         private readonly BlobServiceClient _blobServiceClient;
         private readonly BlobContainerClient _dicomsContainerClient;
 
@@ -39,6 +40,7 @@ namespace CloudPACS.Backend
             _instanceContainer = cosmosClient.GetContainer("CloudPACS", "Instance");
             _patientContainer = cosmosClient.GetContainer("CloudPACS", "Patient");
             _studyContainer = cosmosClient.GetContainer("CloudPACS", "Study");
+            _seriesContainer = cosmosClient.GetContainer("CloudPACS", "Series");
 
             _imageCount = 0;
             _studyCount = 0;
@@ -139,8 +141,9 @@ namespace CloudPACS.Backend
                     string studyId = "UNKNOWN";
                     string studyDate = "UNKNOWN";
                     string modality = "UNKNOWN";
-                    string seriesNumber = "";
+                    string seriesNumber = "UNKNOWN";
                     string sopInstanceUid = null;
+                    string studyInstanceUid = "UNKNOWN";
 
                     try
                     {
@@ -170,6 +173,12 @@ namespace CloudPACS.Backend
 
                         if (!extractedMetadata.TryGetValue("(0020,0011) Series Number", out seriesNumber))
                             errors.Add($"'{fileName}': key '(0020,0011) Series Number' not found.");
+
+                        if (!extractedMetadata.TryGetValue("(0020,000D) Study Instance UID", out studyInstanceUid))
+                            errors.Add($"'{fileName}': key '(0020,000D)  Study Instance UID' not found.");
+
+                        if (!extractedMetadata.TryGetValue("(0020,0010) Study ID", out studyId))
+                            errors.Add($"'{fileName}': key '(0020,0010)  Study ID' not found.");
                     }
                     catch (Exception lookupEx)
                     {
@@ -185,12 +194,14 @@ namespace CloudPACS.Backend
                         patientId = patientId,
                         StudyInstanceUid = studyUid ?? "UNKNOWN",
                         SeriesInstanceUid = seriesUid ?? "UNKNOWN",
+                        seriesGuid = seriesUid ?? "UNKNOWN",
                         SopInstanceUid = documentId,
                         FilePath = blobClient.Uri.ToString(),
                         UploadDate = DateTime.UtcNow,
                         Metadata = extractedMetadata
                     };
                     var studyDoc = new Study(
+                        studyInstanceUid,
                         patientId,
                         studyDate,
                         modality,
@@ -199,16 +210,25 @@ namespace CloudPACS.Backend
                         );
                     var patientDoc = new Patient(
                         patientId,
+                        patientId, //TO DO: Ibrahim when front end sends userId this will be swithced to userId
                         patientId,
                         patientName,
                         dateOfBirth,
                         _studyCount + 1
                     );
+                    var seriesDoc = new Series(
+                        studyInstanceUid,
+                        patientId,
+                        patientName,
+                        seriesNumber,
+                        studyInstanceUid
+                    );
+                    patientDoc.userId = patientDoc.userId + "Test";
                     try
                     {
                         await _instanceContainer.UpsertItemAsync(
                         instanceDoc,
-                        new PartitionKey(instanceDoc.SeriesInstanceUid)
+                        new PartitionKey(instanceDoc.seriesGuid)
                     );
                     }
                     catch (Exception ex)
@@ -236,6 +256,17 @@ namespace CloudPACS.Backend
                     catch (Exception ex)
                     {
                         errors.Add($"study failed: {ex.Message}");
+                    }
+                    try
+                    {
+                        await _seriesContainer.UpsertItemAsync(
+                            seriesDoc,
+                            new PartitionKey(seriesDoc.studyGuid)
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"series failed: {ex.Message}");
                     }
 
                     uploadedFilesData.Add(new

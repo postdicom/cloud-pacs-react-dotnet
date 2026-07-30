@@ -61,8 +61,8 @@ namespace CloudPACS.Backend
             if (string.IsNullOrWhiteSpace(newStudy.patientGuid))
                 throw new ArgumentException("PatientGuid is required.", nameof(newStudy));
 
-            if (string.IsNullOrWhiteSpace(newStudy.Id))
-                newStudy.Id = Guid.NewGuid().ToString();
+            if (string.IsNullOrWhiteSpace(newStudy.id))
+                newStudy.id = Guid.NewGuid().ToString();
 
             var response = await _container.CreateItemAsync(newStudy, new PartitionKey(newStudy.patientGuid));
             return response.Resource;
@@ -73,7 +73,7 @@ namespace CloudPACS.Backend
             if (string.IsNullOrWhiteSpace(updatedStudy.patientGuid))
                 throw new ArgumentException("PatientGuid (partition key) is required.", nameof(updatedStudy));
 
-            updatedStudy.Id = id;
+            updatedStudy.id = id;
 
             try
             {

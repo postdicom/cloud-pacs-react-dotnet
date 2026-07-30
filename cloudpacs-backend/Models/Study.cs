@@ -7,15 +7,16 @@ namespace CloudPACS.Backend
 public class Study
     {
         [JsonProperty("id")]
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public string id { get; set; }
         [JsonProperty("patientGuid")]
         public string patientGuid { get; set; }
         public string Date { get; set; }
         public string Mod { get; set; }
         public string Series { get; set; }
         public int ImageCount { get; set; }
-        public Study(string patientGuid, string date, string mod, string series, int imageCount)
+        public Study(string Id, string patientGuid, string date, string mod, string series, int imageCount)
         {
+            id = Id;
             patientGuid = patientGuid;
             Date = date;
             Mod = mod;

@@ -11,6 +11,6 @@ namespace CloudPACS.Backend
         Task<List<FeedResponse<Patient>>> SearchPatientAsync(string mnr, string userId);
         Task DeletePatientAsync(PatientListDto patientListDto);
         Task<List<FeedResponse<Patient>>> FindPatientsAsync(string userId);
-        Task<Patient> GetPatientByMrn(PatientListDto patientListDto);
+        Task<Patient?> GetPatientByMrn(PatientListDto patientListDto);
     }
 }

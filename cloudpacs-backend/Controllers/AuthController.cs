@@ -38,13 +38,14 @@ namespace CloudPACS.Backend.Controllers
                     Guid.NewGuid(),
                     registerRequestDto.Name,
                     Guid.NewGuid().ToString(),
-                    BCrypt.HashPassword(registerRequestDto.Password)
-                //req.PhoneNumber, 
-                //req.Country,     
+                    BCrypt.HashPassword(registerRequestDto.Password),
+                    DateTime.UtcNow,
+                    null,
+                    Common.objectType.Account
                 );
 
                 var user = new User(
-                    account.accountId,
+                    account.AccountId,
                     registerRequestDto.Name,
                     registerRequestDto.Email,
                     UserRole.Viewer, // default
@@ -79,7 +80,7 @@ namespace CloudPACS.Backend.Controllers
                     if (await _userRepository.IsPasswordValid(loginRequestDto, user.Password))
                     {
                         var token = await GenerateToken(user);
-                        auditLogService.LogAsync(user.UserId, AuditActions.Login, ResourceType.Session, "User logged in");
+                        auditLogService.LogAsync(user.Id, AuditActions.Login, ResourceType.Session, "User logged in");
                         return Ok(user); //loginReponseDto
                     }
                     else
@@ -105,7 +106,7 @@ namespace CloudPACS.Backend.Controllers
 
             List<Claim> claims =
             [
-                new (JwtRegisteredClaimNames.Sub, user.UserId),
+                new (JwtRegisteredClaimNames.Sub, user.Id),
                 new (JwtRegisteredClaimNames.Email, user.Email),
                 new(ClaimTypes.Role, user.Role.ToString())
             ];

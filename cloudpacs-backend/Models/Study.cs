@@ -4,24 +4,23 @@ namespace CloudPACS.Backend
     using System.Drawing;
     using Newtonsoft.Json;
 
-public class Study
+public class Study: Common
     {
-        [JsonProperty("id")]
-        public string id { get; set; }
         [JsonProperty("patientGuid")]
         public string patientGuid { get; set; }
         public string Date { get; set; }
         public string Mod { get; set; }
         public string Series { get; set; }
         public int ImageCount { get; set; }
-        public Study(string Id, string patientGuid, string date, string mod, string series, int imageCount)
+        public Study(string Id, string patientGuid, string date, string mod, string series, int imageCount, objectType objectType)
         {
-            id = Id;
+            this.Id = Id;
             patientGuid = patientGuid;
             Date = date;
             Mod = mod;
             Series = series;
             ImageCount = imageCount;
+            ObjectType = objectType;
 
         }
     }

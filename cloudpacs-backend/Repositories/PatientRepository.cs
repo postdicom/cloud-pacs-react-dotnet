@@ -153,7 +153,7 @@ namespace CloudPACS.Backend
             }
         }
 
-        public async Task<Patient> GetPatientByMrn(PatientListDto patientListDto)
+        public async Task<Patient?> GetPatientByMrn(PatientListDto patientListDto)
         {
             try
             {

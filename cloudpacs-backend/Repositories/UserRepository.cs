@@ -67,7 +67,6 @@ namespace CloudPACS.Backend
                 user.Email = newEmail;
                 user.Name = newUsername;
                 user.Role = newRole;
-                user.PhoneNumber = newPhoneNumber;
                 await container.ReplaceItemAsync(user, userId, new PartitionKey(accountId));
             }
             catch (CosmosException ex)
@@ -76,7 +75,7 @@ namespace CloudPACS.Backend
                 throw;
             }
         }
-        public async Task<User> ReadUserAsync(string userId, string accountId)
+        public async Task<User?> ReadUserAsync(string userId, string accountId)
         {
             try
             {

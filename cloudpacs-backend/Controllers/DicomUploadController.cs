@@ -137,17 +137,17 @@ namespace CloudPACS.Backend
                         continue;
                     }
 
-                    string patientId = "UNKNOWN";
-                    string studyUid = "UNKNOWN";
-                    string seriesUid = "UNKNOWN";
-                    string dateOfBirth = "UNKNOWN";
-                    string patientName = "UNKNOWN";
-                    string studyId = "UNKNOWN";
-                    string studyDate = "UNKNOWN";
-                    string modality = "UNKNOWN";
-                    string seriesNumber = "UNKNOWN";
-                    string sopInstanceUid = null;
-                    string studyInstanceUid = "UNKNOWN";
+                    string? patientId = "UNKNOWN";
+                    string? studyUid = "UNKNOWN";
+                    string? seriesUid = "UNKNOWN";
+                    string? dateOfBirth = "UNKNOWN";
+                    string? patientName = "UNKNOWN";
+                    string? studyId = "UNKNOWN";
+                    string? studyDate = "UNKNOWN";
+                    string? modality = "UNKNOWN";
+                    string? seriesNumber = "UNKNOWN";
+                    string? sopInstanceUid = null;
+                    string? studyInstanceUid = "UNKNOWN";
 
                     try
                     {
@@ -192,39 +192,41 @@ namespace CloudPACS.Backend
                     string documentId = !string.IsNullOrWhiteSpace(sopInstanceUid) ? sopInstanceUid : Guid.NewGuid().ToString();
                     patientId = patientId ?? "UNKNOWN";
 
-                    var instanceDoc = new Instance
-                    {
-                        id = documentId,
-                        seriesGuid = patientId,
-                        StudyInstanceUid = studyUid ?? "UNKNOWN",
-                        SeriesInstanceUid = seriesUid ?? "UNKNOWN",
-                        SopInstanceUid = documentId,
-                        FilePath = blobClient.Uri.ToString(),
-                        UploadDate = DateTime.UtcNow,
-                        Metadata = extractedMetadata
-                    };
+                    var instanceDoc = new Instance(
+                        documentId,
+                        patientId ?? "UNKNOWN",
+                        seriesUid ?? "UNKNOWN",
+                        studyUid ?? "UNKNOWN",
+                        documentId,
+                        blobClient.Uri.ToString(),
+                        DateTime.UtcNow,
+                        extractedMetadata
+                    );
                     var studyDoc = new Study(
-                        studyInstanceUid,
-                        patientId,
-                        studyDate,
-                        modality,
-                        seriesNumber,
-                        _imageCount + 1
+                        studyInstanceUid ?? "UNKNOwN",
+                        patientId ?? "UNKNOwN",
+                        studyDate ?? "UNKNOwN",
+                        modality ?? "UNKNOwN",
+                        seriesNumber ?? "UNKNOwN",
+                        _imageCount + 1,
+                        Common.objectType.Study
                         );
                     var patientDoc = new Patient(
-                        patientId,
-                        patientId, //TO DO: Ibrahim when front end sends userId this will be swithced to userId
-                        patientId,
-                        patientName,
-                        dateOfBirth,
-                        _studyCount + 1
+                        patientId ?? "UNKNOwN",
+                        patientId ?? "UNKNOwN", //TO DO: Ibrahim when front end sends userId this will be swithced to userId
+                        patientId ?? "UNKNOwN",
+                        patientName ?? "UNKNOWN",
+                        dateOfBirth ?? "UNKNOWN",
+                        _studyCount + 1,
+                        Common.objectType.Patient
                     );
                     var seriesDoc = new Series(
-                        studyInstanceUid,
-                        patientId,
-                        patientName,
-                        seriesNumber,
-                        studyInstanceUid
+                        studyInstanceUid ?? "UNKNOWN",
+                        patientId ?? "UNKNOwN",
+                        patientName ?? "UNKNOWN",
+                        seriesNumber ?? "UNKNOWN",
+                        studyInstanceUid ?? "UNKNOWN",
+                        Common.objectType.Series
                     );
                     patientDoc.userId = patientDoc.userId + "Test";
                     try
@@ -275,7 +277,7 @@ namespace CloudPACS.Backend
                     uploadedFilesData.Add(new
                     {
                         originalFileName = fileName,
-                        instanceId = instanceDoc.id,
+                        instanceId = instanceDoc.Id,
                         patientId = instanceDoc.seriesGuid,
                         status = "Saved to Azure and Cosmos DB"
                     });

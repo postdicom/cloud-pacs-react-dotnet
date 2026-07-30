@@ -12,7 +12,7 @@ namespace CloudPACS.Backend.Controllers
         private readonly PatientRepository patientRepository;
 
         [HttpGet]
-        public async Task<IActionResult> GetPatients([FromBody] string userId)
+        public async Task<IActionResult?> GetPatients([FromBody] string userId)
         {
             try
             {
@@ -29,7 +29,7 @@ namespace CloudPACS.Backend.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<IActionResult> GetPatientDetails([FromBody] PatientListDto patientListDto)
+        public async Task<IActionResult?> GetPatientDetails([FromBody] PatientListDto patientListDto)
         {
             try
             {

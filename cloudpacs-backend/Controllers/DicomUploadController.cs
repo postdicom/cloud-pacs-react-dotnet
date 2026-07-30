@@ -1,5 +1,7 @@
 namespace CloudPACS.Backend
 {
+    using System.Net;
+    using Azure.Core.Pipeline;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.Cosmos;
@@ -17,8 +19,13 @@ namespace CloudPACS.Backend
     {
         private readonly string _uploadDirectory;
         private readonly Container _instanceContainer;
+        private readonly Container _patientContainer;
+        private readonly Container _studyContainer;
         private readonly BlobServiceClient _blobServiceClient;
         private readonly BlobContainerClient _dicomsContainerClient;
+
+        private int _imageCount;
+        private int _studyCount;
 
         public DicomUploadController(CosmosClient cosmosClient, BlobServiceClient blobServiceClient)
         {
@@ -30,16 +37,19 @@ namespace CloudPACS.Backend
             }
 
             _instanceContainer = cosmosClient.GetContainer("CloudPACS", "Instance");
+            _patientContainer = cosmosClient.GetContainer("CloudPACS", "Patient");
+            _studyContainer = cosmosClient.GetContainer("CloudPACS", "Study");
 
+            _imageCount = 0;
+            _studyCount = 0;
             _blobServiceClient = blobServiceClient;
 
-            _dicomsContainerClient = _blobServiceClient.GetBlobContainerClient("dicom-uploads");//TO DO Ibrahim: When azurite container name is decided on this will be switched to that containers name.
+            _dicomsContainerClient = _blobServiceClient.GetBlobContainerClient("test2");
         }
 
         [HttpGet("generate-sas")]
         public IActionResult GenerateSasUrl([FromQuery] string fileName)
         {
-
             if (string.IsNullOrEmpty(fileName))
             {
                 return BadRequest(new { message = "File name is required." });
@@ -62,6 +72,7 @@ namespace CloudPACS.Backend
 
             return Ok(new { sasUrl = sasUri.ToString() });
         }
+
         [HttpPost("upload")]
         public async Task<IActionResult> UploadDicomFiles([FromBody] List<string> uploadedFileNames)
         {
@@ -98,7 +109,18 @@ namespace CloudPACS.Backend
                     {
                         using (var memoryStream = new MemoryStream())
                         {
-                            await blobClient.DownloadToAsync(memoryStream);
+                            var downloadOptions = new Azure.Storage.Blobs.Models.BlobDownloadToOptions
+                            {
+                                TransferOptions = new Azure.Storage.StorageTransferOptions
+                                {
+                                    MaximumConcurrency = 1,
+                                    InitialTransferSize = 4 * 1024 * 1024,
+                                    MaximumTransferSize = 4 * 1024 * 1024
+                                }
+                            };
+
+                            await blobClient.DownloadToAsync(memoryStream, downloadOptions);
+
                             memoryStream.Position = 0;
                             extractedMetadata = parser.ExtractMetadataDictionary(memoryStream);
                         }
@@ -112,6 +134,12 @@ namespace CloudPACS.Backend
                     string patientId = "UNKNOWN";
                     string studyUid = "UNKNOWN";
                     string seriesUid = "UNKNOWN";
+                    string dateOfBirth = "UNKNOWN";
+                    string patientName = "UNKNOWN";
+                    string studyId = "UNKNOWN";
+                    string studyDate = "UNKNOWN";
+                    string modality = "UNKNOWN";
+                    string seriesNumber = "";
                     string sopInstanceUid = null;
 
                     try
@@ -127,6 +155,21 @@ namespace CloudPACS.Backend
 
                         if (!extractedMetadata.TryGetValue("(0008,0018) SOP Instance UID", out sopInstanceUid))
                             errors.Add($"'{fileName}': key '(0008,0018) SOP Instance UID' not found.");
+
+                        if (!extractedMetadata.TryGetValue("(0010,0030) Patient's Birth Date", out dateOfBirth))
+                            errors.Add($"'{fileName}': key '(0010,0030) Patient's Birth Date' not found.");
+
+                        if (!extractedMetadata.TryGetValue("(0010,0010) Patient's Name", out patientName))
+                            errors.Add($"'{fileName}': key '(0010,0010) Patient's Name' not found.");
+
+                        if (!extractedMetadata.TryGetValue("(0008,0020) Study Date", out studyDate))
+                            errors.Add($"'{fileName}': key '(0008,0020) Study Date' not found.");
+
+                        if (!extractedMetadata.TryGetValue("(0008,0060) Modality", out modality))
+                            errors.Add($"'{fileName}': key '(0008,0060) Modality' not found.");
+
+                        if (!extractedMetadata.TryGetValue("(0020,0011) Series Number", out seriesNumber))
+                            errors.Add($"'{fileName}': key '(0020,0011) Series Number' not found.");
                     }
                     catch (Exception lookupEx)
                     {
@@ -147,11 +190,53 @@ namespace CloudPACS.Backend
                         UploadDate = DateTime.UtcNow,
                         Metadata = extractedMetadata
                     };
-
-                    await _instanceContainer.UpsertItemAsync(
-                        instanceDoc,
-                        new PartitionKey(patientId)
+                    var studyDoc = new Study(
+                        patientId,
+                        studyDate,
+                        modality,
+                        seriesNumber,
+                        _imageCount + 1
+                        );
+                    var patientDoc = new Patient(
+                        patientId,
+                        patientId,
+                        patientName,
+                        dateOfBirth,
+                        _studyCount + 1
                     );
+                    try
+                    {
+                        await _instanceContainer.UpsertItemAsync(
+                        instanceDoc,
+                        new PartitionKey(instanceDoc.SeriesInstanceUid)
+                    );
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"instance failed: {ex.Message}");
+                    }
+                    try
+                    {
+                        await _patientContainer.UpsertItemAsync(
+                            patientDoc,
+                            new PartitionKey(patientDoc.userId)
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"patient failed: {ex.Message}");
+                    }
+                    try
+                    {
+                        await _studyContainer.UpsertItemAsync(
+                            studyDoc,
+                            new PartitionKey(studyDoc.patientGuid)
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"study failed: {ex.Message}");
+                    }
 
                     uploadedFilesData.Add(new
                     {
@@ -179,6 +264,7 @@ namespace CloudPACS.Backend
                 data = uploadedFilesData
             });
         }
+
         [HttpGet("viewer/instance/{id}/metadata")]
         public async Task<IActionResult> GetInstanceMetadata(string id)
         {

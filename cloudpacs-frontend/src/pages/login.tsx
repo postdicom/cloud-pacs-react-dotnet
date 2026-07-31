@@ -8,29 +8,27 @@ import api from "../queryClientProvider";
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('');
     let [isCreditentialsValid, setCreditentialValidity] = useState(true);
 
     const navigate = useNavigate();
-    const home = () => {
+    const loggedIn = () => {
         navigate("/patientList");
-        window.location.reload();
     };
 
     let handleSubmit = async (e: React.ChangeEvent<any>) => {
         try {
             setCreditentialValidity(true);
             e.preventDefault();
-            const details = { email, password, role };
+            const details = { email, password};
 
             const response = await api.post("api/Auth/Login", {
-                method: 'POST',
-                headers: { "Content-type": "application/json" },
-                body: JSON.stringify(details)
-            })
+                "email": email,
+                "password": password
+            });
             try {
                 const data = await response.data;
-                localStorage.setItem("token", data.token);
+                localStorage.setItem("token", data);
+                loggedIn();
             }
             catch (error) {
                 console.error(error);
@@ -74,7 +72,7 @@ function Login() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)} />
                     <div id="forgotPassword">Forgot Password?</div>
-                    <button onClick={home} id="signInButton">Sign in</button>
+                    <button id="signInButton">Sign in</button>
                     <div>
                         {!isCreditentialsValid &&
                             <div>

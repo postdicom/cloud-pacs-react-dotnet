@@ -12,6 +12,9 @@ namespace CloudPACS.Backend
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using System.IdentityModel.Tokens.Jwt;
+    using Microsoft.AspNetCore.Authorization;
+    using System.Security.Claims;
 
     [ApiController]
     [Route("api/v1")]
@@ -46,11 +49,12 @@ namespace CloudPACS.Backend
             _studyCount = 0;
             _blobServiceClient = blobServiceClient;
 
-            _dicomsContainerClient = _blobServiceClient.GetBlobContainerClient("dicom-uploads");//TO DO Ibrahim: When azurite container name is decided on this will be switched to that containers name.
+            _dicomsContainerClient = _blobServiceClient.GetBlobContainerClient("dicom-uploads");
 
-            
+
         }
-
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Radiologist")]
         [HttpGet("generate-sas")]
         public async Task<IActionResult> GenerateSasUrlAsync([FromQuery] string fileName)
         {
@@ -80,6 +84,8 @@ namespace CloudPACS.Backend
         }
 
         [HttpPost("upload")]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Radiologist")]
         public async Task<IActionResult> UploadDicomFiles([FromBody] List<string> uploadedFileNames)
         {
             if (uploadedFileNames == null || uploadedFileNames.Count == 0)
@@ -88,9 +94,15 @@ namespace CloudPACS.Backend
             }
 
             var uploadedFilesData = new List<object>();
-            var errors = new List<string>();
             var parser = new DicomParser();
+            var errors = new List<string>();
 
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? string.Empty;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                errors.Add("User ID claim was not found in the authenticated context.");
+            }
             foreach (var fileName in uploadedFileNames)
             {
                 var extension = Path.GetExtension(fileName);
@@ -213,7 +225,7 @@ namespace CloudPACS.Backend
                         );
                     var patientDoc = new Patient(
                         patientId ?? "UNKNOwN",
-                        patientId ?? "UNKNOwN", //TO DO: Ibrahim when front end sends userId this will be swithced to userId
+                        userId,
                         patientId ?? "UNKNOwN",
                         patientName ?? "UNKNOWN",
                         dateOfBirth ?? "UNKNOWN",
@@ -228,7 +240,6 @@ namespace CloudPACS.Backend
                         studyInstanceUid ?? "UNKNOWN",
                         Common.objectType.Series
                     );
-                    patientDoc.userId = patientDoc.userId + "Test";
                     try
                     {
                         await _instanceContainer.UpsertItemAsync(
@@ -300,7 +311,9 @@ namespace CloudPACS.Backend
                 data = uploadedFilesData
             });
         }
-
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Radiologist")]
+        [Authorize(Roles = "Viewer")]
         [HttpGet("viewer/instance/{id}/metadata")]
         public async Task<IActionResult> GetInstanceMetadata(string id)
         {

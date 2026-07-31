@@ -12,6 +12,7 @@ namespace CloudPACS.Backend
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using System.IdentityModel.Tokens.Jwt;
 
     [ApiController]
     [Route("api/v1")]
@@ -46,9 +47,9 @@ namespace CloudPACS.Backend
             _studyCount = 0;
             _blobServiceClient = blobServiceClient;
 
-            _dicomsContainerClient = _blobServiceClient.GetBlobContainerClient("dicom-uploads");//TO DO Ibrahim: When azurite container name is decided on this will be switched to that containers name.
+            _dicomsContainerClient = _blobServiceClient.GetBlobContainerClient("dicom-uploads");
 
-            
+
         }
 
         [HttpGet("generate-sas")]
@@ -88,9 +89,38 @@ namespace CloudPACS.Backend
             }
 
             var uploadedFilesData = new List<object>();
-            var errors = new List<string>();
             var parser = new DicomParser();
+            var errors = new List<string>();
+            string userId = string.Empty;
 
+            string authHeader = Request.Headers["Authorization"].ToString();
+
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                return Unauthorized(new { message = "Missing or malformed Authorization header." });
+            }
+
+            string jwtToken = authHeader.Substring("Bearer ".Length).Trim();
+
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.ReadJwtToken(jwtToken);
+                var userIdClaim = token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
+
+                if (userIdClaim != null)
+                {
+                    userId = userIdClaim.Value;
+                }
+                else
+                {
+                    errors.Add("User ID claim was not found in the provided JWT token.");
+                }
+            }
+            catch (Exception e)
+            {
+                errors.Add($"Could not decode or read JWT: {e.Message}");
+            }
             foreach (var fileName in uploadedFileNames)
             {
                 var extension = Path.GetExtension(fileName);
@@ -213,7 +243,7 @@ namespace CloudPACS.Backend
                         );
                     var patientDoc = new Patient(
                         patientId ?? "UNKNOwN",
-                        patientId ?? "UNKNOwN", //TO DO: Ibrahim when front end sends userId this will be swithced to userId
+                        userId,
                         patientId ?? "UNKNOwN",
                         patientName ?? "UNKNOWN",
                         dateOfBirth ?? "UNKNOWN",

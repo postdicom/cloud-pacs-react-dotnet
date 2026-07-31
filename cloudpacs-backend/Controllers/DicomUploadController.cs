@@ -53,7 +53,8 @@ namespace CloudPACS.Backend
 
 
         }
-
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Radiologist")]
         [HttpGet("generate-sas")]
         public async Task<IActionResult> GenerateSasUrlAsync([FromQuery] string fileName)
         {
@@ -310,7 +311,9 @@ namespace CloudPACS.Backend
                 data = uploadedFilesData
             });
         }
-
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Radiologist")]
+        [Authorize(Roles = "Viewer")]
         [HttpGet("viewer/instance/{id}/metadata")]
         public async Task<IActionResult> GetInstanceMetadata(string id)
         {

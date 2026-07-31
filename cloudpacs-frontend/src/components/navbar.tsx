@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import '../stylesheets/navbar.css';
 
 const IconPlaceholder = () => (
@@ -33,18 +33,19 @@ const CloudPACS: React.FC = () => {
 
           <nav className="nav-menu">
             {navItems.map((item) => (
-              <button
-                key={item.id}
-                className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
-                onClick={() => { setActiveTab(item.id); /* changePage(item.id); */ }}
-                title={item.label}
-              >
-                <span className="icon">
-                  <IconPlaceholder />
-                </span>
-                <span className="nav-text">{item.label}</span>
-              </button>
-
+              <Link to={`/${item.id}`} key={item.id} onChange={() => { setActiveTab(item.id);}}>
+                <button
+                  key={item.id}
+                  className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
+                  onClick={() => { setActiveTab(item.id); /* changePage(item.id); */ }}
+                  title={item.label}
+                >
+                  <span className="icon">
+                    <IconPlaceholder />
+                  </span>
+                  <span className="nav-text">{item.label}</span>
+                </button>
+              </Link>
             ))}
           </nav>
         </div>

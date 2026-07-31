@@ -81,7 +81,7 @@ namespace CloudPACS.Backend.Controllers
                     {
                         var token = await GenerateToken(user);
                         auditLogService.LogAsync(user.Id, AuditActions.Login, ResourceType.Session, "User logged in");
-                        return Ok(user); //loginReponseDto
+                        return Ok(token); //loginReponseDto
                     }
                     else
                     {
@@ -108,7 +108,7 @@ namespace CloudPACS.Backend.Controllers
             [
                 new (JwtRegisteredClaimNames.Sub, user.Id),
                 new (JwtRegisteredClaimNames.Email, user.Email),
-                new(ClaimTypes.Role, user.Role.ToString())
+                new (ClaimTypes.Role, user.Role.ToString())
             ];
 
             var issuer = jwtSettings["Issuer"];

@@ -2,25 +2,34 @@ import "../stylesheets/login.css"
 import { useState } from "react";
 import Alert from "@mui/material/Alert";
 import { usePatients } from "../hooks/usePatients";
+import { useNavigate } from "react-router-dom";
+import api from "../queryClientProvider";
 
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState('');
     let [isCreditentialsValid, setCreditentialValidity] = useState(true);
+
+    const navigate = useNavigate();
+    const home = () => {
+        navigate("/patientList");
+        window.location.reload();
+    };
 
     let handleSubmit = async (e: React.ChangeEvent<any>) => {
         try {
             setCreditentialValidity(true);
             e.preventDefault();
-            const details = { email, password };
+            const details = { email, password, role };
 
-            const response = await fetch("http://localhost:5000/api/Auth/Login", {
+            const response = await api.post("api/Auth/Login", {
                 method: 'POST',
                 headers: { "Content-type": "application/json" },
                 body: JSON.stringify(details)
             })
             try {
-                const data = await response.json();
+                const data = await response.data;
                 localStorage.setItem("token", data.token);
             }
             catch (error) {
@@ -65,7 +74,7 @@ function Login() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)} />
                     <div id="forgotPassword">Forgot Password?</div>
-                    <button id="signInButton">Sign in</button>
+                    <button onClick={home} id="signInButton">Sign in</button>
                     <div>
                         {!isCreditentialsValid &&
                             <div>

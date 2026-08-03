@@ -20,8 +20,9 @@ namespace CloudPACS.Backend
         public UserRole Role { get; set; }
         public DateTime? LastLoginAt { get; set; }
 
-        public User(string accountId, string name, string email, UserRole role, string password)
+        public User(string id, string accountId, string name, string email, UserRole role, string password)
         {
+            Id = id;
             this.accountId = accountId;
             Name = name;
             Email = email;

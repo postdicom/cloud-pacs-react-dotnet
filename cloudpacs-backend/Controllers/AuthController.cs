@@ -36,6 +36,7 @@ namespace CloudPACS.Backend.Controllers
             {
                 Console.WriteLine("Attempting to save user to Database...");
                 var account = new Account(
+                    Guid.NewGuid().ToString(),
                     Guid.NewGuid(),
                     registerRequestDto.Name,
                     Guid.NewGuid().ToString(),
@@ -46,6 +47,7 @@ namespace CloudPACS.Backend.Controllers
                 );
 
                 var user = new User(
+                    Guid.NewGuid().ToString(),
                     account.accountId,
                     registerRequestDto.Name,
                     registerRequestDto.Email,
@@ -53,7 +55,7 @@ namespace CloudPACS.Backend.Controllers
                     BCrypt.HashPassword(registerRequestDto.Password)
                 );
 
-                await _accountRepository.AddAccountAsync(account);
+                
                 await _userRepository.AddUserAsync(user);
                 Console.WriteLine("Successfully saved!");
 

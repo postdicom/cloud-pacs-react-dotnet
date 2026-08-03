@@ -4,7 +4,7 @@ namespace CloudPACS.Backend
     public abstract class Common
     {
         [JsonProperty("id")]
-        public string Id { get; set; } = String.Empty;
+        public string Id { get; set; } = Guid.Empty.ToString();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }

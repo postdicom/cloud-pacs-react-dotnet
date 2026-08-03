@@ -12,12 +12,13 @@ namespace CloudPACS.Backend
         public string UserId { get; set;}
         public string SeriesId { get; set;}
         public int numberOfInstances { get; set; }
-        public Series(string Id, string patientId, string patientName, string SeriesId, string studyGuid, objectType objectType)
+        public Series(string id, string patientId, string patientName, string userId, string seriesId, string studyGuid, objectType objectType)
         {
-            this.Id = Id;
+            Id = id;
             PatientId = patientId;
             PatientName = patientName;
-            this.SeriesId = SeriesId;
+            UserId = userId;
+            SeriesId = seriesId;
             this.studyGuid = studyGuid;
             ObjectType = objectType;
         }

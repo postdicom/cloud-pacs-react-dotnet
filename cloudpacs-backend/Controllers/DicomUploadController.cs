@@ -53,8 +53,8 @@ namespace CloudPACS.Backend
 
 
         }
-        [Authorize(Roles = "Admin")]
-        [Authorize(Roles = "Radiologist")]
+        
+        [Authorize(Roles = "Radiologist,Admin")]
         [HttpGet("generate-sas")]
         public async Task<IActionResult> GenerateSasUrlAsync([FromQuery] string fileName)
         {
@@ -84,8 +84,7 @@ namespace CloudPACS.Backend
         }
 
         [HttpPost("upload")]
-        [Authorize(Roles = "Admin")]
-        [Authorize(Roles = "Radiologist")]
+        [Authorize(Roles = "Radiologist,Admin")]
         public async Task<IActionResult> UploadDicomFiles([FromBody] List<string> uploadedFileNames)
         {
             if (uploadedFileNames == null || uploadedFileNames.Count == 0)
@@ -97,7 +96,9 @@ namespace CloudPACS.Backend
             var parser = new DicomParser();
             var errors = new List<string>();
 
+
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? string.Empty;
+            string role = User.FindFirstValue(ClaimTypes.Role) ?? User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
 
             if (string.IsNullOrEmpty(userId))
             {
@@ -153,6 +154,7 @@ namespace CloudPACS.Backend
                     string? studyUid = "UNKNOWN";
                     string? seriesUid = "UNKNOWN";
                     string? dateOfBirth = "UNKNOWN";
+                    string? gender = "UNKNOWN";
                     string? patientName = "UNKNOWN";
                     string? studyId = "UNKNOWN";
                     string? studyDate = "UNKNOWN";
@@ -204,7 +206,7 @@ namespace CloudPACS.Backend
                     string documentId = !string.IsNullOrWhiteSpace(sopInstanceUid) ? sopInstanceUid : Guid.NewGuid().ToString();
                     patientId = patientId ?? "UNKNOWN";
 
-                    var instanceDoc = new Instance(
+                    var instanceDoc = new Instance( //TO DO: seriesUid and and document id will be formatted as needed by the instance
                         documentId,
                         patientId ?? "UNKNOWN",
                         seriesUid ?? "UNKNOWN",
@@ -230,12 +232,15 @@ namespace CloudPACS.Backend
                         patientName ?? "UNKNOWN",
                         dateOfBirth ?? "UNKNOWN",
                         _studyCount + 1,
-                        Common.objectType.Patient
+                        Common.objectType.Patient,
+                        gender ?? "UNKNOWN"
                     );
+                    
                     var seriesDoc = new Series(
                         studyInstanceUid ?? "UNKNOWN",
                         patientId ?? "UNKNOwN",
                         patientName ?? "UNKNOWN",
+                        userId,
                         seriesNumber ?? "UNKNOWN",
                         studyInstanceUid ?? "UNKNOWN",
                         Common.objectType.Series
@@ -311,9 +316,7 @@ namespace CloudPACS.Backend
                 data = uploadedFilesData
             });
         }
-        [Authorize(Roles = "Admin")]
-        [Authorize(Roles = "Radiologist")]
-        [Authorize(Roles = "Viewer")]
+        [Authorize(Roles = "Radiologist,Admin,Viewer")]
         [HttpGet("viewer/instance/{id}/metadata")]
         public async Task<IActionResult> GetInstanceMetadata(string id)
         {

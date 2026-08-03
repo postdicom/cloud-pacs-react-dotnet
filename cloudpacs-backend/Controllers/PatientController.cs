@@ -1,6 +1,8 @@
 namespace CloudPACS.Backend.Controllers
 {
     using System;
+    using System.IdentityModel.Tokens.Jwt;
+    using System.Security.Claims;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.Cosmos;
@@ -9,14 +11,19 @@ namespace CloudPACS.Backend.Controllers
     [ApiController]
     public class PatientsController : ControllerBase
     {
-        private readonly PatientRepository patientRepository;
+        private readonly IPatientRepository patientRepository;
+        public PatientsController(IPatientRepository patientRepository)
+        {
+            this.patientRepository = patientRepository;
+        }
 
         [HttpGet]
-        public async Task<IActionResult?> GetPatients([FromBody] string userId)
+        public async Task<IActionResult?> GetPatients()
         {
             try
             {
-                List<FeedResponse<Patient>> patientList = await patientRepository.FindPatientsAsync(userId);
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? string.Empty;
+                List<Patient> patientList = await patientRepository.FindPatientsAsync(userId);
                 return Ok(patientList);
             }
             catch (Exception ex)

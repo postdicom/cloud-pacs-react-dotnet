@@ -2,13 +2,54 @@ import Pagination from "@mui/material/Pagination"
 import Navbar from "../components/navbar.tsx"
 import "../stylesheets/patientList.css"
 import Typography from "@mui/material/Typography"
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import api from "../queryClientProvider.tsx";
+import { useNavigate } from "react-router-dom";
 
 function patientList() {
     const [page, setPage] = useState<number>(1);
+    let [usablePatientsList, setUsablePatientsList] = useState([]);
+    let [patients, setPatients] = useState([]);
     const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);
     };
+
+
+    getPatients();
+    async function getPatients() {
+
+        useEffect(() => {
+            const callApi = async () => {
+                try {
+                    const data = (await api.get("api/Patients"));
+                    patients = data.data;
+                    Array.from(patients).forEach(patient => {
+                        setUsablePatientsList((prev) => [...prev, patient]);
+                    });
+
+                } catch (error) {
+                    console.log("Error " + error);
+                }
+            };
+
+            callApi();
+        }, []);
+        console.log(usablePatientsList);
+    }
+
+    //console.log(patients);
+
+    /*     const displayPatients = async () => {
+            const patients = await getPatients();
+            const patientL = patients.map((patient: Patient) => patient);
+        }; */
+
+    const navigate = useNavigate();
+    const studyList = (patient) => {
+        navigate("/studyList", {
+            state: {patient}
+        });
+    }; 
 
     return <>
         <div className='patientListContainer'>
@@ -33,27 +74,16 @@ function patientList() {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <th className="patientName" scope="row">Smith, Jane A.</th>
-                                    <td className="mrnRow">MRN-00421</td>
-                                    <td>1974-03-22</td>
-                                    <td>14 Jul 2026</td>
-                                    <td>3</td>
-                                </tr>
-                                <tr>
-                                    <th className="patientName" scope="row">Johnson, Robert</th>
-                                    <td className="mrnRow">MRN-00389</td>
-                                    <td>1958-11-07</td>
-                                    <td>02 Jul 2026</td>
-                                    <td>7</td>
-                                </tr>
-                                <tr>
-                                    <th className="patientName" scope="row">Patel, Anika</th>
-                                    <td className="mrnRow">MRN-00512</td>
-                                    <td>1991-06-14</td>
-                                    <td>28 Jun 2026</td>
-                                    <td>1</td>
-                                </tr>
+                                {usablePatientsList.map((patient: any) => (
+                                    <tr key={patient.id} onClick={() => studyList(patient)}>
+                                        <th className="patientName" scope="row">{patient.name}</th>
+                                        <td className="mrnRow">{patient.mrn}</td>
+                                        <td>{patient.doB}</td>
+                                        <td>14 Jul 2026</td>
+                                        <td>{patient.numOfStudies}</td>
+                                    </tr>
+                                ))}
+
                             </tbody>
                         </table>
                         <div id="patientListPagination">

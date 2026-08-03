@@ -23,7 +23,7 @@ namespace CloudPACS.Backend
                     throw new InvalidOperationException($"There is already a patient '{patient.Name}' under this user");
                 }
 
-                await container.CreateItemAsync(patient, new PartitionKey(patient.Mrn));
+                await container.CreateItemAsync(patient, new PartitionKey(patient.userId));
             }
             catch (CosmosException ex)
             {
@@ -37,9 +37,9 @@ namespace CloudPACS.Backend
             try
             {
                 var query = new QueryDefinition(
-                    "SELECT VALUE FROM c WHERE c.Mrn = @mrn AND c.userId = @userId")
+                    "SELECT VALUE 1 FROM c WHERE c.Mrn = @mrn AND c.UserId = @userId")
                     .WithParameter("@mrn", mrn)
-                    .WithParameter("@accountId", userId);
+                    .WithParameter("@userId", userId);
 
                 using FeedIterator<int> iterator = container.GetItemQueryIterator<int>(
                     query,
@@ -77,34 +77,39 @@ namespace CloudPACS.Backend
             }
         }
 
-        public async Task<List<FeedResponse<Patient>>> SearchPatientAsync(string search, string userId)
+        public async Task<List<Patient>> SearchPatientAsync(string keyword, string userId)
         {
             try
             {
                 var query = new QueryDefinition(
                     "SELECT VALUE c FROM c WHERE c.UserId = @userId OR c.Mrn = @mrn OR c.DoB = @dob")
-                    .WithParameter("@userId", search)
-                    .WithParameter("@mrn", search)
-                    .WithParameter("@userId", search);
+                    .WithParameter("@userId", keyword)
+                    .WithParameter("@mrn", keyword)
+                    .WithParameter("@dob", keyword);
 
-                using FeedIterator<Patient> iterator = container.GetItemQueryIterator<Patient>(query);
+                var requestOptions = new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(userId)
+                };
 
-                List<FeedResponse<Patient>> patientList = new List<FeedResponse<Patient>>();
+                var patientList = new List<Patient>();
+                using var iterator = container.GetItemQueryIterator<Patient>(query, requestOptions: requestOptions);
+
                 while (iterator.HasMoreResults)
                 {
-                    FeedResponse<Patient> response = await iterator.ReadNextAsync();
-                    patientList.Add(response);
+                    var page = await iterator.ReadNextAsync();
+                    patientList.AddRange(page);
                 }
                 return patientList;
             }
             catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 Console.WriteLine("The patient has not been found");
-                return null;
+                return new List<Patient>();
             }
             catch (CosmosException ex)
             {
-                Console.WriteLine($"Cosmos error while reading patient: {ex.StatusCode} — {ex.Message}");
+                Console.WriteLine($"Cosmos error while reading patient list: {ex.StatusCode} — {ex.Message}");
                 throw;
             }
         }
@@ -113,11 +118,11 @@ namespace CloudPACS.Backend
         {
             try
             {
-                await container.DeleteItemAsync<User>(patientListDto.mrn, new PartitionKey(patientListDto.userId));
+                await container.DeleteItemAsync<Patient>(patientListDto.mrn, new PartitionKey(patientListDto.userId));
             }
             catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                Console.WriteLine("This patient does not exist.");
+                Console.WriteLine("The patient list has not been found");
                 return;
             }
             catch (CosmosException ex)
@@ -127,29 +132,39 @@ namespace CloudPACS.Backend
             }
         }
 
-        public async Task<List<FeedResponse<Patient>>> FindPatientsAsync(string userId)
+        public async Task<List<Patient>> FindPatientsAsync(string userId)
         {
             try
             {
                 var query = new QueryDefinition(
-                    "SELECT VALUE c FROM c WHERE c.UserId = @userId")
+                    "SELECT VALUE c FROM c WHERE c.userId = @userId")
                     .WithParameter("@userId", userId);
 
-                using FeedIterator<Patient> iterator = container.GetItemQueryIterator<Patient>(query);
+                var requestOptions = new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(userId)
+                };
 
-                List<FeedResponse<Patient>> patientList = new List<FeedResponse<Patient>>();
+                var userPatients = new List<Patient>();
+                using var iterator = container.GetItemQueryIterator<Patient>(query, requestOptions: requestOptions);
+
                 while (iterator.HasMoreResults)
                 {
-                    FeedResponse<Patient> response = await iterator.ReadNextAsync();
-                    patientList.Add(response);
+                    var page = await iterator.ReadNextAsync();
+                    userPatients.AddRange(page);
                 }
-                return patientList;
+                return userPatients;
             }
 
             catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                Console.WriteLine("This patient does not exist.");
-                return null;
+                Console.WriteLine("The patient list has not been found");
+                return new List<Patient>();
+            }
+            catch (CosmosException ex)
+            {
+                Console.WriteLine($"Cosmos error while reading patient list: {ex.StatusCode} — {ex.Message}");
+                throw;
             }
         }
 
@@ -158,9 +173,9 @@ namespace CloudPACS.Backend
             try
             {
                 var query = new QueryDefinition(
-                        "SELECT VALUE (1) c FROM c WHERE c.Mrn = @mrn")
+                        "SELECT VALUE c FROM c WHERE c.Mrn = @mrn")
                         .WithParameter("@mrn", patientListDto.mrn);
-                using FeedIterator<Patient> iterator = container.GetItemQueryIterator<Patient>(query);
+                using FeedIterator<Patient> iterator = container.GetItemQueryIterator<Patient>(query, patientListDto.userId);
 
                 if (iterator.HasMoreResults)
                 {

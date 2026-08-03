@@ -1,35 +1,72 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../stylesheets/studylist.css";
 import Navbar from '../components/navbar';
+import { useLocation, useNavigate } from "react-router-dom";
+import api from "../queryClientProvider";
 
-const studiesData = [
-    { date: "14/Jul/2026", desc: "Brain MRI w/ contrast", mod: "MR", series: 4, images: 320, modColor: "#F3E5F5", modText: "#6A1B9A" },
-    { date: "02/Jun/2026", desc: "Chest CT", mod: "CT", series: 2, images: 180, modColor: "#E3F2FD", modText: "#1565C0" },
-    { date: "02/Jun/2026", desc: "Chest CT follow-up", mod: "CT", series: 3, images: 220, modColor: "#E3F2FD", modText: "#1565C0" },
-    { date: "18/May/2026", desc: "Chest X-ray", mod: "CR", series: 1, images: 2, modColor: "#FFF3E0", modText: "#E65100" },
-];
+
 const accessLog = [
-    { user: "John Doe", study: "Brain MRI w/ contrast", action: "Viewed", timeStamp: "17-Jul-2026, 09:14", modColor: "#E3F2FD", modText: "#1565C0"},
-    { user: "John Doe", study: "Chest CT", action: "Viewed", timeStamp: "17-Jul-2026, 09:14", modColor: "#E3F2FD", modText: "#1565C0"},
-    { user: "Sara Kim", study: "Brain MRI w/ contrast", action: "Viewed", timeStamp: "17-Jul-2026, 09:14", modColor: "#E3F2FD", modText: "#1565C0"},
-    { user: "John Doe", study: "Brain MRI w/ contrast", action: "Uploaded", timeStamp: "17-Jul-2026, 09:14", modColor: "#d1fae5", modText: "#076046"}
+    { user: "John Doe", study: "Brain MRI w/ contrast", action: "Viewed", timeStamp: "17-Jul-2026, 09:14", modColor: "#E3F2FD", modText: "#1565C0" },
+    { user: "John Doe", study: "Chest CT", action: "Viewed", timeStamp: "17-Jul-2026, 09:14", modColor: "#E3F2FD", modText: "#1565C0" },
+    { user: "Sara Kim", study: "Brain MRI w/ contrast", action: "Viewed", timeStamp: "17-Jul-2026, 09:14", modColor: "#E3F2FD", modText: "#1565C0" },
+    { user: "John Doe", study: "Brain MRI w/ contrast", action: "Uploaded", timeStamp: "17-Jul-2026, 09:14", modColor: "#d1fae5", modText: "#076046" }
 ];
 
 function Register() {
-    const [activeTab, setActiveTab] = useState("Switch");
+    const [activeTab, setActiveTab] = useState("Studies");
+    let [studies, setStudies] = useState([]);
+    let [usableStudies, setUsableStudiesList] = useState([]);
+
+    const modColours = {
+        MR: "#F3E5F5",
+        CT: "#E3F2FD",
+        CR: "#FFF3E0"
+    };
+    const getModColour = (mod) => modColours[mod];
+
+    const location = useLocation();
+    const patient = location.state?.patient;
+    const navigate = useNavigate();
+    const dicomViewer = () => {
+        navigate("/dicomViewer");
+    };
+
+    getPatientStudies();
+    async function getPatientStudies() {
+
+        useEffect(() => {
+            const callApi = async () => {
+                try {
+                    const data = await api.get(`api/v1/patients/${patient.mrn}/studies`); //try with the og studyrep
+                    studies = data.data;
+                    Array.from(studies).forEach(study => {
+                        setUsableStudiesList((prev) => [...prev, study]);
+                    });
+
+                } catch (error) {
+                    console.log("Error " + error);
+                }
+            }
+            callApi();
+        }, []);
+
+        console.log(usableStudies);
+    }
+
+
     return (
         <div className="register-layout">
             <Navbar />
             <div className="main-content">
                 <div className="patient-header">
                     <div className="patient-name-container">
-                        <div className="patient-name-title">Smith, Jane A.</div>
+                        <div className="patient-name-title">{patient.name}</div>
                         <div className="patient-info-text">
-                            MRN-00421 &middot; DOB: 1974-03-22 &middot; F &middot; 4 studies
+                            {patient.mrn} &middot; DOB: {patient.doB} &middot; {patient.gender} &middot; {patient.numOfStudies}
                         </div>
                     </div>
                     <button className="all-patients-btn">
-                        <button> All patients </button>
+                        All patients
                     </button>
                 </div>
                 <div className="tabs-container">
@@ -60,8 +97,8 @@ function Register() {
                             </tr>
                         </thead>
                         <tbody>
-                            {studiesData.map((row, index) => (
-                                <tr key={index}>
+                            {usableStudies.map((row: any) => (
+                                <tr key={row.patientGuid}>
 
                                     <td className="date-cell">
                                         {row.date.split(' ').map((text, i) => (
@@ -74,7 +111,7 @@ function Register() {
                                     <td>
                                         <span
                                             className="mod-chip"
-                                            style={{ backgroundColor: row.modColor, color: row.modText }}
+                                            style={{ backgroundColor: getModColour(row), color: row.mod }}
                                         >
                                             {row.mod}
                                         </span>
@@ -82,10 +119,10 @@ function Register() {
 
                                     <td className="number-cell">{row.series}</td>
 
-                                    <td className="number-cell">{row.images}</td>
+                                    <td className="number-cell">{row.imageCount}</td>
 
                                     <td style={{ textAlign: 'right' }}>
-                                        <button className="open-btn">
+                                        <button className="open-btn" onClick={dicomViewer}>
                                             Open
                                         </button>
                                     </td>
@@ -98,7 +135,7 @@ function Register() {
                 {activeTab === "Access Log" && (
                     <div className="access-log-wrapper">
                         <div className="access-log-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                            <h3 style={{ margin: 0, color: '#4A5568', fontSize: 25}}>ACCESS LOG</h3>
+                            <h3 style={{ margin: 0, color: '#4A5568', fontSize: 25 }}>ACCESS LOG</h3>
                             <div className="filter-container">
                                 <label htmlFor="studyFilter" style={{ marginRight: '8px', color: '#4A5568' }}>Filter by study:</label>
                                 <select id="studyFilter" className="studySort" defaultValue="All studies">
@@ -130,8 +167,8 @@ function Register() {
                                         <td>
                                             <span
                                                 className="action-chip"
-                                                style={{ 
-                                                    backgroundColor: row.modColor || '#E8EAF6', 
+                                                style={{
+                                                    backgroundColor: row.modColor || '#E8EAF6',
                                                     color: row.modText || '#3F51B5',
                                                     padding: '4px 12px',
                                                     borderRadius: '16px',

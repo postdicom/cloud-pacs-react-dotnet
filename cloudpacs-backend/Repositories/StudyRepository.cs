@@ -12,16 +12,16 @@ namespace CloudPACS.Backend
     {
         private readonly Container _container;
 
-        public StudyRepository(CosmosClient cosmosClient, string databaseName, string containerName)
+        public StudyRepository(CosmosClient cosmosClient)
         {
-            _container = cosmosClient.GetContainer(databaseName, containerName);
+            _container = cosmosClient.GetContainer("CloudPACS", "Study");
         }
 
         public async Task<List<Study>> GetStudiesByPatientIdAsync(string patientGuid)
         {
             var results = new List<Study>();
 
-            var query = new QueryDefinition("SELECT * FROM c WHERE c.patientGuid = @patientGuid")
+            var query = new QueryDefinition("SELECT VALUE c FROM c WHERE c.patientGuid = @patientGuid")
                 .WithParameter("@patientGuid", patientGuid);
 
             var requestOptions = new QueryRequestOptions

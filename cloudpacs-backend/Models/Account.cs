@@ -11,7 +11,6 @@ namespace CloudPACS.Backend
             Passive,
             Deleted
         }
-
         [JsonProperty("accountId")]
         public string accountId { get; set; }
         public string AccountName { get; set; }
@@ -19,8 +18,9 @@ namespace CloudPACS.Backend
         public AccountStatus Status { get; set; }
         public AccountIdentityInformation IdentityInformation { get; set; }
 
-        public Account(Guid userUuid, string accountName, string accountId, string accountPassword, DateTime? createdAt, DateTime? updatedAt, objectType objectType)
+        public Account(string id, Guid userUuid, string accountName, string accountId, string accountPassword, DateTime? createdAt, DateTime? updatedAt, objectType objectType)
         {
+            Id = id;
             this.accountId = accountId;
             AccountName = accountName;
             CreatedAt = createdAt ?? DateTime.UtcNow;

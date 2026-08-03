@@ -54,8 +54,9 @@ namespace CloudPACS.Backend.Controllers
                     UserRole.Radiologist, // Set to radiologist to be able to upload
                     BCrypt.HashPassword(registerRequestDto.Password)
                 );
-
                 
+                await _accountRepository.AddAccountAsync(account);
+     
                 await _userRepository.AddUserAsync(user);
                 Console.WriteLine("Successfully saved!");
 

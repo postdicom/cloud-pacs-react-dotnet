@@ -12,16 +12,16 @@ namespace CloudPACS.Backend
             Deleted
         }
 
-        [JsonProperty("AccountId")]
-        public string AccountId { get; set; }
+        [JsonProperty("accountId")]
+        public string accountId { get; set; }
         public string AccountName { get; set; }
         public string AccountPassword { get; set; }
         public AccountStatus Status { get; set; }
         public AccountIdentityInformation IdentityInformation { get; set; }
 
-        public Account(Guid userUuid, string accountName, string accountId, string accountPassword, DateTime? createdAt, DateTime? updatedAt, Common.objectType objectType)
+        public Account(Guid userUuid, string accountName, string accountId, string accountPassword, DateTime? createdAt, DateTime? updatedAt, objectType objectType)
         {
-            AccountId = accountId;
+            this.accountId = accountId;
             AccountName = accountName;
             CreatedAt = createdAt ?? DateTime.UtcNow;
             UpdatedAt = updatedAt;

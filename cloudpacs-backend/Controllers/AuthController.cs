@@ -10,6 +10,7 @@ namespace CloudPACS.Backend.Controllers
     using System.Security.Claims;
     using System.Text;
     using DotNetEnv;
+    using Microsoft.Identity.Client;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -40,15 +41,15 @@ namespace CloudPACS.Backend.Controllers
                     Guid.NewGuid().ToString(),
                     BCrypt.HashPassword(registerRequestDto.Password),
                     DateTime.UtcNow,
-                    null,
+                    DateTime.UtcNow,
                     Common.objectType.Account
                 );
 
                 var user = new User(
-                    account.AccountId,
+                    account.accountId,
                     registerRequestDto.Name,
                     registerRequestDto.Email,
-                    UserRole.Viewer, // default
+                    UserRole.Radiologist, // Set to radiologist to be able to upload
                     BCrypt.HashPassword(registerRequestDto.Password)
                 );
 

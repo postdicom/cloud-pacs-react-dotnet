@@ -15,7 +15,7 @@ public class Study: Common
         public Study(string Id, string patientGuid, string date, string mod, string series, int imageCount, objectType objectType)
         {
             this.Id = Id;
-            patientGuid = patientGuid;
+            this.patientGuid = patientGuid;
             Date = date;
             Mod = mod;
             Series = series;

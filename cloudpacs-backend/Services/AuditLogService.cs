@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Microsoft.Azure.Cosmos;
 
 namespace CloudPACS.Backend
@@ -12,7 +14,7 @@ namespace CloudPACS.Backend
             this.httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task LogAsync(string userId, AuditActions action, ResourceType resourceType, string resourceId)
+        public async Task LogAsync(string userId, string userName, AuditActions action, ResourceType resourceType, string resourceId)
         {
             try
             {
@@ -20,6 +22,7 @@ namespace CloudPACS.Backend
                 var entry = new AuditLogEntry
                 {
                     userId = userId,
+                    userName = userName,
                     Action = action,
                     ResourceType = resourceType,
                     ResourceId = resourceId,
@@ -56,6 +59,42 @@ namespace CloudPACS.Backend
                 return null;
             }
 
+        }
+
+        public async Task<List<AuditLogEntry>> GetAuditLogRecordsForUserAsync(string userId)
+        {
+            try
+            {
+                var query = new QueryDefinition(
+                        "SELECT VALUE c FROM c WHERE c.userId = @userId")
+                        .WithParameter("@userId", userId);
+
+                var requestOptions = new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(userId)
+                };
+
+                var recordList = new List<AuditLogEntry>();
+                using var iterator = container.GetItemQueryIterator<AuditLogEntry>(query, requestOptions: requestOptions);
+
+                while (iterator.HasMoreResults)
+                {
+                    var page = await iterator.ReadNextAsync();
+                    recordList.AddRange(page);
+                }
+                return recordList;
+            }
+
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteLine("Auditlog entries have not been found");
+                return new List<AuditLogEntry>();
+            }
+            catch (CosmosException ex)
+            {
+                Console.WriteLine($"Cosmos error while reading the audit log: {ex.StatusCode} — {ex.Message}");
+                throw;
+            }
         }
     }
 }

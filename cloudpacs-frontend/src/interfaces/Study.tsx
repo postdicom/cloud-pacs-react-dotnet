@@ -1,8 +1,9 @@
 export interface Study {
   id: string;
   patientGuid: string;
-  modality: string;
-  studyDate: string;
+  mod: string;
+  date: string;
   studyDescription: string;
-  createdAt: string;
+  imageCount: number;
+  series: number;
 }

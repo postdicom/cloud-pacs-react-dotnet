@@ -12,5 +12,6 @@ namespace CloudPACS.Backend
         Task UpdateUserAsync(User user, UserRole newRole, string newEmail, string newUsername, string newPhoneNumber, string userId, string accountId);
         Task<User?> FindUserAsync(string email);
         Task<bool> IsPasswordValid(LoginRequestDto loginRequestDto, string password);
+        Task<User?> FindUserByUserIdAsync(string userId);
     }
 }

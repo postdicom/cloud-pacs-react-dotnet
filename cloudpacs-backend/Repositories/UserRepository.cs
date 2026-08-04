@@ -5,6 +5,7 @@ namespace CloudPACS.Backend
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos;
     using BCrypt.Net;
+    using Microsoft.AspNetCore.Http.HttpResults;
 
     public class UserRepository : IUserRepository
     {
@@ -140,6 +141,32 @@ namespace CloudPACS.Backend
         public async Task<bool> IsPasswordValid(LoginRequestDto loginRequestDto, string password)
         {
             return BCrypt.Verify(loginRequestDto.Password, password);
+        }
+
+        public async Task<User?> FindUserByUserIdAsync(string accountId)
+        {
+            try
+            {
+                var query = new QueryDefinition(
+                    "SELECT VALUE c FROM c WHERE c.id = @accountId")
+                    .WithParameter("@accountId", accountId);
+
+                using FeedIterator<User> iterator = container.GetItemQueryIterator<User>(query);
+
+                if (iterator.HasMoreResults)
+                {
+                    var response = await iterator.ReadNextAsync();
+                    Console.WriteLine($"[DEBUG] Searching for accountId: '{accountId}'");
+                    return response.FirstOrDefault();
+                }
+                return null;
+            }
+
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteLine("This user does not exist.");
+                return null;
+            }
         }
     }
 }

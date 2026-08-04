@@ -29,7 +29,7 @@ namespace CloudPACS.Backend.Controllers
                 string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? string.Empty;
                 User user = await userRepository.FindUserByUserIdAsync(userId);
                 string userName = user.Name;
-                auditLogService.LogAsync(userId, userName, AuditActions.Login, ResourceType.Session, "User viewed instances in the series with the:  " + id);
+                auditLogService.LogAsync(userId, userName, AuditActions.Login, ResourceType.Session, "Ic - User viewed instances in the series with the:  " + id);
                 return Ok(instanceList);
             }
             catch (Exception ex)

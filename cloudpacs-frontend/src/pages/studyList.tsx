@@ -38,6 +38,10 @@ function Register() {
         });
     };
 
+    const patients = () => {
+        navigate("/patientList");
+    };
+
 
     useEffect(() => {
         const callApi = async () => {
@@ -76,7 +80,7 @@ function Register() {
                             {patient.mrn} &middot; DOB: {patient.doB} &middot; {patient.gender} &middot; {patient.numOfStudies}
                         </div>
                     </div>
-                    <button className="all-patients-btn">
+                    <button className="all-patients-btn" onClick={() => patients()}>
                         All patients
                     </button>
                 </div>
@@ -169,7 +173,7 @@ function Register() {
                             <tbody>
                                 {usableAuditLog.map((row: AuditLogEntry) => (
                                     <tr key={row.id}>
-                                        <td className="user-cell"> {row.userId}
+                                        <td className="user-cell"> {row.userName}
                                             {/* {row.userId.split(' ').map((text, i) => (
                                                 <span key={i} style={{ marginRight: '4px' }}>{text}</span>
                                             ))} */}

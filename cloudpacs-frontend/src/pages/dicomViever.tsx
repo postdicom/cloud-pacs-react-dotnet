@@ -43,10 +43,11 @@ export default function dicomViewer() {
   useEffect(() => {
     const callApi = async () => {
       try {
-        const data = await api.get(`api/v1/studies/${study.id}/series`); //try with the og studyrep
+        const data = await api.get(`api/v1/studies/${study.id}/series`);
         series = data.data;
         Array.from(series).forEach(element => {
           const series: Series = element;
+          console.log(series);
           setUsableSeriesList((prev) => [...prev, series]);
         });
 
@@ -56,6 +57,8 @@ export default function dicomViewer() {
     }
     callApi();
   }, []);
+
+  console.log(usableSeries);
 
   return (
     <div className="dv-reader">

@@ -24,5 +24,10 @@ namespace CloudPACS.Backend
             ObjectType = objectType;
             this.Gender = Gender;
         }
+
+        public static implicit operator Patient(List<Patient> v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

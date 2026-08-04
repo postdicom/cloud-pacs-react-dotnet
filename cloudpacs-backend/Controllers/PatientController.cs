@@ -5,7 +5,6 @@ namespace CloudPACS.Backend.Controllers
     using System.Security.Claims;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Azure.Cosmos;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -41,6 +40,25 @@ namespace CloudPACS.Backend.Controllers
             try
             {
                 Patient patient = await patientRepository.GetPatientByMrn(patientListDto);
+                return Ok(patient);
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DATABASE ERROR: {ex.Message}");
+                return null;
+            }
+        }
+
+
+        [HttpGet]
+        [Route("search/{keyword}")]
+        public async Task<IActionResult?> SearchForPatient(string keyword)
+        {
+            try
+            {
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? string.Empty;
+                Patient patient = await patientRepository.SearchPatientAsync(keyword, userId);
                 return Ok(patient);
             }
 

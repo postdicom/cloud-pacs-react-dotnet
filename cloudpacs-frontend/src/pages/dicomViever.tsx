@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../stylesheets/dicomViewer.css";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import api from "../queryClientProvider";
 
 type ToolId = "wl" | "zoom" | "pan" | "scroll";
 type PresetId = "brain" | "bone" | "lung" | "abd";
@@ -20,6 +22,36 @@ export default function dicomViewer() {
   const [activePreset, setActivePreset] = useState<PresetId>("brain");
   const [inverted, setInverted] = useState(false);
   const [activeSeries, setActiveSeries] = useState<string>("s1");
+  let [series, setSeries] = useState([]);
+  let [usableSeries, setUsableSeriesList] = useState([]);
+
+  const location = useLocation();
+  const { study, patientName } = location.state || {};
+
+  const navigate = useNavigate();
+  const studyList = (patient) => {
+    navigate("/studyList", {
+      state: { patient }
+    });
+  };
+
+  useEffect(() => {
+    const callApi = async () => {
+      try {
+        const data = await api.get(`api/v1/studies/${study.id}/series`); //try with the og studyrep
+        series = data.data;
+        Array.from(series).forEach(series => {
+          setUsableSeriesList((prev) => [...prev, series]);
+        });
+
+      } catch (error) {
+        console.log("Error " + error);
+      }
+    }
+    callApi();
+  }, []);
+
+  console.log(study);
 
   return (
     <div className="dv-reader">
@@ -53,9 +85,8 @@ export default function dicomViewer() {
           <span className="dv-topbar__divider" />
 
           <button
-            className={`dv-tool-btn ${
-              activePreset === "brain" ? "dv-tool-btn--preset-active" : ""
-            }`}
+            className={`dv-tool-btn ${activePreset === "brain" ? "dv-tool-btn--preset-active" : ""
+              }`}
             onClick={() => setActivePreset("brain")}
           >
             Brain
@@ -89,23 +120,23 @@ export default function dicomViewer() {
 
         <div className="dv-topbar__meta">
           <div className="dv-topbar__breadcrumb">
-            <a className="dv-topbar__link" href="#patients">
-              Patients
-            </a>
+            <Link to={`/patientList`} key="patientButton">
+              <div className="dv-topbar__link">
+                Patients
+              </div>
+            </Link>
             <span className="dv-topbar__slash">/</span>
-            <a className="dv-topbar__link" href="#patient">
-              Smith,
-              <br />
-              Jane A.
-            </a>
+            <Link to={`/studyList`} key={study.patientGuid}>
+              <div className="dv-topbar__link">
+                {patientName}
+                <br />
+              </div>
+            </Link>
           </div>
           <div className="dv-topbar__study">
-            Chest
-            CT
+            {study.mod}
             <br />
-            14
-            Jul
-            2026
+            {study.date}
           </div>
         </div>
       </header>
@@ -114,24 +145,24 @@ export default function dicomViewer() {
         <aside className="dv-sidebar-left">
           <h2 className="dv-section-title">Series</h2>
           <div className="dv-series-list">
-            {SERIES.map((series) => (
+            {usableSeries.map((series: any) => (
               <button
                 key={series.id}
-                className={`dv-series-btn ${
-                  activeSeries === series.id ? "dv-series-btn--active" : ""
-                }`}
+                className={`dv-series-btn ${activeSeries === series.id ? "dv-series-btn--active" : ""
+                  }`}
                 onClick={() => setActiveSeries(series.id)}
               >
-                {series.imageCount} img
+                {series.numberOfInstances} img
               </button>
-            ))}
+            ))
+            }
           </div>
         </aside>
         <main className="dv-viewport">
           <div className="dv-overlay-top-left">
-            <span>Smith, Jane A.</span>
-            <div>CT Chest</div>
-            <div>14 Jul 2026</div>
+            <span>{patientName}</span>
+            <div>{study.mod}</div> {/*!! Area isn't shared */}
+            <div>{study.date}</div>
             <div>W:400 L:40</div>
           </div>
 
@@ -155,23 +186,23 @@ export default function dicomViewer() {
             <div className="dv-info-table">
               <div className="dv-info-row">
                 <span className="dv-info-label">Patient</span>
-                <span className="dv-info-value">Smith, J.</span>
+                <span className="dv-info-value">{patientName}</span>
               </div>
               <div className="dv-info-row">
                 <span className="dv-info-label">Modality</span>
-                <span className="dv-info-value">CT</span>
+                <span className="dv-info-value">{study.mod}</span>
               </div>
               <div className="dv-info-row">
                 <span className="dv-info-label">Date</span>
-                <span className="dv-info-value">14 Jul 2026</span>
+                <span className="dv-info-value">{study.date}</span>
               </div>
               <div className="dv-info-row">
                 <span className="dv-info-label">Series</span>
-                <span className="dv-info-value">3</span>
+                <span className="dv-info-value">{study.series}</span>
               </div>
               <div className="dv-info-row">
                 <span className="dv-info-label">Instances</span>
-                <span className="dv-info-value">66</span>
+                <span className="dv-info-value">{study.imageCount}</span> {/* Is image and instance used interchangable here? */}
               </div>
             </div>
           </section>

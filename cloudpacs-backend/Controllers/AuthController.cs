@@ -124,5 +124,25 @@ namespace CloudPACS.Backend.Controllers
                 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+
+        [HttpGet]
+        [Route("auditLog")]
+        public async Task<ActionResult> GetAuditLogForUser()
+        {
+            try
+            {
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? string.Empty;
+                List<AuditLogEntry> auditLogList = await auditLogService.GetAuditLogRecordsForUserAsync(userId);
+                return Ok(auditLogList);
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DATABASE ERROR: {ex.Message}");
+                return null;
+            }
+        }
+
     }
 }

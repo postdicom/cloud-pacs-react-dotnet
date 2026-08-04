@@ -15,26 +15,29 @@ function patientList() {
     };
 
 
-    getPatients();
-    async function getPatients() {
+    useEffect(() => {
+        const callApi = async () => {
+            try {
+                const data = (await api.get("api/Patients"));
+                patients = data.data;
+                Array.from(patients).forEach(patient => {
+                    setUsablePatientsList((prev) => [...prev, patient]);
+                });
 
-        useEffect(() => {
-            const callApi = async () => {
-                try {
-                    const data = (await api.get("api/Patients"));
-                    patients = data.data;
-                    Array.from(patients).forEach(patient => {
-                        setUsablePatientsList((prev) => [...prev, patient]);
-                    });
+            } catch (error) {
+                console.log("Error " + error);
+            }
+        };
 
-                } catch (error) {
-                    console.log("Error " + error);
-                }
-            };
+        callApi();
+    }, []);
+    console.log(usablePatientsList);
 
-            callApi();
-        }, []);
-        console.log(usablePatientsList);
+    async function search() {
+        const el = document.querySelector<HTMLInputElement>('.input');
+        const input = el?.value;
+        const data = (await api.get(`api/Patients/search/${input}`));
+        console.log(data);
     }
 
     //console.log(patients);
@@ -47,9 +50,9 @@ function patientList() {
     const navigate = useNavigate();
     const studyList = (patient) => {
         navigate("/studyList", {
-            state: {patient}
+            state: { patient }
         });
-    }; 
+    };
 
     return <>
         <div className='patientListContainer'>
@@ -59,7 +62,7 @@ function patientList() {
                 <div id='patientTable'>
                     <div id="searchBar">
                         <input id="input" type="text" placeholder='Search by name, MRN, or date of birth' />
-                        <button className="patientTableButton" id='filtersButton'>Filters</button>
+                        <button className="patientTableButton" id='filtersButton' onClick={() => search()}>Filters</button>
                         <button className="patientTableButton" id='searchButton'>Search</button>
                     </div>
                     <div>
@@ -79,7 +82,7 @@ function patientList() {
                                         <th className="patientName" scope="row">{patient.name}</th>
                                         <td className="mrnRow">{patient.mrn}</td>
                                         <td>{patient.doB}</td>
-                                        <td>14 Jul 2026</td>
+                                        <td>{new Date().toLocaleDateString()}</td>
                                         <td>{patient.numOfStudies}</td>
                                     </tr>
                                 ))}
@@ -87,7 +90,7 @@ function patientList() {
                             </tbody>
                         </table>
                         <div id="patientListPagination">
-                            <Typography id="pageSelection">Showing {page * 3} of all patients</Typography>
+                            <Typography id="pageSelection">Showing {usablePatientsList.length} of all patients</Typography>
                             {/* <Pagination count={10} onChange={handlePageChange} page={page} size="small" /> */}
                         </div>
                     </div>

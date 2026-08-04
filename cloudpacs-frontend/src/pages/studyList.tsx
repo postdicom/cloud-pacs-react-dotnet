@@ -16,6 +16,8 @@ function Register() {
     const [activeTab, setActiveTab] = useState("Studies");
     let [studies, setStudies] = useState([]);
     let [usableStudies, setUsableStudiesList] = useState([]);
+    let [auditLog, setAuditLog] = useState([]);
+    let [usableAuditLog, setUsableAuditLog] = useState([]);
 
     const modColours = {
         MR: "#F3E5F5",
@@ -26,32 +28,42 @@ function Register() {
 
     const location = useLocation();
     const patient = location.state?.patient;
+
     const navigate = useNavigate();
-    const dicomViewer = () => {
-        navigate("/dicomViewer");
+    const dicomViewer = (study) => {
+        navigate("/dicomViewer", {
+            state: { study: study, patientName: patient.name },
+        });
     };
 
-    getPatientStudies();
-    async function getPatientStudies() {
 
-        useEffect(() => {
-            const callApi = async () => {
-                try {
-                    const data = await api.get(`api/v1/patients/${patient.mrn}/studies`); //try with the og studyrep
-                    studies = data.data;
-                    Array.from(studies).forEach(study => {
-                        setUsableStudiesList((prev) => [...prev, study]);
-                    });
+    useEffect(() => {
+        const callApi = async () => {
+            try {
+                const data = await api.get(`api/v1/patients/${patient.mrn}/studies`);
+                studies = data.data;
+                Array.from(studies).forEach(study => {
+                    setUsableStudiesList((prev) => [...prev, study]);
+                });
 
-                } catch (error) {
-                    console.log("Error " + error);
-                }
+                const auditLogData = await api.get("api/Auth/auditLog");
+                auditLog = auditLogData.data
+                Array.from(auditLog).forEach(record => {
+                    setUsableAuditLog((prev) => [...prev, record]);
+                });
+
+
+
+            } catch (error) {
+                console.log("Error " + error);
             }
-            callApi();
-        }, []);
+        }
+        callApi();
+    }, []);
 
-        console.log(usableStudies);
-    }
+    console.log(usableAuditLog);
+    console.log(usableStudies);
+
 
 
     return (
@@ -122,7 +134,7 @@ function Register() {
                                     <td className="number-cell">{row.imageCount}</td>
 
                                     <td style={{ textAlign: 'right' }}>
-                                        <button className="open-btn" onClick={dicomViewer}>
+                                        <button className="open-btn" onClick={() => dicomViewer(row)}>
                                             Open
                                         </button>
                                     </td>
@@ -156,7 +168,34 @@ function Register() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {accessLog.map((row, index) => (
+                                {usableAuditLog.map((row: any) => (
+                                    <tr key={row.id}>
+                                        <td className="user-cell"> {row.userId}
+                                            {/* {row.userId.split(' ').map((text, i) => (
+                                                <span key={i} style={{ marginRight: '4px' }}>{text}</span>
+                                            ))} */}
+                                        </td>
+                                        <td className="study-cell">{/* {row.study} */}</td>
+                                        <td>
+                                            <span
+                                                className="action-chip"
+                                                style={{
+                                                    /* backgroundColor: row.modColor || '#E8EAF6',
+                                                    color: row.modText || '#3F51B5', */
+                                                    padding: '4px 12px',
+                                                    borderRadius: '16px',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '0.85rem'
+                                                }}
+                                            >
+                                                {row.resourceId}
+                                            </span>
+                                        </td>
+                                        <td className="time-stamp-cell">{row.timestamp}</td>
+                                    </tr>
+                                ))}
+
+                                {/* {accessLog.map((row, index) => (
                                     <tr key={index}>
                                         <td className="user-cell">
                                             {row.user.split(' ').map((text, i) => (
@@ -181,11 +220,11 @@ function Register() {
                                         </td>
                                         <td className="time-stamp-cell">{row.timeStamp}</td>
                                     </tr>
-                                ))}
+                                ))} */}
                             </tbody>
                         </table>
                         <div style={{ textAlign: 'right', marginTop: '16px', fontSize: '0.85rem', color: '#718096' }}>
-                            4 events &middot; append-only log
+                            {usableAuditLog.length} events &middot; append-only log
                         </div>
                     </div>
                 )}

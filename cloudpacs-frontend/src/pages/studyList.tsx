@@ -3,6 +3,8 @@ import "../stylesheets/studylist.css";
 import Navbar from '../components/navbar';
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../queryClientProvider";
+import type { Study } from "../interfaces/Study";
+import type { AuditLogEntry } from "../interfaces/AuditLogEntry";
 
 
 const accessLog = [
@@ -15,9 +17,9 @@ const accessLog = [
 function Register() {
     const [activeTab, setActiveTab] = useState("Studies");
     let [studies, setStudies] = useState([]);
-    let [usableStudies, setUsableStudiesList] = useState([]);
+    let [usableStudies, setUsableStudiesList] = useState<Study[]>([]);
     let [auditLog, setAuditLog] = useState([]);
-    let [usableAuditLog, setUsableAuditLog] = useState([]);
+    let [usableAuditLog, setUsableAuditLog] = useState<AuditLogEntry[]>([]);
 
     const modColours = {
         MR: "#F3E5F5",
@@ -32,7 +34,7 @@ function Register() {
     const navigate = useNavigate();
     const dicomViewer = (study) => {
         navigate("/dicomViewer", {
-            state: { study: study, patientName: patient.name },
+            state: { study: study, patient: patient },
         });
     };
 
@@ -42,13 +44,15 @@ function Register() {
             try {
                 const data = await api.get(`api/v1/patients/${patient.mrn}/studies`);
                 studies = data.data;
-                Array.from(studies).forEach(study => {
+                Array.from(studies).forEach(element => {
+                    const study: Study = element;
                     setUsableStudiesList((prev) => [...prev, study]);
                 });
 
                 const auditLogData = await api.get("api/Auth/auditLog");
                 auditLog = auditLogData.data
-                Array.from(auditLog).forEach(record => {
+                Array.from(auditLog).forEach(element => {
+                    const record: AuditLogEntry = element;
                     setUsableAuditLog((prev) => [...prev, record]);
                 });
 
@@ -60,11 +64,6 @@ function Register() {
         }
         callApi();
     }, []);
-
-    console.log(usableAuditLog);
-    console.log(usableStudies);
-
-
 
     return (
         <div className="register-layout">
@@ -109,7 +108,7 @@ function Register() {
                             </tr>
                         </thead>
                         <tbody>
-                            {usableStudies.map((row: any) => (
+                            {usableStudies.map((row: Study) => (
                                 <tr key={row.patientGuid}>
 
                                     <td className="date-cell">
@@ -118,7 +117,7 @@ function Register() {
                                         ))}
                                     </td>
 
-                                    <td className="desc-cell">{row.desc}</td>
+                                    <td className="desc-cell">{row.studyDescription}</td>
 
                                     <td>
                                         <span
@@ -168,7 +167,7 @@ function Register() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {usableAuditLog.map((row: any) => (
+                                {usableAuditLog.map((row: AuditLogEntry) => (
                                     <tr key={row.id}>
                                         <td className="user-cell"> {row.userId}
                                             {/* {row.userId.split(' ').map((text, i) => (

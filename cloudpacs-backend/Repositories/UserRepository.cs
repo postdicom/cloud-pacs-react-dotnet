@@ -141,5 +141,30 @@ namespace CloudPACS.Backend
         {
             return BCrypt.Verify(loginRequestDto.Password, password);
         }
+
+        public async Task<User?> FindUserByUserIdAsync(string userId)
+        {
+            try
+            {
+                var query = new QueryDefinition(
+                    "SELECT VALUE c FROM c WHERE c.userId = @userId")
+                    .WithParameter("@userId", userId);
+
+                using FeedIterator<User> iterator = container.GetItemQueryIterator<User>(query);
+
+                if (iterator.HasMoreResults)
+                {
+                    var response = await iterator.ReadNextAsync();
+                    return response.FirstOrDefault();
+                }
+                return null;
+            }
+
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteLine("This user does not exist.");
+                return null;
+            }
+        }
     }
 }

@@ -81,7 +81,7 @@ namespace CloudPACS.Backend.Controllers
                     if (await _userRepository.IsPasswordValid(loginRequestDto, user.Password))
                     {
                         var token = await GenerateToken(user);
-                        auditLogService.LogAsync(user.Id, AuditActions.Login, ResourceType.Session, "User logged in");
+                        auditLogService.LogAsync(user.Id, user.Name, AuditActions.Login, ResourceType.Session, "User logged in");
                         return Ok(token); //loginReponseDto
                     }
                     else

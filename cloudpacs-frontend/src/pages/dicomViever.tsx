@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "../stylesheets/dicomViewer.css";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import api from "../queryClientProvider";
+import type { Series } from "../interfaces/Series";
 
 type ToolId = "wl" | "zoom" | "pan" | "scroll";
 type PresetId = "brain" | "bone" | "lung" | "abd";
@@ -23,10 +24,10 @@ export default function dicomViewer() {
   const [inverted, setInverted] = useState(false);
   const [activeSeries, setActiveSeries] = useState<string>("s1");
   let [series, setSeries] = useState([]);
-  let [usableSeries, setUsableSeriesList] = useState([]);
+  let [usableSeries, setUsableSeriesList] = useState<Series[]>([]);
 
   const location = useLocation();
-  const { study, patientName } = location.state || {};
+  const { study, patient } = location.state || {};
 
   const navigate = useNavigate();
   const studyList = (patient) => {
@@ -35,12 +36,17 @@ export default function dicomViewer() {
     });
   };
 
+  const patients = () => {
+    navigate("/patientList");
+  };
+
   useEffect(() => {
     const callApi = async () => {
       try {
         const data = await api.get(`api/v1/studies/${study.id}/series`); //try with the og studyrep
         series = data.data;
-        Array.from(series).forEach(series => {
+        Array.from(series).forEach(element => {
+          const series: Series = element;
           setUsableSeriesList((prev) => [...prev, series]);
         });
 
@@ -50,8 +56,6 @@ export default function dicomViewer() {
     }
     callApi();
   }, []);
-
-  console.log(study);
 
   return (
     <div className="dv-reader">
@@ -120,18 +124,14 @@ export default function dicomViewer() {
 
         <div className="dv-topbar__meta">
           <div className="dv-topbar__breadcrumb">
-            <Link to={`/patientList`} key="patientButton">
-              <div className="dv-topbar__link">
-                Patients
-              </div>
-            </Link>
+            <div className="dv-topbar__link" onClick={() => patients()}>
+              Patients
+            </div>
             <span className="dv-topbar__slash">/</span>
-            <Link to={`/studyList`} key={study.patientGuid}>
-              <div className="dv-topbar__link">
-                {patientName}
-                <br />
-              </div>
-            </Link>
+            <div className="dv-topbar__link" onClick={() => studyList(patient)}>
+              {patient.name}
+              <br />
+            </div>
           </div>
           <div className="dv-topbar__study">
             {study.mod}
@@ -145,7 +145,7 @@ export default function dicomViewer() {
         <aside className="dv-sidebar-left">
           <h2 className="dv-section-title">Series</h2>
           <div className="dv-series-list">
-            {usableSeries.map((series: any) => (
+            {usableSeries.map((series: Series) => (
               <button
                 key={series.id}
                 className={`dv-series-btn ${activeSeries === series.id ? "dv-series-btn--active" : ""
@@ -160,7 +160,7 @@ export default function dicomViewer() {
         </aside>
         <main className="dv-viewport">
           <div className="dv-overlay-top-left">
-            <span>{patientName}</span>
+            <span>{patient.name}</span>
             <div>{study.mod}</div> {/*!! Area isn't shared */}
             <div>{study.date}</div>
             <div>W:400 L:40</div>
@@ -186,7 +186,7 @@ export default function dicomViewer() {
             <div className="dv-info-table">
               <div className="dv-info-row">
                 <span className="dv-info-label">Patient</span>
-                <span className="dv-info-value">{patientName}</span>
+                <span className="dv-info-value">{patient.name}</span>
               </div>
               <div className="dv-info-row">
                 <span className="dv-info-label">Modality</span>

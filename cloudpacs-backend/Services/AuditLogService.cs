@@ -14,7 +14,7 @@ namespace CloudPACS.Backend
             this.httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task LogAsync(string userId, AuditActions action, ResourceType resourceType, string resourceId)
+        public async Task LogAsync(string userId, string userName, AuditActions action, ResourceType resourceType, string resourceId)
         {
             try
             {
@@ -22,6 +22,7 @@ namespace CloudPACS.Backend
                 var entry = new AuditLogEntry
                 {
                     userId = userId,
+                    userName = userName,
                     Action = action,
                     ResourceType = resourceType,
                     ResourceId = resourceId,

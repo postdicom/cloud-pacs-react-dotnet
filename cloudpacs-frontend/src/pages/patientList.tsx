@@ -5,10 +5,11 @@ import Typography from "@mui/material/Typography"
 import { useEffect, useState } from "react";
 import api from "../queryClientProvider.tsx";
 import { useNavigate } from "react-router-dom";
+import type { Patient } from "../interfaces/Patient.tsx";
 
 function patientList() {
     const [page, setPage] = useState<number>(1);
-    let [usablePatientsList, setUsablePatientsList] = useState([]);
+    let [usablePatientsList, setUsablePatientsList] = useState<Patient[]>([]);
     let [patients, setPatients] = useState([]);
     const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);
@@ -20,7 +21,8 @@ function patientList() {
             try {
                 const data = (await api.get("api/Patients"));
                 patients = data.data;
-                Array.from(patients).forEach(patient => {
+                Array.from(patients).forEach(element => {
+                    const patient: Patient = element;
                     setUsablePatientsList((prev) => [...prev, patient]);
                 });
 
@@ -31,16 +33,12 @@ function patientList() {
 
         callApi();
     }, []);
-    console.log(usablePatientsList);
 
     async function search() {
         const el = document.querySelector<HTMLInputElement>('.input');
         const input = el?.value;
         const data = (await api.get(`api/Patients/search/${input}`));
-        console.log(data);
     }
-
-    //console.log(patients);
 
     /*     const displayPatients = async () => {
             const patients = await getPatients();
@@ -77,11 +75,11 @@ function patientList() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {usablePatientsList.map((patient: any) => (
-                                    <tr key={patient.id} onClick={() => studyList(patient)}>
+                                {usablePatientsList.map((patient: Patient) => (
+                                    <tr key={patient.mrn} onClick={() => studyList(patient)}>
                                         <th className="patientName" scope="row">{patient.name}</th>
                                         <td className="mrnRow">{patient.mrn}</td>
-                                        <td>{patient.doB}</td>
+                                        <td>{patient.dob}</td>
                                         <td>{new Date().toLocaleDateString()}</td>
                                         <td>{patient.numOfStudies}</td>
                                     </tr>

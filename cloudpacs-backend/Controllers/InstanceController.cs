@@ -11,11 +11,13 @@ namespace CloudPACS.Backend.Controllers
     public class InstanceController : ControllerBase
     {
         private readonly IInstanceRepository instanceRepository;
+        private readonly IUserRepository userRepository;
         private AuditLogService auditLogService;
-        public InstanceController(IInstanceRepository instanceRepository, AuditLogService auditLogService)
+        public InstanceController(IInstanceRepository instanceRepository, AuditLogService auditLogService, UserRepository userRepository)
         {
             this.instanceRepository = instanceRepository;
             this.auditLogService = auditLogService;
+            this.userRepository = userRepository;
         }
 
         [HttpGet("series/{id}/instances")]
@@ -25,7 +27,9 @@ namespace CloudPACS.Backend.Controllers
             {
                 List<Instance> instanceList = await instanceRepository.FindInstancesAsync(id);
                 string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? string.Empty;
-                auditLogService.LogAsync(userId, AuditActions.Login, ResourceType.Session, "User viewed instances in the series " + id);
+                User user = await userRepository.FindUserByUserIdAsync(userId);
+                string userName = user.Name;
+                auditLogService.LogAsync(userId, userName, AuditActions.Login, ResourceType.Session, "User viewed instances in the series with the:  " + id);
                 return Ok(instanceList);
             }
             catch (Exception ex)

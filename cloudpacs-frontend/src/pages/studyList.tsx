@@ -100,6 +100,7 @@ function Register() {
                 </div>
 
                 {activeTab === "Studies" && (
+
                     <table className="studies-table">
                         <thead>
                             <tr>
@@ -146,6 +147,7 @@ function Register() {
                             ))}
                         </tbody>
                     </table>
+
                 )}
                 {activeTab === "Access Log" && (
                     <div className="access-log-wrapper">
@@ -161,71 +163,46 @@ function Register() {
                                 </select>
                             </div>
                         </div>
-                        <table className="studies-table">
-                            <thead>
-                                <tr>
-                                    <th>USER</th>
-                                    <th>STUDY</th>
-                                    <th>ACTION</th>
-                                    <th>TIMESTAMP</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {usableAuditLog.map((row: AuditLogEntry) => (
-                                    <tr key={row.id}>
-                                        <td className="user-cell"> {row.userName}
-                                            {/* {row.userId.split(' ').map((text, i) => (
+                        <div className="scroll">
+                            <table className="studies-table">
+                                <thead>
+                                    <tr>
+                                        <th>USER</th>
+                                        <th>STUDY</th>
+                                        <th>ACTION</th>
+                                        <th>TIMESTAMP</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {usableAuditLog.map((row: AuditLogEntry) => (
+                                        <tr key={row.id}>
+                                            <td className="user-cell"> {row.userName}
+                                                {/* {row.userId.split(' ').map((text, i) => (
                                                 <span key={i} style={{ marginRight: '4px' }}>{text}</span>
                                             ))} */}
-                                        </td>
-                                        <td className="study-cell">{/* {row.study} */}</td>
-                                        <td>
-                                            <span
-                                                className="action-chip"
-                                                style={{
-                                                    /* backgroundColor: row.modColor || '#E8EAF6',
-                                                    color: row.modText || '#3F51B5', */
-                                                    padding: '4px 12px',
-                                                    borderRadius: '16px',
-                                                    fontWeight: 'bold',
-                                                    fontSize: '0.85rem'
-                                                }}
-                                            >
-                                                {row.resourceId}
-                                            </span>
-                                        </td>
-                                        <td className="time-stamp-cell">{row.timestamp}</td>
-                                    </tr>
-                                ))}
-
-                                {/* {accessLog.map((row, index) => (
-                                    <tr key={index}>
-                                        <td className="user-cell">
-                                            {row.user.split(' ').map((text, i) => (
-                                                <span key={i} style={{ marginRight: '4px' }}>{text}</span>
-                                            ))}
-                                        </td>
-                                        <td className="study-cell">{row.study}</td>
-                                        <td>
-                                            <span
-                                                className="action-chip"
-                                                style={{
-                                                    backgroundColor: row.modColor || '#E8EAF6',
-                                                    color: row.modText || '#3F51B5',
-                                                    padding: '4px 12px',
-                                                    borderRadius: '16px',
-                                                    fontWeight: 'bold',
-                                                    fontSize: '0.85rem'
-                                                }}
-                                            >
-                                                {row.action}
-                                            </span>
-                                        </td>
-                                        <td className="time-stamp-cell">{row.timeStamp}</td>
-                                    </tr>
-                                ))} */}
-                            </tbody>
-                        </table>
+                                            </td>
+                                            <td className="study-cell">{/* {row.study} */}</td>
+                                            <td>
+                                                <span
+                                                    className="action-chip"
+                                                    style={{
+                                                        /* backgroundColor: row.modColor || '#E8EAF6',
+                                                        color: row.modText || '#3F51B5', */
+                                                        padding: '4px 12px',
+                                                        borderRadius: '16px',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '0.85rem'
+                                                    }}
+                                                >
+                                                    {row.resourceId}
+                                                </span>
+                                            </td>
+                                            <td className="time-stamp-cell">{row.timestamp}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                         <div style={{ textAlign: 'right', marginTop: '16px', fontSize: '0.85rem', color: '#718096' }}>
                             {usableAuditLog.length} events &middot; append-only log
                         </div>

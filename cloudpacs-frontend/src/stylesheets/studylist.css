@@ -16,7 +16,8 @@
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   width: 100%;
   background: #eef1f5;
 }
@@ -27,6 +28,7 @@
   flex-direction: column;
   padding: 32px 40px;
   min-width: 0;
+  min-height: 0;
 }
 
 .register-layout .patient-header {
@@ -107,13 +109,24 @@
   border-bottom-color: #2f7de1;
 }
 
+.register-layout .scroll{
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  table-layout: fixed;
+  height: 100%;
+  margin: 0;
+  overflow-y: scroll;
+  height: 100vh;
+}
+
 .register-layout .studies-table {
   width: 100%;
+  height: 10px;
   table-layout: fixed;
   border-collapse: collapse;
   background: #ffffff;
   border-radius: 0 0 12px 12px;
-  overflow: auto;
   box-shadow: 0 1px 3px rgba(20, 33, 61, 0.06);
 }
 
@@ -211,7 +224,6 @@
 
   .register-layout .studies-table {
     display: block;
-    overflow-x: auto;
   }
   .studySort
   {

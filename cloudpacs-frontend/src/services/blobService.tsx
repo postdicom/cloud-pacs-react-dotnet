@@ -29,15 +29,10 @@ export async function uploadToBlob(arrayBuffer: ArrayBuffer, fDetails: FileDetai
 
 export async function sendToBackend(fileList: string[]) {
     try {
-        /* const sendToBackendResponse = await fetch('https://localhost:5001/api/v1/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(fileList)
-        }) */
         const sendToBackendResponse = await api.post('api/v1/upload', fileList);
         /* onUploadProgress: data => {
             progressPercentage = (Math.round((100 * data.loaded) / data.total))
-        }}); */
+        }; */
         //TO DO: onUploadProgress
     }
 

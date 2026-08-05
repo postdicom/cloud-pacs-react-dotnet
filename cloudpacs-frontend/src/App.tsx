@@ -9,6 +9,7 @@ import StudyList from './pages/studyList'
 import PatientList from './pages/patientList'
 import Upload from './pages/upload'
 import Cornerstone from './pages/cornerstone';
+import NotFound from './pages/pageNotFound';
 
 function App() {
   const [files, setFiles] = useState<File[]>([]);
@@ -25,6 +26,7 @@ function App() {
           </Route>
           <Route path="/Register" element={<Register />}></Route>
           <Route path="/Login" element={<Login />}></Route>
+          <Route path="*" element={<NotFound />} />
         </Routes>
 
     </>

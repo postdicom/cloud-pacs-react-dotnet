@@ -53,7 +53,6 @@ namespace CloudPACS.Backend
 
 
         }
-        
         [Authorize(Roles = "Radiologist,Admin")]
         [HttpGet("generate-sas")]
         public async Task<IActionResult> GenerateSasUrlAsync([FromQuery] string fileName)
@@ -217,18 +216,19 @@ namespace CloudPACS.Backend
                         extractedMetadata
                     );
                     var studyDoc = new Study(
-                        studyInstanceUid ?? "UNKNOwN",
-                        patientId ?? "UNKNOwN",
-                        studyDate ?? "UNKNOwN",
-                        modality ?? "UNKNOwN",
-                        seriesNumber ?? "UNKNOwN",
+                        studyInstanceUid ?? "UNKNOWN",
+                        patientId ?? "UNKNOWN",
+                        studyDate ?? "UNKNOWN",
+                        modality ?? "UNKNOWN",
+                        seriesNumber ?? "UNKNOWN",
                         _imageCount + 1,
-                        Common.objectType.Study
-                        );
+                        Common.objectType.Study,
+                        studyInstanceUid ?? "UNKNOWN"
+                    );
                     var patientDoc = new Patient(
-                        patientId ?? "UNKNOwN",
+                        patientId ?? "UNKNOWN",
                         userId,
-                        patientId ?? "UNKNOwN",
+                        patientId ?? "UNKNOWN",
                         patientName ?? "UNKNOWN",
                         dateOfBirth ?? "UNKNOWN",
                         _studyCount + 1,
@@ -238,12 +238,13 @@ namespace CloudPACS.Backend
                     
                     var seriesDoc = new Series(
                         studyInstanceUid ?? "UNKNOWN",
-                        patientId ?? "UNKNOwN",
+                        patientId ?? "UNKNOWN",
                         patientName ?? "UNKNOWN",
                         userId,
                         seriesNumber ?? "UNKNOWN",
                         studyInstanceUid ?? "UNKNOWN",
-                        Common.objectType.Series
+                        Common.objectType.Series,
+                        seriesUid ?? "UNKNOWN"
                     );
                     try
                     {
@@ -315,38 +316,6 @@ namespace CloudPACS.Backend
                 errors = errors.Any() ? errors : null,
                 data = uploadedFilesData
             });
-        }
-        [Authorize(Roles = "Radiologist,Admin,Viewer")]
-        [HttpGet("viewer/instance/{id}/metadata")]
-        public async Task<IActionResult> GetInstanceMetadata(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest(new { message = "Instance ID is required." });
-            }
-            try
-            {
-                var queryDef = new QueryDefinition("SELECT * FROM c WHERE c.id = @id")
-                    .WithParameter("@id", id);
-
-                using var iterator = _instanceContainer.GetItemQueryIterator<Instance>(queryDef);
-
-                if (iterator.HasMoreResults)
-                {
-                    var response = await iterator.ReadNextAsync();
-                    var instanceDoc = response.FirstOrDefault();
-
-                    if (instanceDoc != null)
-                    {
-                        return Ok(instanceDoc.Metadata);
-                    }
-                }
-                return NotFound(new { message = $"Metadata for instance '{id}' not found." });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = $"Error fetching metadata: {ex.Message}" });
-            }
         }
     }
 }

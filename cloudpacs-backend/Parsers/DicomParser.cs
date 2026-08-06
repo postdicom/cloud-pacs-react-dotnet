@@ -19,7 +19,8 @@ namespace CloudPACS.Backend
 
         internal Dictionary<string, string> ExtractMetadataDictionary(string filePath)
         {
-            throw new NotImplementedException();
+            using var stream = File.OpenRead(filePath);
+            return ExtractMetadataDictionary(stream);
         }
 
         private void ExtractDataset(DicomDataset dataset, Dictionary<string, string> metadata, string prefix)

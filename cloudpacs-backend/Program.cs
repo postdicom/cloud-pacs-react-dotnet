@@ -10,6 +10,7 @@
     using Microsoft.IdentityModel.Tokens;
     using System.Text;
     using Azure.Storage.Blobs;
+    using Microsoft.OpenApi;
 
     public class Program
     {
@@ -53,6 +54,7 @@
             builder.Services.AddScoped<IStudyRepository, StudyRepository>();
             builder.Services.AddScoped<ISeriesRepository, SeriesRepository>();
             builder.Services.AddScoped<IInstanceRepository, InstanceRepository>();
+            builder.Services.AddScoped<IDicomViewRepository, DicomViewRepository>();
             builder.Services.AddSingleton(x => new BlobServiceClient("UseDevelopmentStorage=true"));
 
             builder.Services.AddCors(options =>
@@ -63,7 +65,31 @@
                           .AllowAnyMethod());
             });
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "CloudPACS API",
+                    Version = "v1"
+                });
+
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = jwt
+                });
+
+                options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+                });
+            });
+
             builder.Services.AddHttpContextAccessor();
 
 
@@ -95,6 +121,8 @@
             var app = builder.Build();
 
             app.UseCors("AllowFrontend");
+
+            Console.WriteLine($"Environment: {app.Environment.EnvironmentName}");
 
             app.UseSwagger();//swager test
             app.UseSwaggerUI();

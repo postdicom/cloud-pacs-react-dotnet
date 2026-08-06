@@ -27,11 +27,13 @@ namespace CloudPACS.Backend
         private readonly Container _seriesContainer;
         private readonly BlobServiceClient _blobServiceClient;
         private readonly BlobContainerClient _dicomsContainerClient;
+        private AuditLogService auditLogService;
+        private readonly IUserRepository userRepository;
 
         private int _imageCount;
         private int _studyCount;
 
-        public DicomUploadController(CosmosClient cosmosClient, BlobServiceClient blobServiceClient)
+        public DicomUploadController(CosmosClient cosmosClient, BlobServiceClient blobServiceClient, AuditLogService auditLogService, IUserRepository userRepository)
         {
             _uploadDirectory = Path.Combine(Directory.GetCurrentDirectory(), "UploadedDicoms");
 
@@ -51,8 +53,11 @@ namespace CloudPACS.Backend
 
             _dicomsContainerClient = _blobServiceClient.GetBlobContainerClient("dicom-uploads");
 
+            this.auditLogService = auditLogService;
 
+            this.userRepository = userRepository;
         }
+    
         [Authorize(Roles = "Radiologist,Admin")]
         [HttpGet("generate-sas")]
         public async Task<IActionResult> GenerateSasUrlAsync([FromQuery] string fileName)
@@ -235,7 +240,7 @@ namespace CloudPACS.Backend
                         Common.objectType.Patient,
                         gender ?? "UNKNOWN"
                     );
-                    
+
                     var seriesDoc = new Series(
                         studyInstanceUid ?? "UNKNOWN",
                         patientId ?? "UNKNOWN",
@@ -298,6 +303,10 @@ namespace CloudPACS.Backend
                         patientId = instanceDoc.seriesGuid,
                         status = "Saved to Azure and Cosmos DB"
                     });
+
+                    User user = await userRepository.FindUserByUserIdAsync(userId);
+                    string userName = user.Name;
+                    auditLogService.LogAsync(userId, userName, AuditActions.UploadDICOM, ResourceType.Session, "User uploaded instance/s", studyDoc.Mod);
                 }
                 catch (Exception ex)
                 {

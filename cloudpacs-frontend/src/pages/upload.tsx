@@ -1,5 +1,5 @@
 import type React from "react";
-import { useRef, useState } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import Navbar from "../components/navbar";
 import "../stylesheets/upload.css";
 import { parseByteArrayForPatientName, parseByteArrayForStudyId, parseByteArrayForPatientId } from "../dicomParser"
@@ -13,6 +13,7 @@ interface UploadProps {
 
 function Upload({ onFileChange }: UploadProps) {
     const wrapperRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [fileList, setFileList] = useState<File[]>([]);
     const uploadPromises: Promise<void>[] = [];
     const validBlobNames: string[] = [];
@@ -34,12 +35,7 @@ function Upload({ onFileChange }: UploadProps) {
         e.stopPropagation();
     };
 
-    const getAllFiles = async (e: React.DragEvent): Promise<File[]> => {
-        const items = Array.from(e.dataTransfer.items);
-        const entries = items
-            .map((item) => item.webkitGetAsEntry())
-            .filter((entry): entry is FileSystemEntry => entry !== null);
-
+    const getAllFiles = async (entries): Promise<File[]> => {
         const files: File[] = [];
 
         while (entries.length > 0) {
@@ -82,13 +78,21 @@ function Upload({ onFileChange }: UploadProps) {
     };
 
     const onDrop = async (e: React.DragEvent) => {
-        console.log(e);
         e.preventDefault();
         e.stopPropagation();
 
-        const droppedFiles = await getAllFiles(e);
+        const items = Array.from(e.dataTransfer.items);
+        const entries = items
+            .map((item) => item.webkitGetAsEntry())
+            .filter((entry): entry is FileSystemEntry => entry !== null);
+
+        const droppedFiles = await getAllFiles(entries);
         setFileList(droppedFiles);
 
+        uploadFunction(droppedFiles);
+    };
+
+    async function uploadFunction(droppedFiles: File[]) {
         if (droppedFiles.length > 0) {
             const updatedList = [...droppedFiles];
             updatedList.forEach(async (file: File) => {
@@ -102,7 +106,7 @@ function Upload({ onFileChange }: UploadProps) {
                         studyId: parseByteArrayForStudyId(byteArray)
                     };
 
-                    if (fDetails.selectedFile.size / 102400 > 100) {
+                    if (fDetails.selectedFile.size / 10240000 > 100) {
                         return;
                     }
 
@@ -148,34 +152,39 @@ function Upload({ onFileChange }: UploadProps) {
                 uploadPromises.push(promise);
             });
             await Promise.all(uploadPromises);
-            //const newBlobNames = updatedList.map((file) => file.name);
             setBlobNameList((prev) => [...prev, ...validBlobNames]);
             await sendToBackend(validBlobNames);
             onFileChange(updatedList);
         }
+
+    }
+
+    const handleClick = () => {
+        fileInputRef.current?.click();
     };
 
-    const handleDivClick = () => {
-        /* {
-            wrapperRef.current?.classList.remove('dragover');
-     
-            const droppedFiles = Array.from(e.target);
-     
-            if (droppedFiles.length > 0) {
-                const updatedList = [...fileList, ...droppedFiles];
-                updatedList.forEach(async (file: File) => {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const byteArray = new Uint8Array(arrayBuffer);
-                    setTest(file.name);
-                    setTest(parseByteArray(byteArray));
-                });
-                setFileList(updatedList);
-                onFileChange(updatedList);
-            }
-     
-            e.preventDefault();
-            e.stopPropagation();
-        }; */
+    const handleChange = async (e: ChangeEvent<HTMLInputElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const entries = e.target.webkitEntries.filter((entry): entry is FileSystemEntry => entry !== null);
+
+        const droppedFiles = await getAllFiles(entries);
+        setFileList(droppedFiles);
+
+        /* if (droppedFiles.length > 0) {
+            const updatedList = [...fileList, ...droppedFiles];
+            updatedList.forEach(async (file: File) => {
+                const arrayBuffer = await file.arrayBuffer();
+                const byteArray = new Uint8Array(arrayBuffer);
+            });
+            setFileList(updatedList);
+            onFileChange(updatedList);
+        } */
+
+        setFileList(droppedFiles);
+
+        uploadFunction(droppedFiles);
     };
 
     const onFileChangeSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -203,14 +212,13 @@ function Upload({ onFileChange }: UploadProps) {
                     <h1 id="uploadTitle">Upload DICOM Files</h1>
                     <div id="dragAndDropArea">
                         <div
-                            ref={wrapperRef}
                             className="dragAndDropHeader"
                             onDragEnter={onDragEnter}
                             onDragOver={onDragOver}
                             onDragLeave={onDragLeave}
                             onDrop={onDrop}
-                            onClick={handleDivClick}
-                            style={{ cursor: 'pointer' }}
+                            onClick={handleClick}
+                            onChange={handleChange}        
                         >
                             <svg id="dragAndDropAreaSymbol" viewBox="0 0 24 24">
                                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path>
@@ -219,14 +227,14 @@ function Upload({ onFileChange }: UploadProps) {
                             </svg>
                             <div id="fileDragAndDropInstruction">Drop .dcm files here</div>
                             <div id="fileDragAndDropInfo">or click to browse · Supports .dcm and .dicom · Multiple files accepted</div>
-                            {/* <input
+                            <input
                                 type="file"
                                 ref={fileInputRef}
                                 onChange={onFileChangeSelection}
                                 multiple
                                 style={{ display: 'none' }}
                                 accept=".dcm"
-                            /> */}
+                            />
 
                         </div>
                     </div>

@@ -4,13 +4,10 @@ namespace CloudPACS.Backend.Controllers
     using BCrypt.Net;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.IdentityModel.Tokens;
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using System.Text;
-    using DotNetEnv;
-    using Microsoft.Identity.Client;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -84,7 +81,7 @@ namespace CloudPACS.Backend.Controllers
                     if (await _userRepository.IsPasswordValid(loginRequestDto, user.Password))
                     {
                         var token = await GenerateToken(user);
-                        auditLogService.LogAsync(user.Id, user.Name, AuditActions.Login, ResourceType.Session, "User logged in");
+                        auditLogService.LogAsync(user.Id, user.Name, AuditActions.Login, ResourceType.Session, "User logged in", "");
                         return Ok(token); //loginReponseDto
                     }
                     else

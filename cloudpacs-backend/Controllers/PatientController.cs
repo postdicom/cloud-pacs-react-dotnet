@@ -4,6 +4,7 @@ namespace CloudPACS.Backend.Controllers
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [Route("api/[controller]")]
@@ -17,6 +18,7 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Radiologist,Admin")]
         public async Task<IActionResult?> GetPatients()
         {
             try
@@ -58,15 +60,16 @@ namespace CloudPACS.Backend.Controllers
             try
             {
                 string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? string.Empty;
-                Patient patient = await patientRepository.SearchPatientAsync(keyword, userId);
-                return Ok(patient);
+                List<Patient> patientList = await patientRepository.SearchPatientAsync(keyword, userId);
+                return Ok(patientList);
             }
 
 
             catch (Exception ex)
             {
                 Console.WriteLine($"DATABASE ERROR: {ex.Message}");
-                return null;
+
+                return NotFound(new List<Patient>());
             }
         }
     }

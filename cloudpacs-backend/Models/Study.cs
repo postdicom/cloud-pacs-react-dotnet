@@ -12,7 +12,8 @@ public class Study: Common
         public string Mod { get; set; }
         public string Series { get; set; }
         public int ImageCount { get; set; }
-        public Study(string Id, string patientGuid, string date, string mod, string series, int imageCount, objectType objectType)
+        public string StudyInstanceUid { get; set; }
+        public Study(string Id, string patientGuid, string date, string mod, string series, int imageCount, objectType objectType, string studyInstanceUid)
         {
             this.Id = Id;
             this.patientGuid = patientGuid;
@@ -21,7 +22,7 @@ public class Study: Common
             Series = series;
             ImageCount = imageCount;
             ObjectType = objectType;
-
+            StudyInstanceUid = studyInstanceUid;
         }
     }
 }

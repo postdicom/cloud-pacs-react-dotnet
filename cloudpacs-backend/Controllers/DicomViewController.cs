@@ -60,7 +60,7 @@ namespace CloudPACS.Backend
                     id = s.Id,
                     seriesNumber = s.SeriesNumber,
                     patientName = s.PatientName,
-                    numberOfInstances = s.numberOfInstances
+                    numberOfInstances = s.NumberOfInstances
                 });
 
             return Ok(ordered);

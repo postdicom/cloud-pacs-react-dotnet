@@ -9,8 +9,13 @@ import type { Patient } from "../interfaces/Patient.tsx";
 
 function patientList() {
     const [page, setPage] = useState<number>(1);
-    let [usablePatientsList, setUsablePatientsList] = useState<Patient[]>([]);
+    const [usablePatientsList, setUsablePatientsList] = useState<Patient[]>([]);
+    const [searchedPatientList, setSearchedPatientList] = useState<Patient[]>([]);
     let [patients, setPatients] = useState([]);
+    const [keyword, setKeyword] = useState("");
+    const [searchActive, setSearchActive] = useState(false);
+    const [numberOfPatients, setNumberOfPatients] = useState(0);
+
     const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);
     };
@@ -25,6 +30,8 @@ function patientList() {
                     const patient: Patient = element;
                     setUsablePatientsList((prev) => [...prev, patient]);
                 });
+                setNumberOfPatients(() => patients.length);
+                setSearchedPatientList(usablePatientsList);
 
             } catch (error) {
                 console.log("Error " + error);
@@ -34,16 +41,25 @@ function patientList() {
         callApi();
     }, []);
 
-    async function search() {
-        const el = document.querySelector<HTMLInputElement>('.input');
-        const input = el?.value;
-        const data = (await api.get(`api/Patients/search/${input}`));
+    async function search(keyword: string) {
+        if (keyword) {
+            const data = (await api.get(`api/Patients/search/${keyword}`));
+            patients = data.data;
+            if (patients.length === 0) {
+                setSearchedPatientList([])
+            }
+            setSearchActive(true);
+            Array.from(patients).forEach(element => {
+                const patient: Patient = element;
+                setSearchedPatientList((prev) => prev.some((p) => p.mrn === patient.mrn) ? prev : [...prev, patient]);
+            });
+            setNumberOfPatients(() => patients.length);
+        }
+        else {
+            setSearchActive(false);
+            setNumberOfPatients(() => usablePatientsList.length);
+        }
     }
-
-    /*     const displayPatients = async () => {
-            const patients = await getPatients();
-            const patientL = patients.map((patient: Patient) => patient);
-        }; */
 
     const navigate = useNavigate();
     const studyList = (patient) => {
@@ -59,9 +75,9 @@ function patientList() {
                 <div id='patientListHeader'>Patients</div>
                 <div id='patientTable'>
                     <div id="searchBar">
-                        <input id="input" type="text" placeholder='Search by name, MRN, or date of birth' />
-                        <button className="patientTableButton" id='filtersButton' onClick={() => search()}>Filters</button>
-                        <button className="patientTableButton" id='searchButton'>Search</button>
+                        <input id="input" type="text" placeholder='Search by name, MRN, or date of birth' value={keyword} onChange={(e) => setKeyword(e.target.value)} />
+                        <button className="patientTableButton" id='filtersButton'>Filters</button>
+                        <button className="patientTableButton" id='searchButton' onClick={() => search(keyword)}>Search</button>
                     </div>
                     <div>
                         <table id="patientTable">
@@ -75,7 +91,7 @@ function patientList() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {usablePatientsList.map((patient: Patient) => (
+                                {!searchActive && usablePatientsList.map((patient: Patient) => (
                                     <tr key={patient.mrn} onClick={() => studyList(patient)}>
                                         <th className="patientName" scope="row">{patient.name}</th>
                                         <td className="mrnRow">{patient.mrn}</td>
@@ -85,12 +101,26 @@ function patientList() {
                                     </tr>
                                 ))}
 
+                                {searchActive && searchedPatientList.map((patient: Patient) => (
+                                    <tr key={patient.mrn} onClick={() => studyList(patient)}>
+                                        <th className="patientName" scope="row">{patient.name}</th>
+                                        <td className="mrnRow">{patient.mrn}</td>
+                                        <td>{patient.dob}</td>
+                                        <td>{new Date().toLocaleDateString()}</td>
+                                        <td>{patient.numOfStudies}</td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
-                        <div id="patientListPagination">
-                            <Typography id="pageSelection">Showing {usablePatientsList.length} of all patients</Typography>
+                        {numberOfPatients === 0 &&
+                            <div className="noPatients">There are no patients</div>
+                        }
+
+                        {numberOfPatients != 0 && <div id="patientListPagination">
+                            <Typography id="pageSelection">Showing {numberOfPatients} of all patients</Typography>
                             {/* <Pagination count={10} onChange={handlePageChange} page={page} size="small" /> */}
-                        </div>
+                        </div>}
+
                     </div>
                 </div>
             </div>

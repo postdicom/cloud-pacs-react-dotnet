@@ -4,6 +4,7 @@ namespace CloudPACS.Backend.Controllers
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
     using CloudPACS.Backend;
+    using Microsoft.AspNetCore.Authorization;
 
     [ApiController]
     [Route("api/v1")]
@@ -17,6 +18,7 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpGet("patients/{id}/studies")]
+        [Authorize(Roles = "Radiologist,Admin")]
         public async Task<ActionResult<List<Study>>> GetStudiesForPatient(string id)
         {
             var studies = await _studyRepository.GetStudiesByPatientIdAsync(id);
@@ -24,6 +26,7 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpGet("studies/{id}")]
+        [Authorize(Roles = "Radiologist,Admin")]
         public async Task<ActionResult<Study>> GetStudy(string id)
         {
             var study = await _studyRepository.GetStudyByStudyIdAsync(id);

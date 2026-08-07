@@ -114,7 +114,6 @@
   min-height: 0;
   overflow-x: hidden;
   table-layout: fixed;
-  height: 100%;
   margin: 0;
   overflow-y: scroll;
   height: 100vh;
@@ -131,6 +130,8 @@
 }
 
 .register-layout .studies-table thead th {
+  position: sticky;
+  top: 0;
   text-align: left;
   font-size: 12px;
   font-weight: 700;

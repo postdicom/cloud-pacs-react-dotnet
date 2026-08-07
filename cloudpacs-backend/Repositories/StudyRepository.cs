@@ -41,8 +41,8 @@ namespace CloudPACS.Backend
 
         public async Task<Study?> GetStudyByStudyIdAsync(string studyId)
         {
-            var query = new QueryDefinition("SELECT * FROM c WHERE c.studyId = @studyId")
-                .WithParameter("@studyId", studyId);
+            var query = new QueryDefinition("SELECT * FROM c WHERE c.id = @id")
+                .WithParameter("@id", studyId);
 
             using var iterator = _container.GetItemQueryIterator<Study>(query);
             while (iterator.HasMoreResults)

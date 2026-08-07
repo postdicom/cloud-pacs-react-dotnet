@@ -35,12 +35,10 @@ export default function DicomViewer() {
   const { study, patient } = location.state || {};
 
   const navigate = useNavigate();
-  const studyList = (patient: any) => 
-  {
+  const studyList = (patient: any) => {
     navigate("/studyList", { state: { patient } });
   };
-  const patients = () => 
-  {
+  const patients = () => {
     navigate("/patientList");
   };
 
@@ -162,6 +160,18 @@ export default function DicomViewer() {
     };
   }, [imageIds]);
 
+  useEffect(() => {
+    if (!elementRef.current) return;
+    const el = elementRef.current;
+
+    const resizeObserver = new ResizeObserver(() => {
+      renderingEngineRef.current?.resize(true, false);
+    });
+    resizeObserver.observe(el);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
   if (!study || !patient) {
     return <div>Missing study/patient context.</div>;
   }
@@ -278,8 +288,8 @@ export default function DicomViewer() {
           <div
             ref={elementRef}
             style={{
-              width: "512px",
-              height: "512px",
+              width: "100%",
+              height: "100%",
               backgroundColor: "#000",
               display: imageIds.length > 0 ? "block" : "none",
             }}

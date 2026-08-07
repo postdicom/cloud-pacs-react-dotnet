@@ -106,9 +106,9 @@ function Upload({ onFileChange }: UploadProps) {
                         studyId: parseByteArrayForStudyId(byteArray)
                     };
 
-                    if (fDetails.selectedFile.size / 10240000 > 100) {
+                   /*  if (fDetails.selectedFile.size / 102400 > 100) {
                         return;
-                    }
+                    } */
 
                     if (parseByteArrayForPatientId(byteArray) === "Invalid" || parseByteArrayForPatientId(byteArray) === "Element has no data") {
                         return;

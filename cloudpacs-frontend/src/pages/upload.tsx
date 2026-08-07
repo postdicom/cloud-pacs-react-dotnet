@@ -172,15 +172,6 @@ function Upload({ onFileChange }: UploadProps) {
         const droppedFiles = await getAllFiles(entries);
         setFileList(droppedFiles);
 
-        /* if (droppedFiles.length > 0) {
-            const updatedList = [...fileList, ...droppedFiles];
-            updatedList.forEach(async (file: File) => {
-                const arrayBuffer = await file.arrayBuffer();
-                const byteArray = new Uint8Array(arrayBuffer);
-            });
-            setFileList(updatedList);
-            onFileChange(updatedList);
-        } */
 
         setFileList(droppedFiles);
 

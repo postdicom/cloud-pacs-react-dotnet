@@ -78,7 +78,6 @@ function Register() {
             } catch (error) {
                 console.log("Error " + error);
             }
-            console.log(existingMods);
         }
         callApi();
     }, []);

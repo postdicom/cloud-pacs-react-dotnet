@@ -23,7 +23,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token'); // clear stale/expired token
-      window.location.replace('/login'); // redirect to login page
+      window.location.replace('/UnAuthorized'); // redirect to login page
     }
     return Promise.reject(error); // re-throw so callers can still catch it
   }

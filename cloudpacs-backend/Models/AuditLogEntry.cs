@@ -1,7 +1,6 @@
 namespace CloudPACS.Backend
 {
     using System;
-    using Microsoft.Azure.Cosmos;
     using Newtonsoft.Json;
 
     public enum AuditActions
@@ -34,5 +33,6 @@ namespace CloudPACS.Backend
         public string ResourceId { get; init; } = String.Empty;
         public DateTimeOffset Timestamp { get; init; }
         public string IpAddress { get; init; } = String.Empty;
+        public string StudyDetail { get; init; } = String.Empty;
     }
 }

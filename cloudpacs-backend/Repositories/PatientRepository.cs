@@ -82,8 +82,8 @@ namespace CloudPACS.Backend
             try
             {
                 var query = new QueryDefinition(
-                    "SELECT VALUE c FROM c WHERE c.UserId = @userId OR c.Mrn = @mrn OR c.DoB = @dob")
-                    .WithParameter("@userId", keyword)
+                    "SELECT VALUE c FROM c WHERE c.Name = @Name OR c.Mrn = @mrn OR c.DoB = @dob")
+                    .WithParameter("@Name", keyword)
                     .WithParameter("@mrn", keyword)
                     .WithParameter("@dob", keyword);
 

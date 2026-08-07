@@ -20,6 +20,9 @@ function Register() {
     let [usableStudies, setUsableStudiesList] = useState<Study[]>([]);
     let [auditLog, setAuditLog] = useState([]);
     let [usableAuditLog, setUsableAuditLog] = useState<AuditLogEntry[]>([]);
+    let [filteredAuditLog, setFilteredAuditLog] = useState<AuditLogEntry[]>(usableAuditLog);
+    let [selectedFilter, setSelectedFilter] = useState("All Studies");
+    let [existingMods, setExistingMods] = useState<string[]>([]);
 
     const modColours = {
         MR: "#F3E5F5",
@@ -27,6 +30,18 @@ function Register() {
         CR: "#FFF3E0"
     };
     const getModColour = (mod) => modColours[mod];
+
+    const actionSettings = [
+        { action: "2", label: "Viewed", modColor: "#1e40af", modText: "#dbeafe" },
+        { action: "3", label: "Uploaded", modColor: "#065f46", modText: "#d1fae5" },
+    ]
+
+    const getActionSetting = (action: string | number) =>
+        actionSettings.find((item) => Number(item.action) === Number(action));
+
+    const actionLabel = (action: string) => getActionSetting(action)?.label ?? "";
+    const actionModColor = (action: string) => getActionSetting(action)?.modColor ?? "";
+    const actionModText = (action: string) => getActionSetting(action)?.modText ?? "";
 
     const location = useLocation();
     const patient = location.state?.patient;
@@ -58,16 +73,25 @@ function Register() {
                 Array.from(auditLog).forEach(element => {
                     const record: AuditLogEntry = element;
                     setUsableAuditLog((prev) => [...prev, record]);
+                    setExistingMods((prev) => prev.includes(record.studyDetail) ? prev : [...prev, record.studyDetail]);
                 });
-
-
-
             } catch (error) {
                 console.log("Error " + error);
             }
         }
         callApi();
     }, []);
+
+    function filterAuditLog(value) {
+        setSelectedFilter(value);
+
+        const updatedAuditLog = usableAuditLog.filter((entry) => {
+            if (value === "All Studies") return true;
+            return entry.studyDetail === value;
+        });
+        filteredAuditLog.filter((entry) => entry.studyDetail === selectedFilter)
+        setFilteredAuditLog(updatedAuditLog);
+    }
 
     return (
         <div className="register-layout">
@@ -155,11 +179,11 @@ function Register() {
                             <h3 style={{ margin: 0, color: '#4A5568', fontSize: 25 }}>ACCESS LOG</h3>
                             <div className="filter-container">
                                 <label htmlFor="studyFilter" style={{ marginRight: '8px', color: '#4A5568' }}>Filter by study:</label>
-                                <select id="studyFilter" className="studySort" defaultValue="All studies">
-                                    <option value="All studies">All studies</option>
-                                    <option value="Brain MRI">Brain MRI w/ contrast</option>
-                                    <option value="Chest CT">Chest CT</option>
-                                    <option value="Chest X-ray">Chest X-ray</option>
+                                <select value={selectedFilter} onChange={(e) => filterAuditLog(e.target.value)} id="studyFilter" className="studySort">
+                                    <option value="All Studies">All Studies</option>
+                                    {existingMods.map((studyDetail) => (studyDetail.trim() &&
+                                        <option key={studyDetail} value={studyDetail}>{studyDetail}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -174,27 +198,24 @@ function Register() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {usableAuditLog.map((row: AuditLogEntry) => (
+                                    {filteredAuditLog.map((row: AuditLogEntry) => (row.studyDetail.trim() &&
                                         <tr key={row.id}>
                                             <td className="user-cell"> {row.userName}
-                                                {/* {row.userId.split(' ').map((text, i) => (
-                                                <span key={i} style={{ marginRight: '4px' }}>{text}</span>
-                                            ))} */}
                                             </td>
-                                            <td className="study-cell">{/* {row.study} */}</td>
+                                            <td className="study-cell">{row.studyDetail}</td>
                                             <td>
                                                 <span
                                                     className="action-chip"
                                                     style={{
-                                                        /* backgroundColor: row.modColor || '#E8EAF6',
-                                                        color: row.modText || '#3F51B5', */
                                                         padding: '4px 12px',
                                                         borderRadius: '16px',
                                                         fontWeight: 'bold',
-                                                        fontSize: '0.85rem'
+                                                        fontSize: '0.85rem',
+                                                        color: actionModColor(row.action),
+                                                        backgroundColor: actionModText(row.action)
                                                     }}
                                                 >
-                                                    {row.resourceId}
+                                                    {actionLabel(row.action)}
                                                 </span>
                                             </td>
                                             <td className="time-stamp-cell">{row.timestamp}</td>

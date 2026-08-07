@@ -14,7 +14,7 @@ namespace CloudPACS.Backend
             this.httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task LogAsync(string userId, string userName, AuditActions action, ResourceType resourceType, string resourceId)
+        public async Task LogAsync(string userId, string userName, AuditActions action, ResourceType resourceType, string resourceId, string studyDetail)
         {
             try
             {
@@ -27,7 +27,8 @@ namespace CloudPACS.Backend
                     ResourceType = resourceType,
                     ResourceId = resourceId,
                     Timestamp = DateTimeOffset.UtcNow,
-                    IpAddress = ipAddress
+                    IpAddress = ipAddress,
+                    StudyDetail = studyDetail
                 };
                 await container.CreateItemAsync(entry, new PartitionKey(entry.userId));
             }

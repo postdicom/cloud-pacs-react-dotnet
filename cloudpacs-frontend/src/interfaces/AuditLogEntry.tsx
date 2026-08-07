@@ -6,4 +6,5 @@ export interface AuditLogEntry {
     resourceType: string;
     resourceId: string;
     timestamp: string;
+    studyDetail: string;
 }

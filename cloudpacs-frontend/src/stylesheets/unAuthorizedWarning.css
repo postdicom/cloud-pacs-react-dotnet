@@ -1,0 +1,18 @@
+#notFoundContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#lostMessage {
+    font-size: 1.2rem;
+    padding-bottom: 10px;
+}
+
+#goBackToLogin {
+    padding: 5px;
+    background-color: #0ea5e9;
+    color: white;
+    border: none;
+    border-radius: 10px;
+}

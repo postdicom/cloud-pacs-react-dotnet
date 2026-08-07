@@ -1,61 +1,170 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../stylesheets/dicomViewer.css";
-import { useLocation, useNavigate } from "react-router-dom";
+import { RenderingEngine, Enums, type Types } from "@cornerstonejs/core";
+import type { PublicViewportInput } from "@cornerstonejs/core/types";
+import { init as csRenderInit } from "@cornerstonejs/core";
+import { init as csToolsInit } from "@cornerstonejs/tools";
+import {
+  init as dicomImageLoaderInit,
+  internal as dicomImageLoaderInternal,
+} from "@cornerstonejs/dicom-image-loader";
 import api from "../queryClientProvider";
+import { useLocation, useNavigate } from "react-router-dom";
 import type { Series } from "../interfaces/Series";
 
 type ToolId = "wl" | "zoom" | "pan" | "scroll";
 type PresetId = "brain" | "bone" | "lung" | "abd";
 
-interface SeriesItem {
-  id: string;
-  imageCount: number;
+interface InstanceMeta {
+  sopInstanceUid: string;
+  instanceNumber: number;
+  downloadUrl: string;
+  metadata: Record<string, string>;
 }
 
-const SERIES: SeriesItem[] = [
-  { id: "s1", imageCount: 148 },
-  { id: "s2", imageCount: 212 },
-  { id: "s3", imageCount: 36 },
-];
-
-export default function dicomViewer() {
+export default function DicomViewer() {
   const [activeTool, setActiveTool] = useState<ToolId>("wl");
   const [activePreset, setActivePreset] = useState<PresetId>("brain");
   const [inverted, setInverted] = useState(false);
-  const [activeSeries, setActiveSeries] = useState<string>("s1");
-  let [series, setSeries] = useState([]);
-  let [usableSeries, setUsableSeriesList] = useState<Series[]>([]);
+  const [activeSeries, setActiveSeries] = useState<string>("");
+  const [usableSeries, setUsableSeriesList] = useState<Series[]>([]);
+  const [instances, setInstances] = useState<InstanceMeta[]>([]);
+  const [imageIds, setImageIds] = useState<string[]>([]);
 
   const location = useLocation();
   const { study, patient } = location.state || {};
 
   const navigate = useNavigate();
-  const studyList = (patient) => {
-    navigate("/studyList", {
-      state: { patient }
-    });
+  const studyList = (patient: any) => 
+  {
+    navigate("/studyList", { state: { patient } });
   };
-
-  const patients = () => {
+  const patients = () => 
+  {
     navigate("/patientList");
   };
 
+  const elementRef = useRef<HTMLDivElement>(null);
+  const initPromiseRef = useRef<Promise<void> | null>(null);
+  const renderingEngineRef = useRef<RenderingEngine | null>(null);
+
+  // Step 1/2: fetch series for the study
   useEffect(() => {
+    if (!study?.id) return;
     const callApi = async () => {
       try {
-        const data = await api.get(`api/v1/studies/${study.id}/series`);
-        series = data.data;
-        Array.from(series).forEach(element => {
-          const series: Series = element;
-          setUsableSeriesList((prev) => [...prev, series]);
-        });
-
+        const { data } = await api.get(`api/v1/viewer/study/${study.id}/series`);
+        setUsableSeriesList(data);
+        if (data.length > 0) {
+          setActiveSeries(data[0].seriesInstanceUid ?? data[0].id);
+        }
       } catch (error) {
         console.log("Error " + error);
       }
-    }
+    };
     callApi();
+  }, [study?.id]);
+
+  // Step 2/3: fetch instances for the selected series
+  useEffect(() => {
+    if (!activeSeries) return;
+    const loadInstances = async () => {
+      try {
+        const { data } = await api.get(
+          `api/v1/viewer/series/${activeSeries}/instances`
+        );
+        setInstances(data);
+      } catch (error) {
+        console.log("Error fetching instances: " + error);
+        setInstances([]);
+      }
+    };
+    loadInstances();
+  }, [activeSeries]);
+
+  // Step 3/4/5: build imageIds pointing directly at the backend download route.
+  useEffect(() => {
+    if (instances.length === 0) {
+      setImageIds([]);
+      return;
+    }
+    const API_BASE = "https://localhost:5001";
+    const ids = instances.map(
+      (inst) => `wadouri:${API_BASE}${inst.downloadUrl}`
+    );
+    setImageIds(ids);
+  }, [instances]);
+
+  useEffect(() => {
+    if (!initPromiseRef.current) {
+      initPromiseRef.current = (async () => {
+        await csRenderInit();
+        await csToolsInit();
+        dicomImageLoaderInit({ maxWebWorkers: 1, useLegacyMetadataProvider: true });
+
+        dicomImageLoaderInternal.setOptions({
+          beforeSend: (xhr: XMLHttpRequest) => {
+            const token = localStorage.getItem("token");
+            if (token) {
+              xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+            }
+          },
+        });
+      })();
+    }
   }, []);
+
+  // Step 6: build/rebuild the cornerstone stack whenever imageIds changes
+  useEffect(() => {
+    if (imageIds.length === 0 || !elementRef.current) return;
+
+    let cancelled = false;
+
+    const renderStack = async () => {
+      if (initPromiseRef.current) {
+        await initPromiseRef.current;
+      }
+      if (cancelled) return;
+
+      const renderingEngineId = "DicomImageRenderingEngine";
+      const renderingEngine =
+        renderingEngineRef.current ?? new RenderingEngine(renderingEngineId);
+      renderingEngineRef.current = renderingEngine;
+
+      const viewportId = "CT";
+      const viewportInput = {
+        viewportId,
+        type: Enums.ViewportType.STACK,
+        element: elementRef.current,
+        defaultOptions: {
+          orientation: Enums.OrientationAxis.SAGITTAL,
+        },
+      };
+
+      renderingEngine.enableElement(viewportInput as PublicViewportInput);
+      const viewport = renderingEngine.getViewport(viewportId) as Types.IStackViewport;
+
+      await viewport.setStack(imageIds);
+
+      viewport.setProperties({
+        voiRange: { lower: 0, upper: 255 },
+      });
+
+      viewport.render();
+    };
+
+    renderStack();
+
+    return () => {
+      cancelled = true;
+      renderingEngineRef.current?.destroy();
+      renderingEngineRef.current = null;
+    };
+  }, [imageIds]);
+
+  if (!study || !patient) {
+    return <div>Missing study/patient context.</div>;
+  }
 
   return (
     <div className="dv-reader">
@@ -89,8 +198,7 @@ export default function dicomViewer() {
           <span className="dv-topbar__divider" />
 
           <button
-            className={`dv-tool-btn ${activePreset === "brain" ? "dv-tool-btn--preset-active" : ""
-              }`}
+            className={`dv-tool-btn ${activePreset === "brain" ? "dv-tool-btn--preset-active" : ""}`}
             onClick={() => setActivePreset("brain")}
           >
             Brain
@@ -145,37 +253,50 @@ export default function dicomViewer() {
         <aside className="dv-sidebar-left">
           <h2 className="dv-section-title">Series</h2>
           <div className="dv-series-list">
-            {usableSeries.map((series: Series) => (
-              <button
-                key={series.id}
-                className={`dv-series-btn ${activeSeries === series.id ? "dv-series-btn--active" : ""
-                  }`}
-                onClick={() => setActiveSeries(series.id)}
-              >
-                {series.numberOfInstances} img
-              </button>
-            ))
-            }
+            {usableSeries.map((s) => {
+              const key = s.seriesInstanceUid ?? s.id;
+              return (
+                <button
+                  key={key}
+                  className={`dv-series-btn ${activeSeries === key ? "dv-series-btn--active" : ""}`}
+                  onClick={() => setActiveSeries(key)}
+                >
+                  {s.numberOfInstances} img
+                </button>
+              );
+            })}
           </div>
         </aside>
         <main className="dv-viewport">
           <div className="dv-overlay-top-left">
             <span>{patient.name}</span>
-            <div>{study.mod}</div> {/*!! Area isn't shared */}
+            <div>{study.mod}</div>
             <div>{study.date}</div>
             <div>W:400 L:40</div>
           </div>
 
-          <div className="dv-center-message">
-            <div className="dv-placeholder-icon"></div>
-            <p className="dv-center-title">DICOM image renders here</p>
-            <p className="dv-center-subtitle">
-              Cornerstone3D canvas · WebAssembly decoder
-            </p>
-          </div>
+          <div
+            ref={elementRef}
+            style={{
+              width: "512px",
+              height: "512px",
+              backgroundColor: "#000",
+              display: imageIds.length > 0 ? "block" : "none",
+            }}
+          ></div>
+
+          {imageIds.length === 0 && (
+            <div className="dv-center-message">
+              <div className="dv-placeholder-icon"></div>
+              <p className="dv-center-title">DICOM image renders here</p>
+              <p className="dv-center-subtitle">
+                Cornerstone3D canvas · WebAssembly decoder
+              </p>
+            </div>
+          )}
 
           <div className="dv-overlay-bottom-right">
-            <div>Instance 14/48</div>
+            <div>Instance {instances.length > 0 ? `1/${instances.length}` : "–"}</div>
             <div>Slice: 7.5mm</div>
             <div>FOV: 350mm</div>
           </div>
@@ -202,7 +323,7 @@ export default function dicomViewer() {
               </div>
               <div className="dv-info-row">
                 <span className="dv-info-label">Instances</span>
-                <span className="dv-info-value">{study.imageCount}</span> {/* Is image and instance used interchangable here? */}
+                <span className="dv-info-value">{study.imageCount}</span>
               </div>
             </div>
           </section>

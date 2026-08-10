@@ -20,6 +20,12 @@ function Upload({ onFileChange }: UploadProps) {
     const [blobNameList, setBlobNameList] = useState<string[]>([]);
     const [patientFileGroups, setPatientFileGroups] = useState<PatientFileGroups[]>([]);
 
+    let [uploadProgress, setUploadProgress] = useState(0);
+    const [totalFilesToUpload, setTotalFilesToUpload] = useState(0);
+    const overallPercent = totalFilesToUpload > 0
+        ? (uploadProgress / totalFilesToUpload) * 100
+        : 0;
+
     const onDragEnter = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -87,15 +93,19 @@ function Upload({ onFileChange }: UploadProps) {
             .filter((entry): entry is FileSystemEntry => entry !== null);
 
         const droppedFiles = await getAllFiles(entries);
-        setFileList(droppedFiles);
+        //setFileList(droppedFiles);
+        setFileList((prev) => [...prev, ...droppedFiles]);
 
         uploadFunction(droppedFiles);
     };
 
     async function uploadFunction(droppedFiles: File[]) {
         if (droppedFiles.length > 0) {
+            setTotalFilesToUpload(prev => prev + droppedFiles.length);
+            setUploadProgress(prev => prev + 0);
+
             const updatedList = [...droppedFiles];
-            updatedList.forEach(async (file: File) => {
+            updatedList.map(async (file: File) => {
                 const promise = (async () => {
                     const arrayBuffer = await file.arrayBuffer();
                     const byteArray = new Uint8Array(arrayBuffer);
@@ -106,15 +116,12 @@ function Upload({ onFileChange }: UploadProps) {
                         studyId: parseByteArrayForStudyId(byteArray)
                     };
 
-                   /*  if (fDetails.selectedFile.size / 102400 > 100) {
-                        return;
-                    } */
-
                     if (parseByteArrayForPatientId(byteArray) === "Invalid" || parseByteArrayForPatientId(byteArray) === "Element has no data") {
                         return;
                     }
 
                     await uploadToBlob(arrayBuffer, fDetails);
+                    setUploadProgress(() => uploadProgress++);
                     validBlobNames.push(file.name);
 
                     setPatientFileGroups((patientFileGroups) => {
@@ -149,32 +156,31 @@ function Upload({ onFileChange }: UploadProps) {
                         }
                     });
                 })()
+                //setUploadProgress(prev => prev + 1);
                 uploadPromises.push(promise);
             });
-            await Promise.all(uploadPromises);
+            await Promise.all(uploadPromises)
+                .then(promises => promises.map((item) => { setUploadProgress(uploadProgress++) }));
             setBlobNameList((prev) => [...prev, ...validBlobNames]);
             await sendToBackend(validBlobNames);
             onFileChange(updatedList);
         }
-
     }
 
     const handleClick = () => {
         fileInputRef.current?.click();
     };
 
-    const handleChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
         e.stopPropagation();
 
-        const entries = e.target.webkitEntries.filter((entry): entry is FileSystemEntry => entry !== null);
+        const entries = e.target.files;
+        if (entries === null) { return; };
+        const droppedFiles = Array.from(entries);
 
-        const droppedFiles = await getAllFiles(entries);
-        setFileList(droppedFiles);
-
-
-        setFileList(droppedFiles);
-
+        //setFileList(droppedFiles)
+        setFileList((prev) => [...prev, ...droppedFiles]);
         uploadFunction(droppedFiles);
     };
 
@@ -209,7 +215,7 @@ function Upload({ onFileChange }: UploadProps) {
                             onDragLeave={onDragLeave}
                             onDrop={onDrop}
                             onClick={handleClick}
-                            onChange={handleChange}        
+                            onChange={handleChange}
                         >
                             <svg id="dragAndDropAreaSymbol" viewBox="0 0 24 24">
                                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path>
@@ -225,10 +231,16 @@ function Upload({ onFileChange }: UploadProps) {
                                 multiple
                                 style={{ display: 'none' }}
                                 accept=".dcm"
+                                {...({ webkitdirectory: 'true' } as React.InputHTMLAttributes<HTMLInputElement>)}
                             />
 
                         </div>
                     </div>
+                    {!(patientFileGroups.length === 0) &&
+                        <div className="uploadBar"> Upload Progress:
+                            <progress className="progressBar" value={overallPercent} max="100">70 %</progress>
+                        </div>
+                    }
                     {fileList.length > 0 && (
                         <div className="drop-file-preview">
                             {patientFileGroups.map((item, index) => (
@@ -239,7 +251,6 @@ function Upload({ onFileChange }: UploadProps) {
                                         <p>{item.files.length} files</p>
                                         <p>{(item.totalFileSize / 102400).toFixed(2)} MB</p>
                                     </div>
-                                    <progress className="progressBar" value="70" max="100">70 %</progress>
                                     {/* <span className="drop-file-preview__item__del" onClick={() => fileRemove(item)}>x</span> */}
                                 </div>
                             ))}

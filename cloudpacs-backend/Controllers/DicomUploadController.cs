@@ -1,8 +1,6 @@
 namespace CloudPACS.Backend
 {
     using System.Net;
-    using Azure.Core.Pipeline;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.Cosmos;
     using Azure.Storage.Blobs;

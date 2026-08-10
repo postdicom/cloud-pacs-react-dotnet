@@ -42,6 +42,11 @@
     stroke-width: 2px;
 }
 
+.uploadBar{
+    margin: 4px;
+    margin-bottom: 10px;
+}
+
 .filesBeingUploaded{
     display: flex;
     flex-direction: column;
@@ -49,7 +54,6 @@
     border-radius: 12px;
     background-color: white;
     padding: 0.9rem;
-
 }
 
 .fileDetails{

@@ -5,15 +5,16 @@ import { init as csRenderInit } from "@cornerstonejs/core"
 import { init as csToolsInit } from "@cornerstonejs/tools"
 import { init as dicomImageLoaderInit } from "@cornerstonejs/dicom-image-loader"
 import type { PublicViewportInput } from "@cornerstonejs/core/types"
-
+import api from "../queryClientProvider"
 
 
 volumeLoader.registerUnknownVolumeLoader(
-    cornerstoneStreamingImageVolumeLoader as any as Types.VolumeLoaderFn
+  cornerstoneStreamingImageVolumeLoader as any as Types.VolumeLoaderFn
 
 )
-function Cornerstone() {
-      const elementRef = useRef<HTMLDivElement>(null)
+function Cornerstone() 
+{
+  const elementRef = useRef<HTMLDivElement>(null)
   const running = useRef(false)
 
   useEffect(() => {
@@ -22,30 +23,34 @@ function Cornerstone() {
         return
       }
       running.current = true
-      
+
       await csRenderInit()
       await csToolsInit()
-      dicomImageLoaderInit({maxWebWorkers:1})
+      dicomImageLoaderInit({ maxWebWorkers: 1 })
 
+      let imageIds:string[] = [];
+
+      imageIds.push("wadouri:https://localhost:5001/api/v1/viewer/instance/1/metadata")
       // Get Cornerstone imageIds and fetch metadata into RAM
-      const imageIds = await createImageIdsAndCacheMetaData({
-        StudyInstanceUID:
-          "1.3.6.1.4.1.14519.5.2.1.7009.2403.334240657131972136850343327463",
-        SeriesInstanceUID:
-          "1.3.6.1.4.1.14519.5.2.1.7009.2403.226151125820845824875394858561",
-        wadoRsRoot: "https://d14fa38qiwhyfd.cloudfront.net/dicomweb",
-        client : null
-      })
+      // const imageIds = await createImageIdsAndCacheMetaData({
+      //   StudyInstanceUID:
+      //     "1.3.6.1.4.1.14519.5.2.1.7009.2403.334240657131972136850343327463",
+      //   SeriesInstanceUID:
+      //     "1.3.6.1.4.1.14519.5.2.1.7009.2403.226151125820845824875394858561",
+      //   wadoRsRoot: "https://d14fa38qiwhyfd.cloudfront.net/dicomweb",
+      //   client: null
+      // })
 
       // Instantiate a rendering engine
-      const renderingEngineId = "myRenderingEngine"
+      const renderingEngineId = "DicomImageRenderingEngine"
       const renderingEngine = new RenderingEngine(renderingEngineId)
       const viewportId = "CT"
 
 
+
       const viewportInput = {
         viewportId,
-        type: Enums.ViewportType.ORTHOGRAPHIC,
+        type: Enums.ViewportType.STACK,
         element: elementRef.current,
         defaultOptions: {
           orientation: Enums.OrientationAxis.SAGITTAL,
@@ -55,20 +60,22 @@ function Cornerstone() {
       renderingEngine.enableElement(viewportInput as PublicViewportInput)
 
       // Get the stack viewport that was created
-      const viewport = renderingEngine.getViewport(viewportId) as Types.IVolumeViewport
+      const viewport = renderingEngine.getViewport(viewportId) as Types.IStackViewport;
+
+      viewport.setStack(imageIds)
 
       // Define a volume in memory
-      const volumeId = "streamingImageVolume"
-      const volume = await volumeLoader.createAndCacheVolume(volumeId, {
-        imageIds,
-      })
+      // const volumeId = "streamingImageVolume"
+      // const volume = await volumeLoader.createAndCacheVolume(volumeId, {
+      //   imageIds,
+      // })
 
       // Set the volume to load
       // @ts-ignore
-      volume.load()
+      // volume.load()
 
       // Set the volume on the viewport and it's default properties
-      viewport.setVolumes([{ volumeId}])
+      // viewport.setVolumes([{ volumeId }])
 
       // Render the image
       viewport.render()
@@ -82,11 +89,7 @@ function Cornerstone() {
   return (
     <div
       ref={elementRef}
-      style={{
-        width: "512px",
-        height: "512px",
-        backgroundColor: "#000",
-      }}
+      style={{ width: "100%", height: "100vh", backgroundColor: "black" }}
     ></div>
   )
 

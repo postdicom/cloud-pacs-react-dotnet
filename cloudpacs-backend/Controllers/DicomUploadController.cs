@@ -47,8 +47,6 @@ namespace CloudPACS.Backend
             _studyContainer = cosmosClient.GetContainer("CloudPACS", "Study");
             _seriesContainer = cosmosClient.GetContainer("CloudPACS", "Series");
 
-            _imageCount = 0;
-            _studyCount = 0;
             _blobServiceClient = blobServiceClient;
 
             _dicomsContainerClient = _blobServiceClient.GetBlobContainerClient("dicom-uploads");
@@ -100,7 +98,6 @@ namespace CloudPACS.Backend
             var parser = new DicomParser();
             var errors = new List<string>();
 
-
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? string.Empty;
             string role = User.FindFirstValue(ClaimTypes.Role) ?? User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
 
@@ -108,6 +105,11 @@ namespace CloudPACS.Backend
             {
                 errors.Add("User ID claim was not found in the authenticated context.");
             }
+
+            var StudyImageCount = new Dictionary<string, int>();
+            var PatientStudyCount = new Dictionary<string, int>();
+            var SeriesImageCount = new Dictionary<string, int>();
+
             foreach (var fileName in uploadedFileNames)
             {
                 var extension = Path.GetExtension(fileName);
@@ -209,10 +211,91 @@ namespace CloudPACS.Backend
 
                     string documentId = !string.IsNullOrWhiteSpace(sopInstanceUid) ? sopInstanceUid : Guid.NewGuid().ToString();
                     patientId = patientId ?? "UNKNOWN";
+                    studyInstanceUid = studyInstanceUid ?? "UNKNOWN";
+                    seriesUid = seriesUid ?? "UNKNOWN";
 
-                    var instanceDoc = new Instance( //TO DO: seriesUid and and document id will be formatted as needed by the instance
+                    if (!StudyImageCount.ContainsKey(studyInstanceUid))
+                    {
+                        int existingImageCount = 0;
+                        bool isNewStudy = false;
+
+                        try
+                        {
+                            var studyResponse = await _studyContainer.ReadItemAsync<Study>(studyInstanceUid, new PartitionKey(patientId));
+
+                            existingImageCount = studyResponse.Resource.ImageCount;
+                        }
+                        catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            existingImageCount = 0;
+                            isNewStudy = true;
+                        }
+
+                        StudyImageCount[studyInstanceUid] = existingImageCount;
+
+                        if (!PatientStudyCount.ContainsKey(patientId))
+                        {
+                            int existingStudyCount = 0;
+                            try
+                            {
+                                var patientResponse = await _patientContainer.ReadItemAsync<Patient>(patientId, new PartitionKey(userId));
+                                existingStudyCount = patientResponse.Resource.NumOfStudies;
+                            }
+                            catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                            {
+                                existingStudyCount = 0;
+                            }
+
+                            PatientStudyCount[patientId] = existingStudyCount;
+                        }
+                        if (isNewStudy)
+                        {
+                            PatientStudyCount[patientId]++;
+                        }
+                    }
+                    if (!SeriesImageCount.ContainsKey(seriesUid))
+                    {
+                        int existingSeriesImageCount = 0;
+
+                        try
+                        {
+                            var seriesResponse = await _seriesContainer.ReadItemAsync<Series>(seriesUid, new PartitionKey(studyInstanceUid));
+
+                            existingSeriesImageCount = seriesResponse.Resource.NumberOfInstances;
+                        }
+                        catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            existingSeriesImageCount = 0;
+                        }
+
+                        SeriesImageCount[seriesUid] = existingSeriesImageCount;
+                    }
+
+                    bool isNewInstance;
+                    try
+                    {
+                        await _instanceContainer.ReadItemAsync<Instance>(documentId, new PartitionKey(seriesUid));
+                        isNewInstance = false;
+                    }
+                    catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        isNewInstance = true;
+                    }
+
+                    if (isNewInstance)
+                    {
+                        StudyImageCount[studyInstanceUid]++;
+                        SeriesImageCount[seriesUid]++; // NEW: keep series count in step with study count
+                    }
+
+                    int currentImageCount = StudyImageCount[studyInstanceUid];
+                    int currentStudyCount = PatientStudyCount[patientId];
+                    int numberOfInstances = SeriesImageCount[seriesUid]; // NEW
+
+
+                    var instanceDoc = new Instance(
                         documentId,
-                        patientId ?? "UNKNOWN",
+                        seriesUid ?? "UNKNOWN",
                         seriesUid ?? "UNKNOWN",
                         studyUid ?? "UNKNOWN",
                         documentId,
@@ -226,7 +309,7 @@ namespace CloudPACS.Backend
                         studyDate ?? "UNKNOWN",
                         modality ?? "UNKNOWN",
                         seriesNumber ?? "UNKNOWN",
-                        _imageCount + 1,
+                        currentImageCount,
                         Common.objectType.Study,
                         studyInstanceUid ?? "UNKNOWN"
                     );
@@ -236,20 +319,21 @@ namespace CloudPACS.Backend
                         patientId ?? "UNKNOWN",
                         patientName ?? "UNKNOWN",
                         dateOfBirth ?? "UNKNOWN",
-                        _studyCount + 1,
+                        currentStudyCount,
                         Common.objectType.Patient,
                         gender ?? "UNKNOWN"
                     );
 
                     var seriesDoc = new Series(
-                        studyInstanceUid ?? "UNKNOWN",
+                        seriesUid ?? "UNKNOWN",
                         patientId ?? "UNKNOWN",
                         patientName ?? "UNKNOWN",
                         userId,
                         seriesNumber ?? "UNKNOWN",
                         studyInstanceUid ?? "UNKNOWN",
                         Common.objectType.Series,
-                        seriesUid ?? "UNKNOWN"
+                        seriesUid ?? "UNKNOWN",
+                        numberOfInstances
                     );
                     try
                     {

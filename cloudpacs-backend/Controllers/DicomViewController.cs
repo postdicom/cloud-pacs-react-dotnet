@@ -20,7 +20,7 @@ namespace CloudPACS.Backend
             _dicomsContainerClient = blobServiceClient.GetBlobContainerClient("dicom-uploads");
         }
 
-        [HttpGet("/instance/{id}/metadata")]
+        [HttpGet("instance/{id}/metadata")]
         public async Task<IActionResult> GetInstanceMetadata(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -56,9 +56,11 @@ namespace CloudPACS.Backend
                 .OrderBy(s => int.TryParse(s.SeriesNumber, out var n) ? n : int.MaxValue)
                 .Select(s => new
                 {
-                    seriesInstanceUid = s.Id,
+                    seriesInstanceUid = s.SeriesInstanceUid,
+                    id = s.Id,
                     seriesNumber = s.SeriesNumber,
-                    patientName = s.PatientName
+                    patientName = s.PatientName,
+                    numberOfInstances = s.NumberOfInstances
                 });
 
             return Ok(ordered);
@@ -87,10 +89,13 @@ namespace CloudPACS.Backend
             return Ok(ordered);
         }
 
-
-        [HttpGet("instance/{seriesGuid}/download")]
-        public async Task<IActionResult> DownloadInstance(string id, string seriesGuid)
+        [HttpGet("instance/{id}/download")]
+        public async Task<IActionResult> DownloadInstance(string id, [FromQuery] string seriesGuid)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest(new { message = "Instance ID is required." });
+            }
             Instance? instanceDoc = null;
 
             if (!string.IsNullOrEmpty(seriesGuid))
@@ -117,27 +122,17 @@ namespace CloudPACS.Backend
             }
             try
             {
-                var sasBuilder = new BlobSasBuilder
-                {
-                    BlobContainerName = _dicomsContainerClient.Name,
-                    BlobName = blobClient.Name,
-                    Resource = "b",
-                    StartsOn = DateTimeOffset.UtcNow.AddMinutes(0),
-                    ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(15)
-                };
-
-                sasBuilder.SetPermissions(BlobSasPermissions.Read);
-
-                var sasUri = blobClient.GenerateSasUri(sasBuilder);
-                return Ok(sasUri.ToString());
+                var downloadResult = await blobClient.DownloadContentAsync();
+                var bytes = downloadResult.Value.Content.ToArray();
+                return File(bytes, "application/dicom", fileName);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = $"Error generating SAS token: {ex.Message}" });
+                return StatusCode(500, new { message = $"Error downloading blob: {ex.Message}" });
             }
 
         }
-        
+
         private static int GetInstanceNumber(Instance instance)
         {
             if (instance.Metadata != null && instance.Metadata.TryGetValue("(0020,0013) Instance Number", out var val)

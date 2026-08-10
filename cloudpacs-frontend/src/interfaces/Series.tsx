@@ -8,4 +8,5 @@ export interface Series {
     numberOfInstances: number;
     createdAt: string;
     updatedAt: string;
+    seriesInstanceUid: string;
 }

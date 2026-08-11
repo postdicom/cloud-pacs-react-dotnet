@@ -4,7 +4,7 @@ import { RenderingEngine, Enums, type Types, utilities as csUtils } from "@corne
 import type { PublicViewportInput } from "@cornerstonejs/core/types";
 import { init as csRenderInit } from "@cornerstonejs/core";
 import { init as coreInit } from '@cornerstonejs/core';
-import { init as csToolsInit, ToolGroupManager, WindowLevelTool } from "@cornerstonejs/tools";
+import { init as csToolsInit, ToolGroupManager, WindowLevelTool, ZoomTool, PanTool } from "@cornerstonejs/tools";
 import {
   init as dicomImageLoaderInit,
   internal as dicomImageLoaderInternal,
@@ -16,7 +16,7 @@ import * as cornerstoneTools from '@cornerstonejs/tools';
 import { MouseBindings } from "@cornerstonejs/tools/enums";
 import { init as cornerstoneToolsInit } from '@cornerstonejs/tools';
 
-type ToolId = "wl" | "zoom" | "pan" | "scroll";
+type ToolId = "WindowLevel" | "Zoom" | "Pan" | "scroll";
 type PresetId = "brain" | "bone" | "lung" | "abd";
 
 interface InstanceMeta {
@@ -27,7 +27,7 @@ interface InstanceMeta {
 }
 
 export default function DicomViewer() {
-  const [activeTool, setActiveTool] = useState<ToolId>("wl");
+  const [activeTool, setActiveTool] = useState<ToolId>("WindowLevel");
   const [activePreset, setActivePreset] = useState<PresetId>("brain");
   const [inverted, setInverted] = useState(false);
   const [activeSeries, setActiveSeries] = useState<string>("");
@@ -37,6 +37,13 @@ export default function DicomViewer() {
 
   const viewportId = "CT";
   const renderingEngineId = "DicomImageRenderingEngine";
+  const toolGroupId = 'STACK_TOOL_GROUP_ID';
+
+  const { PanTool, StackScrollTool, ZoomTool, WindowLevelTool } = cornerstoneTools;
+  cornerstoneTools.addTool(WindowLevelTool);
+  cornerstoneTools.addTool(PanTool);
+  cornerstoneTools.addTool(StackScrollTool);
+  cornerstoneTools.addTool(ZoomTool);
 
   const location = useLocation();
   const { study, patient } = location.state || {};
@@ -103,8 +110,6 @@ export default function DicomViewer() {
   useEffect(() => {
     if (!initPromiseRef.current) {
       initPromiseRef.current = (async () => {
-        await csRenderInit();
-        await csToolsInit();
         dicomImageLoaderInit({ maxWebWorkers: 1, useLegacyMetadataProvider: true });
 
         dicomImageLoaderInternal.setOptions({
@@ -115,6 +120,7 @@ export default function DicomViewer() {
             }
           },
         });
+        await setToolGroup();
       })();
     }
   }, []);
@@ -124,6 +130,7 @@ export default function DicomViewer() {
     if (imageIds.length === 0 || !elementRef.current) return;
 
     let cancelled = false;
+    chooseTool("WindowLevel");
 
     const renderStack = async () => {
       if (initPromiseRef.current) {
@@ -156,7 +163,6 @@ export default function DicomViewer() {
       viewport.render();
     };
 
-    setToolGroup("");
     renderStack();
 
     return () => {
@@ -166,19 +172,10 @@ export default function DicomViewer() {
     };
   }, [imageIds]);
 
-  async function setToolGroup(chosenTool) {
+  async function setToolGroup() {
     await coreInit();
     await cornerstoneToolsInit();
-    const content = document.getElementById('content');
-    const element = document.createElement('div');
-    content!.appendChild(element);
-    const { PanTool, StackScrollTool, ZoomTool } = cornerstoneTools;
-    cornerstoneTools.addTool(WindowLevelTool);
-    cornerstoneTools.addTool(PanTool);
-    cornerstoneTools.addTool(StackScrollTool);
-    cornerstoneTools.addTool(ZoomTool);
 
-    const toolGroupId = 'STACK_TOOL_GROUP_ID';
     let toolGroup = ToolGroupManager.getToolGroup(toolGroupId);
 
     if (!toolGroup) {
@@ -188,61 +185,14 @@ export default function DicomViewer() {
       }
     }
 
-    if (toolGroup.toolOptions[PanTool.toolName]) {
-    } else {
-      toolGroup.addTool(PanTool.toolName);
-    }
+    if (!toolGroup.toolOptions[PanTool.toolName]) { toolGroup.addTool(PanTool.toolName); }
+    if (!toolGroup.toolOptions[ZoomTool.toolName]) { toolGroup.addTool(ZoomTool.toolName); }
+    if (!toolGroup.toolOptions[StackScrollTool.toolName]) { toolGroup.addTool(StackScrollTool.toolName, { loop: false }); }
+    if (!toolGroup.toolOptions[WindowLevelTool.toolName]) { toolGroup.addTool(WindowLevelTool.toolName); }
 
-    if (toolGroup.toolOptions[ZoomTool.toolName]) {
-    } else {
-      toolGroup.addTool(ZoomTool.toolName);
-    }
-
-    if (toolGroup.toolOptions[StackScrollTool.toolName]) {
-    } else {
-      toolGroup.addTool(StackScrollTool.toolName, { loop: false });
-    }
-
-    if (toolGroup.toolOptions[WindowLevelTool.toolName]) {
-    } else {
-      toolGroup.addTool(WindowLevelTool.toolName);
-    }
+    chooseTool("WindowLevel");
 
     toolGroup.addViewport(viewportId, renderingEngineId);
-
-    if (chosenTool === "wl") {
-      toolGroup.setToolPassive(ZoomTool.toolName);
-      toolGroup.setToolPassive(PanTool.toolName);
-      toolGroup.setToolActive(WindowLevelTool.toolName, {
-        bindings: [
-          {
-            mouseButton: MouseBindings.Primary
-          },
-        ],
-      });
-    }
-    else if (chosenTool === "zoom") {
-      toolGroup.setToolPassive(WindowLevelTool.toolName);
-      toolGroup.setToolPassive(PanTool.toolName);
-      toolGroup.setToolActive(ZoomTool.toolName, {
-        bindings: [
-          {
-            mouseButton: MouseBindings.Primary
-          },
-        ],
-      });
-    }
-    else if (chosenTool === "pan") {
-      toolGroup.setToolPassive(ZoomTool.toolName);
-      toolGroup.setToolPassive(WindowLevelTool.toolName);
-      toolGroup.setToolActive(PanTool.toolName, {
-        bindings: [
-          {
-            mouseButton: MouseBindings.Primary
-          },
-        ],
-      });
-    }
 
     toolGroup.setToolActive(StackScrollTool.toolName, {
       bindings: [
@@ -251,6 +201,33 @@ export default function DicomViewer() {
         },
       ],
     });
+  }
+
+  function chooseTool(chosenTool) {
+    const renderingEngine =
+      renderingEngineRef.current ?? new RenderingEngine(renderingEngineId);
+    renderingEngineRef.current = renderingEngine;
+    
+    let toolGroup = ToolGroupManager.getToolGroup(toolGroupId);
+    if (!toolGroup) {
+      toolGroup = ToolGroupManager.createToolGroup(toolGroupId);
+      if (!toolGroup) {
+        throw new Error(`Failed to create tool group: ${toolGroupId}`);
+      }
+    }
+
+    toolGroup.setToolPassive(ZoomTool.toolName);
+    toolGroup.setToolPassive(PanTool.toolName);
+    toolGroup.setToolPassive(WindowLevelTool.toolName);
+    toolGroup.setToolActive((chosenTool), {
+      bindings: [
+        {
+          mouseButton: MouseBindings.Primary
+        },
+      ],
+    });
+
+    toolGroup.addViewport(viewportId, renderingEngineId);
   }
 
   function invert() {
@@ -271,14 +248,14 @@ export default function DicomViewer() {
     renderingEngineRef.current = renderingEngine;
 
     const viewport = renderingEngine.getViewport(viewportId) as Types.IStackViewport;
-    
-    let { lower, upper } = csUtils.windowLevel.toLowHighRange(70, 30);
-    if (presetName === "brain") {({ lower, upper } = csUtils.windowLevel.toLowHighRange(70, 30));}
-    else if (presetName === "bone") {({ lower, upper } = csUtils.windowLevel.toLowHighRange(2000, 500));}
-    else if (presetName === "lung") {({ lower, upper } = csUtils.windowLevel.toLowHighRange(1600, -600));}
-    else if (presetName === "abd") {({ lower, upper } = csUtils.windowLevel.toLowHighRange(400, 40));}
 
-    viewport.setProperties({ voiRange: {lower, upper}});
+    let { lower, upper } = csUtils.windowLevel.toLowHighRange(70, 30);
+    if (presetName === "brain") { ({ lower, upper } = csUtils.windowLevel.toLowHighRange(60, 40)); }
+    else if (presetName === "bone") { ({ lower, upper } = csUtils.windowLevel.toLowHighRange(2500, 480)); }
+    else if (presetName === "lung") { ({ lower, upper } = csUtils.windowLevel.toLowHighRange(1500, -600)); }
+    else if (presetName === "abd") { ({ lower, upper } = csUtils.windowLevel.toLowHighRange(350, 50)); }
+
+    viewport.setProperties({ voiRange: { lower, upper } });
     viewport.render();
   }
 
@@ -303,20 +280,20 @@ export default function DicomViewer() {
       <header className="dv-topbar">
         <div className="dv-topbar__tools">
           <button
-            className={`dv-tool-btn ${activeTool === "wl" ? "dv-tool-btn--active" : ""}`}
-            onClick={() => { setActiveTool("wl"); setToolGroup("wl") }}
+            className={`dv-tool-btn ${activeTool === "WindowLevel" ? "dv-tool-btn--active" : ""}`}
+            onClick={() => { setActiveTool("WindowLevel"); chooseTool("WindowLevel") }}
           >
             W/L
           </button>
           <button
-            className={`dv-tool-btn ${activeTool === "zoom" ? "dv-tool-btn--active" : ""}`}
-            onClick={() => { setActiveTool("zoom"); setToolGroup("zoom") }}
+            className={`dv-tool-btn ${activeTool === "Zoom" ? "dv-tool-btn--active" : ""}`}
+            onClick={() => { setActiveTool("Zoom"); chooseTool("Zoom") }}
           >
             Zoom
           </button>
           <button
-            className={`dv-tool-btn ${activeTool === "pan" ? "dv-tool-btn--active" : ""}`}
-            onClick={() => { setActiveTool("pan"); setToolGroup("pan") }}
+            className={`dv-tool-btn ${activeTool === "Pan" ? "dv-tool-btn--active" : ""}`}
+            onClick={() => { setActiveTool("Pan"); chooseTool("Pan") }}
           >
             Pan
           </button>

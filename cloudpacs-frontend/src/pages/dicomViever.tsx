@@ -18,6 +18,7 @@ import { init as cornerstoneToolsInit } from '@cornerstonejs/tools';
 
 type ToolId = "WindowLevel" | "Zoom" | "Pan" | "scroll";
 type PresetId = "brain" | "bone" | "lung" | "abd";
+type TabId = "Details" | "AI Report";
 
 interface InstanceMeta {
   sopInstanceUid: string;
@@ -30,6 +31,7 @@ export default function DicomViewer() {
   const [activeTool, setActiveTool] = useState<ToolId>("WindowLevel");
   const [activePreset, setActivePreset] = useState<PresetId>("brain");
   const [inverted, setInverted] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabId>("Details");
   const [activeSeries, setActiveSeries] = useState<string>("");
   const [usableSeries, setUsableSeriesList] = useState<Series[]>([]);
   const [instances, setInstances] = useState<InstanceMeta[]>([]);
@@ -404,42 +406,57 @@ export default function DicomViewer() {
             <div>FOV: 350mm</div>
           </div>
         </main>
+
         <aside className="dv-sidebar-right">
-          <section className="dv-sidebar-section">
-            <h2 className="dv-section-title">Study</h2>
-            <div className="dv-info-table">
-              <div className="dv-info-row">
-                <span className="dv-info-label">Patient</span>
-                <span className="dv-info-value">{patient.name}</span>
+          {activeTab === "AI Report" ? (
+            <section className="dv-sidebar-section">
+               <button
+                className="dv-ai-button"
+                onClick={() => setActiveTab("Details")}
+              >
+                Return to Details
+              </button>
+              <h2 className="dv-section-title">AI Report</h2>
+            </section>
+          ) : (
+            <section className="dv-sidebar-section">
+              <button
+                className="dv-ai-button"
+                onClick={() => setActiveTab("AI Report")}
+              >
+                AI Report
+              </button>
+               <p className="dv-disclaimer">
+                Local LLM only. No patient data sent externally.
+              </p>
+
+              <h2 className="dv-section-title">Study</h2>
+              <div className="dv-info-table">
+                <div className="dv-info-row">
+                  <span className="dv-info-label">Patient</span>
+                  <span className="dv-info-value">{patient.name}</span>
+                </div>
+                <div className="dv-info-row">
+                  <span className="dv-info-label">Modality</span>
+                  <span className="dv-info-value">{study.mod}</span>
+                </div>
+                <div className="dv-info-row">
+                  <span className="dv-info-label">Date</span>
+                  <span className="dv-info-value">{study.date}</span>
+                </div>
+                <div className="dv-info-row">
+                  <span className="dv-info-label">Series</span>
+                  <span className="dv-info-value">{study.series}</span>
+                </div>
+                <div className="dv-info-row">
+                  <span className="dv-info-label">Instances</span>
+                  <span className="dv-info-value">{study.imageCount}</span>
+                </div>
               </div>
-              <div className="dv-info-row">
-                <span className="dv-info-label">Modality</span>
-                <span className="dv-info-value">{study.mod}</span>
-              </div>
-              <div className="dv-info-row">
-                <span className="dv-info-label">Date</span>
-                <span className="dv-info-value">{study.date}</span>
-              </div>
-              <div className="dv-info-row">
-                <span className="dv-info-label">Series</span>
-                <span className="dv-info-value">{study.series}</span>
-              </div>
-              <div className="dv-info-row">
-                <span className="dv-info-label">Instances</span>
-                <span className="dv-info-value">{study.imageCount}</span>
-              </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           <hr className="dv-sidebar-divider" />
-
-          <section className="dv-sidebar-section">
-            <h2 className="dv-section-title">AI Report</h2>
-            <button className="dv-ai-button">Generate AI draft</button>
-            <p className="dv-disclaimer">
-              Local LLM only. No patient data sent externally.
-            </p>
-          </section>
         </aside>
       </div>
     </div>

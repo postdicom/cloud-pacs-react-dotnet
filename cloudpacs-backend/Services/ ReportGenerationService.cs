@@ -24,7 +24,7 @@ namespace CloudPACS.Backend
 
         public async Task<string> GetReport(byte[] byteArray)
         {
-            byte[] imageBytes = await httpClient.GetByteArrayAsync("https://github.com/ollama.png");
+           // byte[] imageBytes = await httpClient.GetByteArrayAsync("https://github.com/ollama.png");
 
             var prompt = new ChatMessage(ChatRole.User, "Explain and analyze this image");
             prompt.Contents.Add(new DataContent(byteArray, "image/png"));

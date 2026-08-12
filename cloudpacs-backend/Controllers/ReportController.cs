@@ -11,6 +11,7 @@ namespace CloudPACS.Backend.Controllers
     using Microsoft.Extensions.Logging;
     using CloudPACS.Backend.Interfaces;
     using CloudPACS.Backend;
+    using System.Text.Json;
 
     [ApiController]
     [Route("api/v1/reports")]
@@ -40,6 +41,10 @@ namespace CloudPACS.Backend.Controllers
         [HttpPost("generate")]
         public async Task<ActionResult<Report>> GenerateReport([FromBody] GenerateReportRequestDto request, CancellationToken cancellationToken)
         {
+            Response.ContentType = "text/event-stream";
+            Response.Headers.Append("Cache-Control", "no-cache");
+            Response.Headers.Append("Connection", "keep-alive");
+
             if (request is null || string.IsNullOrWhiteSpace(request.StudyId))
             {
                 return BadRequest("StudyId is required.");
@@ -75,6 +80,13 @@ namespace CloudPACS.Backend.Controllers
             string findings;
             try
             {
+                while (false)
+                {
+                    findings = await _reportGenerationService.GetReport(imageBytes);
+                    var json = JsonSerializer.Serialize(findings);
+                    await Response.WriteAsync($"{json}", cancellationToken: cancellationToken);
+                    await Response.Body.FlushAsync(cancellationToken);
+                }
                 findings = await _reportGenerationService.GetReport(imageBytes);
             }
             catch (Exception ex)

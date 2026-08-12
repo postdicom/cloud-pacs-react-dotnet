@@ -290,11 +290,16 @@ export default function DicomViewer() {
     setReportFindings(null);
 
     try {
-      const { data } = await api.post("api/v1/reports/generate", {
+      await api.post("api/v1/reports/generate", {
         studyId: study.id,
         imageBase64: base64Data,
       });
-      setReportFindings(data.findings);
+
+      const eventSource = new EventSource('https://localhost:5001/api/v1/reports/generate');
+      eventSource.onmessage = function (event) {
+        const report = JSON.parse(event.data);
+        setReportFindings(report);
+      }
     } catch (error) {
       console.log("Error generating AI report: " + error);
       setReportError("Failed to generate report. Please try again.");

@@ -37,6 +37,10 @@ export default function DicomViewer() {
   const [instances, setInstances] = useState<InstanceMeta[]>([]);
   const [imageIds, setImageIds] = useState<string[]>([]);
 
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState<string | null>(null);
+  const [reportFindings, setReportFindings] = useState<string | null>(null);
+
   const viewportId = "CT";
   const renderingEngineId = "DicomImageRenderingEngine";
   const toolGroupId = 'STACK_TOOL_GROUP_ID';
@@ -209,7 +213,7 @@ export default function DicomViewer() {
     const renderingEngine =
       renderingEngineRef.current ?? new RenderingEngine(renderingEngineId);
     renderingEngineRef.current = renderingEngine;
-    
+
     let toolGroup = ToolGroupManager.getToolGroup(toolGroupId);
     if (!toolGroup) {
       toolGroup = ToolGroupManager.createToolGroup(toolGroupId);
@@ -259,6 +263,44 @@ export default function DicomViewer() {
 
     viewport.setProperties({ voiRange: { lower, upper } });
     viewport.render();
+  }
+  async function generateAiReport() {
+    if (!renderingEngineRef.current) {
+      setReportError("Viewer is not ready yet.");
+      return;
+    }
+
+    const viewport = renderingEngineRef.current.getViewport(viewportId);
+    if (!viewport) {
+      setReportError("Viewer is not ready yet.");
+      return;
+    }
+
+    const canvas = viewport.getCanvas();
+    if (!canvas) {
+      setReportError("No image is currently displayed.");
+      return;
+    }
+
+    const dataUrl = canvas.toDataURL("image/png");
+    const base64Data = dataUrl.split(",")[1]; // strip "data:image/png;base64," prefix
+
+    setReportLoading(true);
+    setReportError(null);
+    setReportFindings(null);
+
+    try {
+      const { data } = await api.post("api/v1/reports/generate", {
+        studyId: study.id,
+        imageBase64: base64Data,
+      });
+      setReportFindings(data.findings);
+    } catch (error) {
+      console.log("Error generating AI report: " + error);
+      setReportError("Failed to generate report. Please try again.");
+    } finally {
+      setReportLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -410,13 +452,29 @@ export default function DicomViewer() {
         <aside className="dv-sidebar-right">
           {activeTab === "AI Report" ? (
             <section className="dv-sidebar-section">
-               <button
+              <button
                 className="dv-ai-button"
                 onClick={() => setActiveTab("Details")}
               >
                 Return to Details
               </button>
               <h2 className="dv-section-title">AI Report</h2>
+
+              <button
+                className="dv-ai-button"
+                onClick={generateAiReport}
+                disabled={reportLoading}
+              >
+                {reportLoading ? "Generating..." : "Generate Report"}
+              </button>
+
+              {reportError && <p className="dv-disclaimer">{reportError}</p>}
+
+              {reportFindings && (
+                <div className="dv-info-table">
+                  <p>{reportFindings}</p>
+                </div>
+              )}
             </section>
           ) : (
             <section className="dv-sidebar-section">
@@ -426,7 +484,7 @@ export default function DicomViewer() {
               >
                 AI Report
               </button>
-               <p className="dv-disclaimer">
+              <p className="dv-disclaimer">
                 Local LLM only. No patient data sent externally.
               </p>
 

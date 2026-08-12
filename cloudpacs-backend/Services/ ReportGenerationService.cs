@@ -7,6 +7,7 @@ namespace CloudPACS.Backend
     {
         private readonly IChatClient? chatClient;
         private readonly HttpClient httpClient;
+        private readonly ChatMessage? prompt;
         public ReportGenerationService()
         {
             var host = Host.CreateDefaultBuilder()
@@ -21,13 +22,15 @@ namespace CloudPACS.Backend
             httpClient = new();
         }
 
-
-        public async Task<string> GetReport(byte[] byteArray)
+        public async Task SetPrompt(byte[] byteArray)
         {
-           // byte[] imageBytes = await httpClient.GetByteArrayAsync("https://github.com/ollama.png");
-
             var prompt = new ChatMessage(ChatRole.User, "Explain and analyze this image");
             prompt.Contents.Add(new DataContent(byteArray, "image/png"));
+        }
+
+        public async Task<string> GetReport()
+        {
+           // byte[] imageBytes = await httpClient.GetByteArrayAsync("https://github.com/ollama.png");
 
             Console.WriteLine("AI Response:");
             await foreach (var response in chatClient.GetStreamingResponseAsync(prompt))
@@ -35,7 +38,7 @@ namespace CloudPACS.Backend
                 //Console.Write(response.Text);
                 return response.Text;
             }
-            return "Error";
+            return "The ";
         }
     }
 }

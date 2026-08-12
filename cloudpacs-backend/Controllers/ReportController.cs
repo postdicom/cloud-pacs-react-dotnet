@@ -80,14 +80,15 @@ namespace CloudPACS.Backend.Controllers
             string findings;
             try
             {
+                await _reportGenerationService.SetPrompt(imageBytes);
                 while (false)
                 {
-                    findings = await _reportGenerationService.GetReport(imageBytes);
+                    findings = await _reportGenerationService.GetReport();
                     var json = JsonSerializer.Serialize(findings);
                     await Response.WriteAsync($"{json}", cancellationToken: cancellationToken);
                     await Response.Body.FlushAsync(cancellationToken);
                 }
-                findings = await _reportGenerationService.GetReport(imageBytes);
+                findings = await _reportGenerationService.GetReport();
             }
             catch (Exception ex)
             {

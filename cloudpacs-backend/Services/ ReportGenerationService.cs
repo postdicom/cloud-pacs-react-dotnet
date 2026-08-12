@@ -1,11 +1,12 @@
+using System.Drawing;
 using Microsoft.Extensions.AI;
 
 namespace CloudPACS.Backend
 {
     public class ReportGenerationService
     {
+        private readonly IChatClient? chatClient;
         private readonly HttpClient httpClient;
-        private readonly IChatClient chatClient;
         public ReportGenerationService()
         {
             var host = Host.CreateDefaultBuilder()
@@ -16,27 +17,25 @@ namespace CloudPACS.Backend
                 })
                 .Build();
 
-            var chatClient = host.Services.GetRequiredService<IChatClient>();
-            httpClient = new HttpClient();
+            chatClient = host.Services.GetRequiredService<IChatClient>();
+            httpClient = new();
         }
 
-        public async Task GetReport(string uri)
+
+        public async Task<string> GetReport(byte[] byteArray)
         {
-            byte[] imageBytes = await httpClient.GetByteArrayAsync(uri);
+            byte[] imageBytes = await httpClient.GetByteArrayAsync("https://github.com/ollama.png");
 
             var prompt = new ChatMessage(ChatRole.User, "Explain and analyze this image");
-            prompt.Contents.Add(new DataContent(imageBytes, "image/png"));
+            prompt.Contents.Add(new DataContent(byteArray, "image/png"));
 
             Console.WriteLine("AI Response:");
-            var response = await chatClient.GetResponseAsync(prompt);
-            Console.WriteLine($"\nCaption: {response.Messages[0].Text}");
+            await foreach (var response in chatClient.GetStreamingResponseAsync(prompt))
+            {
+                //Console.Write(response.Text);
+                return response.Text;
+            }
+            return "Error";
         }
     }
 }
-
-
-
-
-
-
-

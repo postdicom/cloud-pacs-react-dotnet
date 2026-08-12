@@ -4,6 +4,7 @@ namespace CloudPACS.Backend
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos;
     using CloudPACS.Backend;
@@ -17,7 +18,7 @@ namespace CloudPACS.Backend
             _container = cosmosClient.GetContainer("CloudPACS", "Study");
         }
 
-        public async Task<List<Study>> GetStudiesByPatientIdAsync(string patientGuid)
+        public async Task<List<Study>> GetStudiesByPatientIdAsync(string patientGuid, CancellationToken cancellationToken = default)
         {
             var results = new List<Study>();
 
@@ -28,56 +29,59 @@ namespace CloudPACS.Backend
             {
                 PartitionKey = new PartitionKey(patientGuid)
             };
-
+                        
             using var iterator = _container.GetItemQueryIterator<Study>(query, requestOptions: requestOptions);
             while (iterator.HasMoreResults)
             {
-                var page = await iterator.ReadNextAsync();
+                var page = await iterator.ReadNextAsync(cancellationToken);
                 results.AddRange(page);
             }
 
             return results;
         }
 
-        public async Task<Study?> GetStudyByStudyIdAsync(string studyId)
+        public async Task<Study?> GetStudyByStudyIdAsync(string studyId, CancellationToken cancellationToken = default)
         {
             var query = new QueryDefinition("SELECT * FROM c WHERE c.id = @id")
                 .WithParameter("@id", studyId);
 
-            using var iterator = _container.GetItemQueryIterator<Study>(query);
+            using var iterator = _container.GetItemQueryIterator<Study>(query);            
             while (iterator.HasMoreResults)
             {
-                var page = await iterator.ReadNextAsync();
+                var page = await iterator.ReadNextAsync(cancellationToken);
                 var match = page.FirstOrDefault();
-                if (match != null)
-                    return match;
+                if (match != null) return match;
             }
 
             return null;
         }
 
-        public async Task<Study> CreateStudyAsync(Study newStudy)
+        public async Task<Study> CreateStudyAsync(Study study, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(newStudy.patientGuid))
-                throw new ArgumentException("PatientGuid is required.", nameof(newStudy));
+            if (string.IsNullOrWhiteSpace(study.patientGuid))
+            {
+                throw new ArgumentException("PatientGuid is required.", nameof(study));
+            }
 
-            if (string.IsNullOrWhiteSpace(newStudy.Id))
-                newStudy.Id = Guid.NewGuid().ToString();
+            if (string.IsNullOrWhiteSpace(study.Id))
+            {
+                study.Id = Guid.NewGuid().ToString();
+            }
 
-            var response = await _container.CreateItemAsync(newStudy, new PartitionKey(newStudy.patientGuid));
+            var response = await _container.CreateItemAsync(study, new PartitionKey(study.patientGuid), cancellationToken: cancellationToken);
             return response.Resource;
         }
 
-        public async Task<bool> UpdateStudyAsync(string id, Study updatedStudy)
+        public async Task<bool> UpdateStudyAsync(string studyId, Study study, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(updatedStudy.patientGuid))
-                throw new ArgumentException("PatientGuid (partition key) is required.", nameof(updatedStudy));
-
-            updatedStudy.Id = id;
-
+            if (string.IsNullOrWhiteSpace(study.patientGuid))
+            {
+                throw new ArgumentException("PatientGuid (partition key) is required.", nameof(study));
+            }
+            study.Id = studyId;
             try
             {
-                await _container.ReplaceItemAsync(updatedStudy, id, new PartitionKey(updatedStudy.patientGuid));
+                await _container.ReplaceItemAsync(study, studyId, new PartitionKey(study.patientGuid), cancellationToken: cancellationToken);
                 return true;
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
@@ -86,32 +90,22 @@ namespace CloudPACS.Backend
             }
         }
 
-        public async Task<bool> DeleteStudyAsync(string id)
+        public async Task<bool> DeleteStudyAsync(string id, CancellationToken cancellationToken = default)
         {
-            var existing = await GetStudyByStudyIdAsync(id);
+            var existing = await GetStudyByStudyIdAsync(id, cancellationToken);
             if (existing == null)
             {
                 return false;
             }
             try
             {
-                await _container.DeleteItemAsync<Study>(id, new PartitionKey(existing.patientGuid));
+                await _container.DeleteItemAsync<Study>(id, new PartitionKey(existing.patientGuid), cancellationToken: cancellationToken);
                 return true;
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
                 return false;
             }
-        }
-
-        public Task<List<Study>> GetStudiesbyPatientIdAsync(string patientId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Study> GetStudiesByIdAsync(string studyId)
-        {
-            throw new NotImplementedException();
         }
     }
 }

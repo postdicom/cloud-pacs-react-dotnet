@@ -1,6 +1,5 @@
 import { BlockBlobClient } from "@azure/storage-blob";
 import type { FileDetails } from "../interfaces/FileDetails";
-import React, { useState } from 'react';
 import api from "../queryClientProvider";
 
 export async function uploadToBlob(arrayBuffer: ArrayBuffer, fDetails: FileDetails) {

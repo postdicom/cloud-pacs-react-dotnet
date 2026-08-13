@@ -147,7 +147,7 @@ namespace CloudPACS.Backend.Controllers
             {
                 return BadRequest("Findings is required.");
             }
-            var existing = await _reportRepository.GetReportsByStudyIdAsync(id, cancellationToken);
+            var existing = await _reportRepository.GetReportByReportId(id, cancellationToken);
             if (existing is null)
             {
                 return NotFound($"Report '{id}' was not found.");

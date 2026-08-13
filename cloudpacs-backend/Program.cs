@@ -11,6 +11,8 @@
     using System.Text;
     using Azure.Storage.Blobs;
     using Microsoft.OpenApi;
+    using CloudPACS.Backend.Interfaces;
+    using CloudPACS.Backend.Repositories;
 
     public class Program
     {
@@ -55,7 +57,9 @@
             builder.Services.AddScoped<ISeriesRepository, SeriesRepository>();
             builder.Services.AddScoped<IInstanceRepository, InstanceRepository>();
             builder.Services.AddScoped<IDicomViewRepository, DicomViewRepository>();
+            builder.Services.AddScoped<IReportRepository, ReportRepository>();
             builder.Services.AddSingleton(x => new BlobServiceClient("UseDevelopmentStorage=true"));
+            builder.Services.AddScoped<ReportGenerationService>();
 
             builder.Services.AddCors(options =>
             {

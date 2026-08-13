@@ -28,16 +28,16 @@ namespace CloudPACS.Backend
             prompt.Contents.Add(new DataContent(byteArray, "image/png"));
         }
 
-        public async Task<string> GetReport()
+        public async IAsyncEnumerable<string> GetReport()
         {
             // byte[] imageBytes = await httpClient.GetByteArrayAsync("https://github.com/ollama.png");
             //Console.WriteLine("AI Response:");
             await foreach (var response in chatClient.GetStreamingResponseAsync(prompt))
             {
                 //Console.Write(response.Text);
-                return response.Text;
+                yield return response.Text;
             }
-            return "The ";
+            yield return "The response is done";
         }
     }
 }

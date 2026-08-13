@@ -39,7 +39,7 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpPost("generate")]
-        public async Task<ActionResult<Report>> GenerateReport([FromBody] GenerateReportRequestDto request, CancellationToken cancellationToken)
+        public async Task<ActionResult<Report>> GenerateReport([FromBody] GenerateReportRequestDto request, CancellationToken cancellationToken = default)
         {
             Response.ContentType = "text/event-stream";
             Response.Headers.Append("Cache-Control", "no-cache");
@@ -77,18 +77,17 @@ namespace CloudPACS.Backend.Controllers
                 return BadRequest("ImageBase64 is not valid base64 image data.");
             }
 
-            string findings;
+            string findings = "";
             try
             {
                 await _reportGenerationService.SetPrompt(imageBytes);
-                while (false)
+                await foreach (var chunk in _reportGenerationService.GetReport())
                 {
-                    findings = await _reportGenerationService.GetReport();
-                    var json = JsonSerializer.Serialize(findings);
+                    findings += chunk;
+                    var json = JsonSerializer.Serialize(chunk);
                     await Response.WriteAsync($"{json}", cancellationToken: cancellationToken);
                     await Response.Body.FlushAsync(cancellationToken);
                 }
-                findings = await _reportGenerationService.GetReport();
             }
             catch (Exception ex)
             {

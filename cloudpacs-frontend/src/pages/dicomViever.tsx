@@ -27,13 +27,21 @@ interface InstanceMeta {
   metadata: Record<string, string>;
 }
 
+interface Report {
+  id: string;
+  CreatedByUserName?: string;
+  CreatedByUserId?: string;
+}
+
 export default function DicomViewer() {
   const [activeTool, setActiveTool] = useState<ToolId>("WindowLevel");
   const [activePreset, setActivePreset] = useState<PresetId>("brain");
   const [inverted, setInverted] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("Details");
   const [activeSeries, setActiveSeries] = useState<string>("");
+  const [activeReport, setActiveReport] = useState<string>("");
   const [usableSeries, setUsableSeriesList] = useState<Series[]>([]);
+  const [usableReports, setUsableReportsList] = useState<Report[]>([]);
   const [instances, setInstances] = useState<InstanceMeta[]>([]);
   const [imageIds, setImageIds] = useState<string[]>([]);
 
@@ -53,6 +61,7 @@ export default function DicomViewer() {
 
   const location = useLocation();
   const { study, patient } = location.state || {};
+  const report = location.state?.report as Report | undefined;
 
   const navigate = useNavigate();
   const studyList = (patient: any) => {
@@ -65,7 +74,26 @@ export default function DicomViewer() {
   const elementRef = useRef<HTMLDivElement>(null);
   const initPromiseRef = useRef<Promise<void> | null>(null);
   const renderingEngineRef = useRef<RenderingEngine | null>(null);
-
+  useEffect(() => {
+    if (!report?.id) return;
+    const callApi = async () => 
+    {
+      try 
+      {
+        const { data } = await api.get(`api/v1/viewer/report/${report.id}/reports`);
+        setUsableSeriesList(data);
+        if (data.length > 0) 
+        {
+          setActiveSeries(data[0].seriesInstanceUid ?? data[0].id);
+        }
+      } 
+      catch (error) 
+      {
+        console.log("Error " + error);
+      }
+    };
+    callApi();
+  }, [report?.id]);
   // Step 1/2: fetch series for the study
   useEffect(() => {
     if (!study?.id) return;
@@ -480,6 +508,23 @@ export default function DicomViewer() {
                   <p>{reportFindings}</p>
                 </div>
               )}
+              <aside className="dv-sidebar-left">
+                <h2 className="dv-section-title">Previous Reports</h2>
+                <div className="dv-series-list">
+                  {usableReports.map((r) => {
+                    const key = r.CreatedByUserId ?? r.id;
+                    return (
+                      <button
+                        key={key}
+                        className={`dv-series-btn ${activeReport === key ? "dv-series-btn--active" : ""}`}
+                        onClick={() => setActiveReport(key)}
+                      >
+                        {r.CreatedByUserName}
+                      </button>
+                    );
+                  })}
+                </div>
+              </aside>
             </section>
           ) : (
             <section className="dv-sidebar-section">

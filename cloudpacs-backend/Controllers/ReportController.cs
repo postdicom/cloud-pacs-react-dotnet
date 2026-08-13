@@ -94,12 +94,14 @@ namespace CloudPACS.Backend.Controllers
                 _logger.LogError(ex, "AI report generation failed for the instance {StudyId}", instance.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, "Report generation failed. Please try again.");
             }
-
+            try
+            {
             var report = new Report(
                 id: Guid.NewGuid().ToString(),
                 studyId: instance.StudyInstanceUid,
                 findings: findings,
                 createdByUserId: userId,
+                createdByUserName: userName,
                 createdAtUtc: DateTime.UtcNow);
 
             var created = await _reportRepository.CreateReportAsync(report, cancellationToken);
@@ -113,6 +115,12 @@ namespace CloudPACS.Backend.Controllers
                 $"AI report {created.Id} generated for instance {instance.Id}");
 
             return CreatedAtAction(nameof(GetReportsForStudy), new { studyId = instance.Id }, created);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to save the generated report for the instance {StudyId}", instance.Id);
+                return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save the generated report. Please try again.");
+            }
         }
 
         [HttpGet("{studyId}")]

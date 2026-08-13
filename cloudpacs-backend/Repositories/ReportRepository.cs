@@ -45,7 +45,7 @@ namespace CloudPACS.Backend.Repositories
             {
                 throw new ArgumentNullException("Report cannot be null.");
             }
-            if (string.IsNullOrWhiteSpace(report.StudyId))
+            if (string.IsNullOrWhiteSpace(report.studyId))
             {
                 throw new ArgumentException("StudyId is required for partitioning.");
             }
@@ -54,7 +54,7 @@ namespace CloudPACS.Backend.Repositories
                 report.CreatedAtUtc = DateTime.UtcNow;
             }
 
-            var response = await _container.CreateItemAsync(report, new PartitionKey(report.StudyId));
+            var response = await _container.CreateItemAsync(report, new PartitionKey(report.studyId));
             return response.Resource;
         }
 
@@ -65,14 +65,14 @@ namespace CloudPACS.Backend.Repositories
                 throw new ArgumentNullException(nameof(report));
             }
 
-            if (string.IsNullOrWhiteSpace(report.StudyId))
+            if (string.IsNullOrWhiteSpace(report.studyId))
             {
                 throw new ArgumentException("StudyId is required for partitioning.");
             }
 
             report.UpdatedAtUtc = DateTime.UtcNow;
 
-            var response = await _container.UpsertItemAsync(report, new PartitionKey(report.StudyId));
+            var response = await _container.UpsertItemAsync(report, new PartitionKey(report.studyId));
             return response.Resource;
         }
     }

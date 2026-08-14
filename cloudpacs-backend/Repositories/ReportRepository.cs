@@ -17,7 +17,7 @@ namespace CloudPACS.Backend.Repositories
             _container = client.GetContainer("CloudPACS", "Report");
         }
 
-        public async Task<List<Report>> GetReportsByStudyIdAsync(string studyId, CancellationToken cancellationToken = default)
+        public async Task<List<Report>> GetReportsByStudyIdAsync(string studyId)
         {
             try
             {
@@ -56,7 +56,7 @@ namespace CloudPACS.Backend.Repositories
             }
         }
 
-        public async Task<Report> GetReportByReportId(string id, CancellationToken cancellationToken = default)
+        public async Task<Report> GetReportByReportId(string id)
         {
             var query = new QueryDefinition("SELECT * FROM c WHERE c.id = @id")
                 .WithParameter("@id", id);
@@ -64,7 +64,7 @@ namespace CloudPACS.Backend.Repositories
             using var iterator = _container.GetItemQueryIterator<Report>(query);            
             while (iterator.HasMoreResults)
             {
-                var page = await iterator.ReadNextAsync(cancellationToken);
+                var page = await iterator.ReadNextAsync();
                 var match = page.FirstOrDefault();
                 if (match != null) return match;
             }
@@ -72,7 +72,7 @@ namespace CloudPACS.Backend.Repositories
             return null;
         }
 
-        public async Task<Report> CreateReportAsync(Report report, CancellationToken cancellationToken = default)
+        public async Task<Report> CreateReportAsync(Report report)
         {
             if (report == null)
             {
@@ -91,7 +91,7 @@ namespace CloudPACS.Backend.Repositories
             return response.Resource;
         }
 
-        public async Task<Report> UpdateReportAsync(Report report, CancellationToken cancellationToken = default)
+        public async Task<Report> UpdateReportAsync(Report report)
         {
             if (report == null)
             {

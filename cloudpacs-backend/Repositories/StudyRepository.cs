@@ -18,7 +18,7 @@ namespace CloudPACS.Backend
             _container = cosmosClient.GetContainer("CloudPACS", "Study");
         }
 
-        public async Task<List<Study>> GetStudiesByPatientIdAsync(string patientGuid, CancellationToken cancellationToken = default)
+        public async Task<List<Study>> GetStudiesByPatientIdAsync(string patientGuid)
         {
             var results = new List<Study>();
 
@@ -33,14 +33,14 @@ namespace CloudPACS.Backend
             using var iterator = _container.GetItemQueryIterator<Study>(query, requestOptions: requestOptions);
             while (iterator.HasMoreResults)
             {
-                var page = await iterator.ReadNextAsync(cancellationToken);
+                var page = await iterator.ReadNextAsync();
                 results.AddRange(page);
             }
 
             return results;
         }
 
-        public async Task<Study?> GetStudyByStudyIdAsync(string studyId, CancellationToken cancellationToken = default)
+        public async Task<Study?> GetStudyByStudyIdAsync(string studyId)
         {
             var query = new QueryDefinition("SELECT * FROM c WHERE c.id = @id")
                 .WithParameter("@id", studyId);
@@ -48,7 +48,7 @@ namespace CloudPACS.Backend
             using var iterator = _container.GetItemQueryIterator<Study>(query);            
             while (iterator.HasMoreResults)
             {
-                var page = await iterator.ReadNextAsync(cancellationToken);
+                var page = await iterator.ReadNextAsync();
                 var match = page.FirstOrDefault();
                 if (match != null) return match;
             }
@@ -56,7 +56,7 @@ namespace CloudPACS.Backend
             return null;
         }
 
-        public async Task<Study> CreateStudyAsync(Study study, CancellationToken cancellationToken = default)
+        public async Task<Study> CreateStudyAsync(Study study)
         {
             if (string.IsNullOrWhiteSpace(study.patientGuid))
             {
@@ -68,11 +68,11 @@ namespace CloudPACS.Backend
                 study.Id = Guid.NewGuid().ToString();
             }
 
-            var response = await _container.CreateItemAsync(study, new PartitionKey(study.patientGuid), cancellationToken: cancellationToken);
+            var response = await _container.CreateItemAsync(study, new PartitionKey(study.patientGuid));
             return response.Resource;
         }
 
-        public async Task<bool> UpdateStudyAsync(string studyId, Study study, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateStudyAsync(string studyId, Study study)
         {
             if (string.IsNullOrWhiteSpace(study.patientGuid))
             {
@@ -81,7 +81,7 @@ namespace CloudPACS.Backend
             study.Id = studyId;
             try
             {
-                await _container.ReplaceItemAsync(study, studyId, new PartitionKey(study.patientGuid), cancellationToken: cancellationToken);
+                await _container.ReplaceItemAsync(study, studyId, new PartitionKey(study.patientGuid));
                 return true;
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
@@ -90,16 +90,16 @@ namespace CloudPACS.Backend
             }
         }
 
-        public async Task<bool> DeleteStudyAsync(string id, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteStudyAsync(string id)
         {
-            var existing = await GetStudyByStudyIdAsync(id, cancellationToken);
+            var existing = await GetStudyByStudyIdAsync(id);
             if (existing == null)
             {
                 return false;
             }
             try
             {
-                await _container.DeleteItemAsync<Study>(id, new PartitionKey(existing.patientGuid), cancellationToken: cancellationToken);
+                await _container.DeleteItemAsync<Study>(id, new PartitionKey(existing.patientGuid));
                 return true;
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)

@@ -30,11 +30,8 @@ namespace CloudPACS.Backend
 
         public async IAsyncEnumerable<string> GetReport()
         {
-            // byte[] imageBytes = await httpClient.GetByteArrayAsync("https://github.com/ollama.png");
-            //Console.WriteLine("AI Response:");
             await foreach (var response in chatClient.GetStreamingResponseAsync(prompt))
             {
-                //Console.Write(response.Text);
                 yield return response.Text;
             }
             yield return "The response is done";

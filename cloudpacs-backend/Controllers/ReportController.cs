@@ -39,7 +39,7 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpPost("generate")]
-        public async Task<ActionResult<Report>> GenerateReport([FromBody] GenerateReportRequestDto request, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<Report>> GenerateReport([FromBody] GenerateReportRequestDto request)
         {
             Response.ContentType = "text/event-stream";
             Response.Headers.Append("Cache-Control", "no-cache");
@@ -61,7 +61,7 @@ namespace CloudPACS.Backend.Controllers
                 return Unauthorized();
             }
 
-            var instance = await _studyRepository.GetStudyByStudyIdAsync(request.StudyId, cancellationToken);
+            var instance = await _studyRepository.GetStudyByStudyIdAsync(request.StudyId);
             if (instance is null)
             {
                 return NotFound($"Study '{request.StudyId}' was not found.");
@@ -85,8 +85,7 @@ namespace CloudPACS.Backend.Controllers
                 {
                     findings += chunk;
                     var json = JsonSerializer.Serialize(chunk);
-                    await Response.WriteAsync($"data: {json}\n\n", cancellationToken: cancellationToken);
-                    await Response.Body.FlushAsync(cancellationToken);
+                    await Response.WriteAsync($"data: {json}\n\n");
                 }
             }
             catch (Exception ex)
@@ -104,7 +103,7 @@ namespace CloudPACS.Backend.Controllers
                     createdByUserName: userName ?? ",Unknown",
                     createdAtUtc: DateTime.UtcNow);
 
-                var created = await _reportRepository.CreateReportAsync(report, cancellationToken);
+                var created = await _reportRepository.CreateReportAsync(report);
 
                 await _auditLogService.LogAsync(
                     userId,
@@ -115,8 +114,7 @@ namespace CloudPACS.Backend.Controllers
                     $"AI report {created.Id} generated for instance {instance.Id}");
 
                 var completeJson = JsonSerializer.Serialize(created, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-                await Response.WriteAsync($"event: complete\ndata: {completeJson}\n\n", cancellationToken: cancellationToken);
-                await Response.Body.FlushAsync(cancellationToken);
+                await Response.WriteAsync($"event: complete\ndata: {completeJson}\n\n");
                 return new EmptyResult();
             }
             catch (Exception ex)
@@ -127,19 +125,19 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpGet("{studyId}")]
-        public async Task<ActionResult<List<Report>>> GetReportsForStudy(string studyId, CancellationToken cancellationToken)
+        public async Task<ActionResult<List<Report>>> GetReportsForStudy(string studyId)
         {
             if (string.IsNullOrWhiteSpace(studyId))
             {
                 return BadRequest("studyId is required.");
             }
 
-            var reports = await _reportRepository.GetReportsByStudyIdAsync(studyId, cancellationToken);
+            var reports = await _reportRepository.GetReportsByStudyIdAsync(studyId);
             return Ok(reports);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Report>> UpdateReport(string id, [FromBody] UpdateReportRequestDto request, CancellationToken cancellationToken)
+        public async Task<ActionResult<Report>> UpdateReport(string id, [FromBody] UpdateReportRequestDto request)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
@@ -150,7 +148,7 @@ namespace CloudPACS.Backend.Controllers
             {
                 return BadRequest("Findings is required.");
             }
-            var existing = await _reportRepository.GetReportByReportId(id, cancellationToken);
+            var existing = await _reportRepository.GetReportByReportId(id);
             if (existing is null)
             {
                 return NotFound($"Report '{id}' was not found.");
@@ -159,7 +157,7 @@ namespace CloudPACS.Backend.Controllers
             existing.Findings = request.Findings;
             existing.UpdatedAtUtc = DateTime.UtcNow;
 
-            var updated = await _reportRepository.UpdateReportAsync(existing, cancellationToken);
+            var updated = await _reportRepository.UpdateReportAsync(existing);
 
             return Ok(updated);
         }

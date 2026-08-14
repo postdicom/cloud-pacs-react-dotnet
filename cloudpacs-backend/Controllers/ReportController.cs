@@ -15,7 +15,7 @@ namespace CloudPACS.Backend.Controllers
 
     [ApiController]
     [Route("api/v1/reports")]
-    [Authorize]
+    [Authorize(Roles = "Radiologist,Admin")]
     public class ReportController : ControllerBase
     {
         private readonly IReportRepository _reportRepository;

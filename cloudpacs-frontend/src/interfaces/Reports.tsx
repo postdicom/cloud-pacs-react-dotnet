@@ -3,8 +3,9 @@ export interface Report {
     studyGuid: string;
     patientId: string;
     userId: string;
-    CreatedByUserName: string;
-    CreatedByUserId: string;
+    createdByUserName: string;
+    createdByUserId: string;
     createdAt: string;
     updatedAt: string;
+    findings: string;
 }

@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import "../stylesheets/dicomViewer.css";
 import { RenderingEngine, Enums, type Types, utilities as csUtils } from "@cornerstonejs/core";
 import type { PublicViewportInput } from "@cornerstonejs/core/types";
-import { init as csRenderInit } from "@cornerstonejs/core";
 import { init as coreInit } from '@cornerstonejs/core';
 import { init as csToolsInit, ToolGroupManager, WindowLevelTool, ZoomTool, PanTool } from "@cornerstonejs/tools";
 import {
@@ -16,27 +15,12 @@ import * as cornerstoneTools from '@cornerstonejs/tools';
 import { MouseBindings } from "@cornerstonejs/tools/enums";
 import { init as cornerstoneToolsInit } from '@cornerstonejs/tools';
 import { useMutation } from "@tanstack/react-query";
+import type { Report } from "../interfaces/Reports.tsx";
+import type { InstanceMeta } from "../interfaces/InstanceMeta.tsx";
 
 type ToolId = "WindowLevel" | "Zoom" | "Pan" | "scroll";
 type PresetId = "brain" | "bone" | "lung" | "abd";
 type TabId = "Details" | "AI Report";
-
-interface InstanceMeta {
-  sopInstanceUid: string;
-  instanceNumber: number;
-  downloadUrl: string;
-  metadata: Record<string, string>;
-}
-
-interface Report {
-  id: string;
-  studyId: string;
-  findings: string;
-  createdByUserId: string;
-  createdByUserName: string;
-  createdAtUtc: string;
-  updatedAtUtc?: string;
-}
 
 export default function DicomViewer() {
   const [activeTool, setActiveTool] = useState<ToolId>("WindowLevel");

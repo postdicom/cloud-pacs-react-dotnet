@@ -13,6 +13,7 @@
     using Microsoft.OpenApi;
     using CloudPACS.Backend.Interfaces;
     using CloudPACS.Backend.Repositories;
+    using Microsoft.AspNetCore.Server.Kestrel.Core;
 
     public class Program
     {
@@ -93,6 +94,13 @@
                     [new OpenApiSecuritySchemeReference("Bearer", document)] = []
                 });
             });
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.ConfigureEndpointDefaults(listenOptions =>
+            {
+                listenOptions.Protocols = HttpProtocols.Http1;
+            });
+            });
 
             builder.Services.AddHttpContextAccessor();
 
@@ -134,7 +142,7 @@
 
             app.UseRouting();
 
-            
+
 
             app.UseAuthentication();
             app.UseAuthorization();

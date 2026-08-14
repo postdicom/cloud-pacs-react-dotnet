@@ -85,41 +85,44 @@ namespace CloudPACS.Backend.Controllers
                 {
                     findings += chunk;
                     var json = JsonSerializer.Serialize(chunk);
-                    await Response.WriteAsync($"{json}", cancellationToken: cancellationToken);
+                    await Response.WriteAsync($"data: {json}\n\n", cancellationToken: cancellationToken);
                     await Response.Body.FlushAsync(cancellationToken);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "AI report generation failed for the instance {StudyId}", instance.Id);
-                return StatusCode(StatusCodes.Status502BadGateway, "Report generation failed. Please try again.");
+                return new EmptyResult();
             }
             try
             {
-            var report = new Report(
-                id: Guid.NewGuid().ToString(),
-                studyId: instance.StudyInstanceUid,
-                findings: findings,
-                createdByUserId: userId,
-                createdByUserName: userName,
-                createdAtUtc: DateTime.UtcNow);
+                var report = new Report(
+                    id: Guid.NewGuid().ToString(),
+                    studyId: instance.StudyInstanceUid,
+                    findings: findings,
+                    createdByUserId: userId,
+                    createdByUserName: userName ?? ",Unknown",
+                    createdAtUtc: DateTime.UtcNow);
 
-            var created = await _reportRepository.CreateReportAsync(report, cancellationToken);
+                var created = await _reportRepository.CreateReportAsync(report, cancellationToken);
 
-            await _auditLogService.LogAsync(
-                userId,
-                userName ?? userId,
-                AuditActions.GenerateReport,
-                ResourceType.Study,
-                instance.Id,
-                $"AI report {created.Id} generated for instance {instance.Id}");
+                await _auditLogService.LogAsync(
+                    userId,
+                    userName ?? userId,
+                    AuditActions.GenerateReport,
+                    ResourceType.Study,
+                    instance.Id,
+                    $"AI report {created.Id} generated for instance {instance.Id}");
 
-            return CreatedAtAction(nameof(GetReportsForStudy), new { studyId = instance.Id }, created);
+                var completeJson = JsonSerializer.Serialize(created, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                await Response.WriteAsync($"event: complete\ndata: {completeJson}\n\n", cancellationToken: cancellationToken);
+                await Response.Body.FlushAsync(cancellationToken);
+                return new EmptyResult();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to save the generated report for the instance {StudyId}", instance.Id);
-                return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save the generated report. Please try again.");
+                return new EmptyResult();
             }
         }
 

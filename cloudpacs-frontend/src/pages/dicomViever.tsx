@@ -15,6 +15,7 @@ import type { Series } from "../interfaces/Series";
 import * as cornerstoneTools from '@cornerstonejs/tools';
 import { MouseBindings } from "@cornerstonejs/tools/enums";
 import { init as cornerstoneToolsInit } from '@cornerstonejs/tools';
+import { useMutation } from "@tanstack/react-query";
 
 type ToolId = "WindowLevel" | "Zoom" | "Pan" | "scroll";
 type PresetId = "brain" | "bone" | "lung" | "abd";
@@ -29,8 +30,12 @@ interface InstanceMeta {
 
 interface Report {
   id: string;
-  CreatedByUserName?: string;
-  CreatedByUserId?: string;
+  studyId: string;
+  findings: string;
+  createdByUserId: string;
+  createdByUserName: string;
+  createdAtUtc: string;
+  updatedAtUtc?: string;
 }
 
 export default function DicomViewer() {
@@ -39,7 +44,6 @@ export default function DicomViewer() {
   const [inverted, setInverted] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("Details");
   const [activeSeries, setActiveSeries] = useState<string>("");
-  const [activeReport, setActiveReport] = useState<string>("");
   const [usableSeries, setUsableSeriesList] = useState<Series[]>([]);
   const [usableReports, setUsableReportsList] = useState<Report[]>([]);
   const [instances, setInstances] = useState<InstanceMeta[]>([]);
@@ -48,6 +52,11 @@ export default function DicomViewer() {
   const [reportLoading, setReportLoading] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
   const [reportFindings, setReportFindings] = useState<string | null>(null);
+
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [reportText, setReportText] = useState("");
+  const [reportSaveError, setReportSaveError] = useState<string | null>(null);
 
   const viewportId = "CT";
   const renderingEngineId = "DicomImageRenderingEngine";
@@ -61,7 +70,6 @@ export default function DicomViewer() {
 
   const location = useLocation();
   const { study, patient } = location.state || {};
-  const report = location.state?.report as Report | undefined;
 
   const navigate = useNavigate();
   const studyList = (patient: any) => {
@@ -74,26 +82,20 @@ export default function DicomViewer() {
   const elementRef = useRef<HTMLDivElement>(null);
   const initPromiseRef = useRef<Promise<void> | null>(null);
   const renderingEngineRef = useRef<RenderingEngine | null>(null);
+  // Fetch previous reports for the study
   useEffect(() => {
-    if (!report?.id) return;
-    const callApi = async () => 
-    {
-      try 
-      {
-        const { data } = await api.get(`api/v1/viewer/report/${report.id}/reports`);
-        setUsableSeriesList(data);
-        if (data.length > 0) 
-        {
-          setActiveSeries(data[0].seriesInstanceUid ?? data[0].id);
-        }
-      } 
-      catch (error) 
-      {
-        console.log("Error " + error);
+    if (!study?.id) return;
+    const callApi = async () => {
+      try {
+        const { data } = await api.get(`api/v1/reports/${study.id}`);
+        setUsableReportsList(data);
+      } catch (error) {
+        console.log("Error fetching reports: " + error);
+        setUsableReportsList([]);
       }
     };
     callApi();
-  }, [report?.id]);
+  }, [study?.id]);
   // Step 1/2: fetch series for the study
   useEffect(() => {
     if (!study?.id) return;
@@ -318,22 +320,99 @@ export default function DicomViewer() {
     setReportFindings(null);
 
     try {
-      await api.post("api/v1/reports/generate", {
-        studyId: study.id,
-        imageBase64: base64Data,
+      const token = localStorage.getItem("token");
+      const response = await fetch("https://localhost:5001/api/v1/reports/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          studyId: study.id,
+          imageBase64: base64Data,
+        }),
       });
 
-      const eventSource = new EventSource('https://localhost:5001/api/v1/reports/generate');
-      eventSource.onmessage = function (event) {
-        const report = JSON.parse(event.data);
-        setReportFindings(report);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      if (!response.body) throw new Error("No response body returned.");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let currentFindings = "";
+      let isCompleteEvent = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          if (line.startsWith("event: complete")) {
+            isCompleteEvent = true;
+          }
+          else if (line.startsWith("data: ")) {
+            const dataStr = line.substring(6).trim();
+            if (!dataStr) continue;
+
+            const parsedData = JSON.parse(dataStr);
+            if (isCompleteEvent || parsedData.id) {
+              setUsableReportsList((prev) => [...prev, parsedData]);
+              isCompleteEvent = false;
+            }
+            else {
+              currentFindings += parsedData;
+              setReportFindings(currentFindings);
+            }
+          }
+        }
       }
     } catch (error) {
-      console.log("Error generating AI report: " + error);
+      console.log("Error generating AI report: ", error);
       setReportError("Failed to generate report. Please try again.");
     } finally {
       setReportLoading(false);
     }
+  }
+
+  function openReport(r: Report) {
+    setSelectedReport(r);
+    setReportText(r.findings ?? "");
+    setReportModalOpen(true);
+    setReportSaveError(null);
+  }
+
+  function closeReportModal() {
+    setReportModalOpen(false);
+    setSelectedReport(null);
+    setReportText("");
+    setReportSaveError(null);
+  }
+
+  const saveReportMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedReport) throw new Error("No report selected");
+      const { data } = await api.put(`api/v1/reports/${selectedReport.id}`, {
+        findings: reportText,
+      });
+      return data as Report;
+    },
+    onSuccess: (updated) => 
+    {
+      setUsableReportsList((prev) =>
+        prev.map((r) => (r.id === updated.id ? updated : r))
+      );
+      setSelectedReport(updated);
+    },
+    onError: () => setReportSaveError("Failed to save report. Please try again."),
+  });
+
+  function handlePrintReport() {
+    window.print();
   }
 
   useEffect(() => {
@@ -505,26 +584,21 @@ export default function DicomViewer() {
 
               {reportFindings && (
                 <div className="dv-info-table">
-                  <p>{reportFindings}</p>
                 </div>
               )}
-              <aside className="dv-sidebar-left">
-                <h2 className="dv-section-title">Previous Reports</h2>
-                <div className="dv-series-list">
-                  {usableReports.map((r) => {
-                    const key = r.CreatedByUserId ?? r.id;
-                    return (
-                      <button
-                        key={key}
-                        className={`dv-series-btn ${activeReport === key ? "dv-series-btn--active" : ""}`}
-                        onClick={() => setActiveReport(key)}
-                      >
-                        {r.CreatedByUserName}
-                      </button>
-                    );
-                  })}
-                </div>
-              </aside>
+
+              <h2 className="dv-section-title">Previous Reports</h2>
+              <div className="dv-series-list">
+                {usableReports.map((r, index) => (
+                  <button
+                    key={r.id}
+                    className={`dv-series-btn ${selectedReport?.id === r.id ? "dv-series-btn--active" : ""}`}
+                    onClick={() => openReport(r)}
+                  >
+                    V{index + 1}
+                  </button>
+                ))}
+              </div>
             </section>
           ) : (
             <section className="dv-sidebar-section">
@@ -567,6 +641,52 @@ export default function DicomViewer() {
           <hr className="dv-sidebar-divider" />
         </aside>
       </div>
+
+      {reportModalOpen && selectedReport && (
+        <div className="dv-modal-overlay" onClick={closeReportModal}>
+          <div className="dv-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="dv-modal__header">
+              <h3>Report — {selectedReport.createdByUserName ?? "Unknown"}</h3>
+              <button className="dv-modal__close" onClick={closeReportModal}>×</button>
+            </div>
+
+            <textarea
+              className="dv-modal__textarea"
+              value={reportText}
+              onChange={(e) => setReportText(e.target.value)}
+              rows={16}
+            />
+
+            {reportSaveError && <p className="dv-disclaimer">{reportSaveError}</p>}
+            {saveReportMutation.isSuccess && <p className="dv-save-success">Saved.</p>}
+
+            <div className="dv-modal__actions">
+              <button
+                className="dv-ai-button"
+                onClick={() => saveReportMutation.mutate()}
+                disabled={saveReportMutation.isPending || reportText.trim().length === 0}
+              >
+                {saveReportMutation.isPending ? "Saving..." : "Save"}
+              </button>
+              <button className="dv-ai-button" onClick={handlePrintReport}>
+                Print / Save as PDF
+              </button>
+            </div>
+          </div>
+
+          <div className="dv-print-report">
+            <h1>Radiology Report</h1>
+            <div className="dv-print-meta">
+              <div><strong>Patient:</strong> {patient.name}</div>
+              <div><strong>Modality:</strong> {study.mod}</div>
+              <div><strong>Study Date:</strong> {study.date}</div>
+              <div><strong>Author:</strong> {selectedReport.createdByUserName}</div>
+            </div>
+            <hr />
+            <div className="dv-print-findings">{reportText}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

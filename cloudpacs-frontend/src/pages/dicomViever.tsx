@@ -14,9 +14,10 @@ import type { Series } from "../interfaces/Series";
 import * as cornerstoneTools from '@cornerstonejs/tools';
 import { MouseBindings } from "@cornerstonejs/tools/enums";
 import { init as cornerstoneToolsInit } from '@cornerstonejs/tools';
-import { useMutation } from "@tanstack/react-query";
-import type { Report } from "../interfaces/Reports.tsx";
 import type { InstanceMeta } from "../interfaces/InstanceMeta.tsx";
+import DicomViewerTopBar from "../components/DicomViewerTopBar";
+import SeriesSidebar from "../components/SeriesSidebar.tsx";
+import AiReportPanel from "../components/AiReportPanel";
 
 type ToolId = "WindowLevel" | "Zoom" | "Pan" | "scroll";
 type PresetId = "brain" | "bone" | "lung" | "abd";
@@ -29,18 +30,8 @@ export default function DicomViewer() {
   const [activeTab, setActiveTab] = useState<TabId>("Details");
   const [activeSeries, setActiveSeries] = useState<string>("");
   const [usableSeries, setUsableSeriesList] = useState<Series[]>([]);
-  const [usableReports, setUsableReportsList] = useState<Report[]>([]);
   const [instances, setInstances] = useState<InstanceMeta[]>([]);
   const [imageIds, setImageIds] = useState<string[]>([]);
-
-  const [reportLoading, setReportLoading] = useState(false);
-  const [reportError, setReportError] = useState<string | null>(null);
-  const [reportFindings, setReportFindings] = useState<string | null>(null);
-
-  const [reportModalOpen, setReportModalOpen] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [reportText, setReportText] = useState("");
-  const [reportSaveError, setReportSaveError] = useState<string | null>(null);
 
   const viewportId = "CT";
   const renderingEngineId = "DicomImageRenderingEngine";
@@ -66,20 +57,7 @@ export default function DicomViewer() {
   const elementRef = useRef<HTMLDivElement>(null);
   const initPromiseRef = useRef<Promise<void> | null>(null);
   const renderingEngineRef = useRef<RenderingEngine | null>(null);
-  // Fetch previous reports for the study
-  useEffect(() => {
-    if (!study?.id) return;
-    const callApi = async () => {
-      try {
-        const { data } = await api.get(`api/v1/reports/${study.id}`);
-        setUsableReportsList(data);
-      } catch (error) {
-        console.log("Error fetching reports: " + error);
-        setUsableReportsList([]);
-      }
-    };
-    callApi();
-  }, [study?.id]);
+
   // Step 1/2: fetch series for the study
   useEffect(() => {
     if (!study?.id) return;
@@ -278,125 +256,20 @@ export default function DicomViewer() {
     viewport.setProperties({ voiRange: { lower, upper } });
     viewport.render();
   }
-  async function generateAiReport() {
-    if (!renderingEngineRef.current) {
-      setReportError("Viewer is not ready yet.");
-      return;
-    }
 
-    const viewport = renderingEngineRef.current.getViewport(viewportId);
-    if (!viewport) {
-      setReportError("Viewer is not ready yet.");
-      return;
-    }
-
-    const canvas = viewport.getCanvas();
-    if (!canvas) {
-      setReportError("No image is currently displayed.");
-      return;
-    }
-
-    const dataUrl = canvas.toDataURL("image/png");
-    const base64Data = dataUrl.split(",")[1]; // strip "data:image/png;base64," prefix
-
-    setReportLoading(true);
-    setReportError(null);
-    setReportFindings(null);
-
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("https://localhost:5001/api/v1/reports/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({
-          studyId: study.id,
-          imageBase64: base64Data,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      if (!response.body) throw new Error("No response body returned.");
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let currentFindings = "";
-      let isCompleteEvent = false;
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (line.startsWith("event: complete")) {
-            isCompleteEvent = true;
-          }
-          else if (line.startsWith("data: ")) {
-            const dataStr = line.substring(6).trim();
-            if (!dataStr) continue;
-
-            const parsedData = JSON.parse(dataStr);
-            if (isCompleteEvent || parsedData.id) {
-              setUsableReportsList((prev) => [...prev, parsedData]);
-              isCompleteEvent = false;
-            }
-            else {
-              currentFindings += parsedData;
-              setReportFindings(currentFindings);
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.log("Error generating AI report: ", error);
-      setReportError("Failed to generate report. Please try again.");
-    } finally {
-      setReportLoading(false);
-    }
+  function handleSelectTool(tool: ToolId) {
+    setActiveTool(tool);
+    chooseTool(tool);
   }
 
-  function openReport(r: Report) {
-    setSelectedReport(r);
-    setReportText(r.findings ?? "");
-    setReportModalOpen(true);
-    setReportSaveError(null);
+  function handleSelectPreset(preset: PresetId) {
+    setActivePreset(preset);
+    setPresetWL(preset);
   }
 
-  function closeReportModal() {
-    setReportModalOpen(false);
-    setSelectedReport(null);
-    setReportText("");
-    setReportSaveError(null);
-  }
-
-  const saveReportMutation = useMutation({
-    mutationFn: async () => {
-      if (!selectedReport) throw new Error("No report selected");
-      const { data } = await api.put(`api/v1/reports/${selectedReport.id}`, {
-        findings: reportText,
-      });
-      return data as Report;
-    },
-    onSuccess: (updated) => 
-    {
-      setUsableReportsList((prev) =>
-        prev.map((r) => (r.id === updated.id ? updated : r))
-      );
-      setSelectedReport(updated);
-    },
-    onError: () => setReportSaveError("Failed to save report. Please try again."),
-  });
-
-  function handlePrintReport() {
-    window.print();
+  function handleToggleInvert() {
+    setInverted((v) => !v);
+    invert();
   }
 
   useEffect(() => {
@@ -417,99 +290,26 @@ export default function DicomViewer() {
 
   return (
     <div className="dv-reader">
-      <header className="dv-topbar">
-        <div className="dv-topbar__tools">
-          <button
-            className={`dv-tool-btn ${activeTool === "WindowLevel" ? "dv-tool-btn--active" : ""}`}
-            onClick={() => { setActiveTool("WindowLevel"); chooseTool("WindowLevel") }}
-          >
-            W/L
-          </button>
-          <button
-            className={`dv-tool-btn ${activeTool === "Zoom" ? "dv-tool-btn--active" : ""}`}
-            onClick={() => { setActiveTool("Zoom"); chooseTool("Zoom") }}
-          >
-            Zoom
-          </button>
-          <button
-            className={`dv-tool-btn ${activeTool === "Pan" ? "dv-tool-btn--active" : ""}`}
-            onClick={() => { setActiveTool("Pan"); chooseTool("Pan") }}
-          >
-            Pan
-          </button>
-
-          <span className="dv-topbar__divider" />
-
-          <button
-            className={`dv-tool-btn ${activePreset === "brain" ? "dv-tool-btn--preset-active" : ""}`}
-            onClick={() => { setActivePreset("brain"); setPresetWL("brain") }}
-          >
-            Brain
-          </button>
-          <button
-            className={`dv-tool-btn ${activePreset === "bone" ? "dv-tool-btn--preset-active" : ""}`}
-            onClick={() => { setActivePreset("bone"); setPresetWL("bone") }}
-          >
-            Bone
-          </button>
-          <button
-            className={`dv-tool-btn ${activePreset === "lung" ? "dv-tool-btn--preset-active" : ""}`}
-            onClick={() => { setActivePreset("lung"); setPresetWL("lung") }}
-          >
-            Lung
-          </button>
-          <button
-            className={`dv-tool-btn ${activePreset === "abd" ? "dv-tool-btn--preset-active" : ""}`}
-            onClick={() => { setActivePreset("abd"); setPresetWL("abd") }}
-          >
-            Abd
-          </button>
-          <span className="dv-topbar__divider" />
-          <button
-            className={`dv-tool-btn ${inverted ? "dv-tool-btn--preset-active" : ""}`}
-            onClick={() => { setInverted((v) => !v); invert() }}
-          >
-            Invert
-          </button>
-        </div>
-
-        <div className="dv-topbar__meta">
-          <div className="dv-topbar__breadcrumb">
-            <div className="dv-topbar__link" onClick={() => patients()}>
-              Patients
-            </div>
-            <span className="dv-topbar__slash">/</span>
-            <div className="dv-topbar__link" onClick={() => studyList(patient)}>
-              {patient.name}
-              <br />
-            </div>
-          </div>
-          <div className="dv-topbar__study">
-            {study.mod}
-            <br />
-            {study.date}
-          </div>
-        </div>
-      </header>
+      <DicomViewerTopBar
+        activeTool={activeTool}
+        activePreset={activePreset}
+        inverted={inverted}
+        onSelectTool={handleSelectTool}
+        onSelectPreset={handleSelectPreset}
+        onToggleInvert={handleToggleInvert}
+        patient={patient}
+        study={study}
+        onNavigateToPatients={patients}
+        onNavigateToStudyList={() => studyList(patient)}
+      />
 
       <div className="dv-body">
-        <aside className="dv-sidebar-left">
-          <h2 className="dv-section-title">Series</h2>
-          <div className="dv-series-list">
-            {usableSeries.map((s) => {
-              const key = s.seriesInstanceUid ?? s.id;
-              return (
-                <button
-                  key={key}
-                  className={`dv-series-btn ${activeSeries === key ? "dv-series-btn--active" : ""}`}
-                  onClick={() => setActiveSeries(key)}
-                >
-                  {s.numberOfInstances} img
-                </button>
-              );
-            })}
-          </div>
-        </aside>
+        <SeriesSidebar
+          usableSeries={usableSeries}
+          activeSeries={activeSeries}
+          onSelectSeries={setActiveSeries}
+        />
+
         <main className="dv-viewport" id="content">
           <div className="dv-overlay-top-left">
             <span>{patient.name}</span>
@@ -547,43 +347,13 @@ export default function DicomViewer() {
 
         <aside className="dv-sidebar-right">
           {activeTab === "AI Report" ? (
-            <section className="dv-sidebar-section">
-              <button
-                className="dv-ai-button"
-                onClick={() => setActiveTab("Details")}
-              >
-                Return to Details
-              </button>
-              <h2 className="dv-section-title">AI Report</h2>
-
-              <button
-                className="dv-ai-button"
-                onClick={generateAiReport}
-                disabled={reportLoading}
-              >
-                {reportLoading ? "Generating..." : "Generate Report"}
-              </button>
-
-              {reportError && <p className="dv-disclaimer">{reportError}</p>}
-
-              {reportFindings && (
-                <div className="dv-info-table">
-                </div>
-              )}
-
-              <h2 className="dv-section-title">Previous Reports</h2>
-              <div className="dv-series-list">
-                {usableReports.map((r, index) => (
-                  <button
-                    key={r.id}
-                    className={`dv-series-btn ${selectedReport?.id === r.id ? "dv-series-btn--active" : ""}`}
-                    onClick={() => openReport(r)}
-                  >
-                    V{index + 1}
-                  </button>
-                ))}
-              </div>
-            </section>
+            <AiReportPanel
+              study={study}
+              patient={patient}
+              renderingEngineRef={renderingEngineRef}
+              viewportId={viewportId}
+              onReturnToDetails={() => setActiveTab("Details")}
+            />
           ) : (
             <section className="dv-sidebar-section">
               <button
@@ -625,52 +395,6 @@ export default function DicomViewer() {
           <hr className="dv-sidebar-divider" />
         </aside>
       </div>
-
-      {reportModalOpen && selectedReport && (
-        <div className="dv-modal-overlay" onClick={closeReportModal}>
-          <div className="dv-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="dv-modal__header">
-              <h3>Report — {selectedReport.createdByUserName ?? "Unknown"}</h3>
-              <button className="dv-modal__close" onClick={closeReportModal}>×</button>
-            </div>
-
-            <textarea
-              className="dv-modal__textarea"
-              value={reportText}
-              onChange={(e) => setReportText(e.target.value)}
-              rows={16}
-            />
-
-            {reportSaveError && <p className="dv-disclaimer">{reportSaveError}</p>}
-            {saveReportMutation.isSuccess && <p className="dv-save-success">Saved.</p>}
-
-            <div className="dv-modal__actions">
-              <button
-                className="dv-ai-button"
-                onClick={() => saveReportMutation.mutate()}
-                disabled={saveReportMutation.isPending || reportText.trim().length === 0}
-              >
-                {saveReportMutation.isPending ? "Saving..." : "Save"}
-              </button>
-              <button className="dv-ai-button" onClick={handlePrintReport}>
-                Print / Save as PDF
-              </button>
-            </div>
-          </div>
-
-          <div className="dv-print-report">
-            <h1>Radiology Report</h1>
-            <div className="dv-print-meta">
-              <div><strong>Patient:</strong> {patient.name}</div>
-              <div><strong>Modality:</strong> {study.mod}</div>
-              <div><strong>Study Date:</strong> {study.date}</div>
-              <div><strong>Author:</strong> {selectedReport.createdByUserName}</div>
-            </div>
-            <hr />
-            <div className="dv-print-findings">{reportText}</div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

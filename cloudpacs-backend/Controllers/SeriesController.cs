@@ -4,7 +4,7 @@ namespace CloudPACS.Backend.Controllers
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using System.Threading.Tasks;
-    using global::CloudPACS.Backend.CloudPACS.Backend;
+    using global::CloudPACS.Backend;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 

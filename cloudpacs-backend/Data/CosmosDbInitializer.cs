@@ -42,6 +42,7 @@ namespace CloudPACS.Backend.Data
                 await CreateContainer(cloudPacsDb, "Patient", "/userId");
                 await CreateContainer(cloudPacsDb, "Series", "/studyGuid");
                 await CreateContainer(cloudPacsDb, "Study", "/patientGuid");
+                await CreateContainer(cloudPacsDb, "Report", "/studyId");
 
                 // Console DB Containers
                 await CreateContainer(consoleDb, "Client-Accounts", "/accountId");

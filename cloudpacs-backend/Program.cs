@@ -11,6 +11,9 @@
     using System.Text;
     using Azure.Storage.Blobs;
     using Microsoft.OpenApi;
+    using CloudPACS.Backend.Interfaces;
+    using CloudPACS.Backend.Repositories;
+    using Microsoft.AspNetCore.Server.Kestrel.Core;
 
     public class Program
     {
@@ -55,7 +58,9 @@
             builder.Services.AddScoped<ISeriesRepository, SeriesRepository>();
             builder.Services.AddScoped<IInstanceRepository, InstanceRepository>();
             builder.Services.AddScoped<IDicomViewRepository, DicomViewRepository>();
+            builder.Services.AddScoped<IReportRepository, ReportRepository>();
             builder.Services.AddSingleton(x => new BlobServiceClient("UseDevelopmentStorage=true"));
+            builder.Services.AddScoped<ReportGenerationService>();
 
             builder.Services.AddCors(options =>
             {
@@ -88,6 +93,13 @@
                 {
                     [new OpenApiSecuritySchemeReference("Bearer", document)] = []
                 });
+            });
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.ConfigureEndpointDefaults(listenOptions =>
+            {
+                listenOptions.Protocols = HttpProtocols.Http1;
+            });
             });
 
             builder.Services.AddHttpContextAccessor();
@@ -130,7 +142,7 @@
 
             app.UseRouting();
 
-            
+
 
             app.UseAuthentication();
             app.UseAuthorization();

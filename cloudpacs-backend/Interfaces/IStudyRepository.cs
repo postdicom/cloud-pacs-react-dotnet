@@ -1,18 +1,15 @@
 namespace CloudPACS.Backend
 {
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
 
-    namespace CloudPACS.Backend
+    public interface IStudyRepository
     {
-        public interface IStudyRepository
-        {
-            Task<List<Study>> GetStudiesByPatientIdAsync(string patientId);
-            Task<Study> GetStudiesByIdAsync(string studyId);
-            Task<Study> CreateStudyAsync(Study study);
-            Task<bool> UpdateStudyAsync(string studyId, Study study);
-            Task<Study?> GetStudyByStudyIdAsync(string id);
-            Task<bool> DeleteStudyAsync(string id);
-        }
+        Task<List<Study>> GetStudiesByPatientIdAsync(string patientGuid);
+        Task<Study?> GetStudyByStudyIdAsync(string studyId);
+        Task<Study> CreateStudyAsync(Study study);
+        Task<bool> UpdateStudyAsync(string studyId, Study study);
+        Task<bool> DeleteStudyAsync(string id);
     }
 }

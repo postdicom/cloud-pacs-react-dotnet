@@ -1,11 +1,13 @@
+using System.Drawing;
 using Microsoft.Extensions.AI;
 
 namespace CloudPACS.Backend
 {
     public class ReportGenerationService
     {
+        private readonly IChatClient? chatClient;
         private readonly HttpClient httpClient;
-        private readonly IChatClient chatClient;
+        private ChatMessage? prompt;
         public ReportGenerationService()
         {
             var host = Host.CreateDefaultBuilder()
@@ -16,27 +18,23 @@ namespace CloudPACS.Backend
                 })
                 .Build();
 
-            var chatClient = host.Services.GetRequiredService<IChatClient>();
-            httpClient = new HttpClient();
+            chatClient = host.Services.GetRequiredService<IChatClient>();
+            httpClient = new();
         }
 
-        public async Task GetReport(string uri)
+        public async Task SetPrompt(byte[] byteArray)
         {
-            byte[] imageBytes = await httpClient.GetByteArrayAsync(uri);
+            prompt = new ChatMessage(ChatRole.User, "Say hi");
+            prompt.Contents.Add(new DataContent(byteArray, "image/png"));
+        }
 
-            var prompt = new ChatMessage(ChatRole.User, "Explain and analyze this image");
-            prompt.Contents.Add(new DataContent(imageBytes, "image/png"));
-
-            Console.WriteLine("AI Response:");
-            var response = await chatClient.GetResponseAsync(prompt);
-            Console.WriteLine($"\nCaption: {response.Messages[0].Text}");
+        public async IAsyncEnumerable<string> GetReport()
+        {
+            await foreach (var response in chatClient.GetStreamingResponseAsync(prompt))
+            {
+                yield return response.Text;
+            }
+            yield return "The response is done";
         }
     }
 }
-
-
-
-
-
-
-

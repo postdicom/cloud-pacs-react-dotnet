@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import "../stylesheets/dicomViewer.css";
 import { RenderingEngine, Enums, type Types, utilities as csUtils } from "@cornerstonejs/core";
 import type { PublicViewportInput } from "@cornerstonejs/core/types";
-import { init as csRenderInit } from "@cornerstonejs/core";
 import { init as coreInit } from '@cornerstonejs/core';
 import { init as csToolsInit, ToolGroupManager, WindowLevelTool, ZoomTool, PanTool } from "@cornerstonejs/tools";
 import {
@@ -15,21 +14,20 @@ import type { Series } from "../interfaces/Series";
 import * as cornerstoneTools from '@cornerstonejs/tools';
 import { MouseBindings } from "@cornerstonejs/tools/enums";
 import { init as cornerstoneToolsInit } from '@cornerstonejs/tools';
+import type { InstanceMeta } from "../interfaces/InstanceMeta.tsx";
+import DicomViewerTopBar from "../components/DicomViewerTopBar";
+import SeriesSidebar from "../components/SeriesSidebar.tsx";
+import AiReportPanel from "../components/AiReportPanel";
 
 type ToolId = "WindowLevel" | "Zoom" | "Pan" | "scroll";
 type PresetId = "brain" | "bone" | "lung" | "abd";
-
-interface InstanceMeta {
-  sopInstanceUid: string;
-  instanceNumber: number;
-  downloadUrl: string;
-  metadata: Record<string, string>;
-}
+type TabId = "Details" | "AI Report";
 
 export default function DicomViewer() {
   const [activeTool, setActiveTool] = useState<ToolId>("WindowLevel");
   const [activePreset, setActivePreset] = useState<PresetId>("brain");
   const [inverted, setInverted] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabId>("Details");
   const [activeSeries, setActiveSeries] = useState<string>("");
   const [usableSeries, setUsableSeriesList] = useState<Series[]>([]);
   const [instances, setInstances] = useState<InstanceMeta[]>([]);
@@ -207,7 +205,7 @@ export default function DicomViewer() {
     const renderingEngine =
       renderingEngineRef.current ?? new RenderingEngine(renderingEngineId);
     renderingEngineRef.current = renderingEngine;
-    
+
     let toolGroup = ToolGroupManager.getToolGroup(toolGroupId);
     if (!toolGroup) {
       toolGroup = ToolGroupManager.createToolGroup(toolGroupId);
@@ -259,6 +257,21 @@ export default function DicomViewer() {
     viewport.render();
   }
 
+  function handleSelectTool(tool: ToolId) {
+    setActiveTool(tool);
+    chooseTool(tool);
+  }
+
+  function handleSelectPreset(preset: PresetId) {
+    setActivePreset(preset);
+    setPresetWL(preset);
+  }
+
+  function handleToggleInvert() {
+    setInverted((v) => !v);
+    invert();
+  }
+
   useEffect(() => {
     if (!elementRef.current) return;
     const el = elementRef.current;
@@ -277,99 +290,26 @@ export default function DicomViewer() {
 
   return (
     <div className="dv-reader">
-      <header className="dv-topbar">
-        <div className="dv-topbar__tools">
-          <button
-            className={`dv-tool-btn ${activeTool === "WindowLevel" ? "dv-tool-btn--active" : ""}`}
-            onClick={() => { setActiveTool("WindowLevel"); chooseTool("WindowLevel") }}
-          >
-            W/L
-          </button>
-          <button
-            className={`dv-tool-btn ${activeTool === "Zoom" ? "dv-tool-btn--active" : ""}`}
-            onClick={() => { setActiveTool("Zoom"); chooseTool("Zoom") }}
-          >
-            Zoom
-          </button>
-          <button
-            className={`dv-tool-btn ${activeTool === "Pan" ? "dv-tool-btn--active" : ""}`}
-            onClick={() => { setActiveTool("Pan"); chooseTool("Pan") }}
-          >
-            Pan
-          </button>
-
-          <span className="dv-topbar__divider" />
-
-          <button
-            className={`dv-tool-btn ${activePreset === "brain" ? "dv-tool-btn--preset-active" : ""}`}
-            onClick={() => { setActivePreset("brain"); setPresetWL("brain") }}
-          >
-            Brain
-          </button>
-          <button
-            className={`dv-tool-btn ${activePreset === "bone" ? "dv-tool-btn--preset-active" : ""}`}
-            onClick={() => { setActivePreset("bone"); setPresetWL("bone") }}
-          >
-            Bone
-          </button>
-          <button
-            className={`dv-tool-btn ${activePreset === "lung" ? "dv-tool-btn--preset-active" : ""}`}
-            onClick={() => { setActivePreset("lung"); setPresetWL("lung") }}
-          >
-            Lung
-          </button>
-          <button
-            className={`dv-tool-btn ${activePreset === "abd" ? "dv-tool-btn--preset-active" : ""}`}
-            onClick={() => { setActivePreset("abd"); setPresetWL("abd") }}
-          >
-            Abd
-          </button>
-          <span className="dv-topbar__divider" />
-          <button
-            className={`dv-tool-btn ${inverted ? "dv-tool-btn--preset-active" : ""}`}
-            onClick={() => { setInverted((v) => !v); invert() }}
-          >
-            Invert
-          </button>
-        </div>
-
-        <div className="dv-topbar__meta">
-          <div className="dv-topbar__breadcrumb">
-            <div className="dv-topbar__link" onClick={() => patients()}>
-              Patients
-            </div>
-            <span className="dv-topbar__slash">/</span>
-            <div className="dv-topbar__link" onClick={() => studyList(patient)}>
-              {patient.name}
-              <br />
-            </div>
-          </div>
-          <div className="dv-topbar__study">
-            {study.mod}
-            <br />
-            {study.date}
-          </div>
-        </div>
-      </header>
+      <DicomViewerTopBar
+        activeTool={activeTool}
+        activePreset={activePreset}
+        inverted={inverted}
+        onSelectTool={handleSelectTool}
+        onSelectPreset={handleSelectPreset}
+        onToggleInvert={handleToggleInvert}
+        patient={patient}
+        study={study}
+        onNavigateToPatients={patients}
+        onNavigateToStudyList={() => studyList(patient)}
+      />
 
       <div className="dv-body">
-        <aside className="dv-sidebar-left">
-          <h2 className="dv-section-title">Series</h2>
-          <div className="dv-series-list">
-            {usableSeries.map((s) => {
-              const key = s.seriesInstanceUid ?? s.id;
-              return (
-                <button
-                  key={key}
-                  className={`dv-series-btn ${activeSeries === key ? "dv-series-btn--active" : ""}`}
-                  onClick={() => setActiveSeries(key)}
-                >
-                  {s.numberOfInstances} img
-                </button>
-              );
-            })}
-          </div>
-        </aside>
+        <SeriesSidebar
+          usableSeries={usableSeries}
+          activeSeries={activeSeries}
+          onSelectSeries={setActiveSeries}
+        />
+
         <main className="dv-viewport" id="content">
           <div className="dv-overlay-top-left">
             <span>{patient.name}</span>
@@ -404,42 +344,55 @@ export default function DicomViewer() {
             <div>FOV: 350mm</div>
           </div>
         </main>
+
         <aside className="dv-sidebar-right">
-          <section className="dv-sidebar-section">
-            <h2 className="dv-section-title">Study</h2>
-            <div className="dv-info-table">
-              <div className="dv-info-row">
-                <span className="dv-info-label">Patient</span>
-                <span className="dv-info-value">{patient.name}</span>
+          {activeTab === "AI Report" ? (
+            <AiReportPanel
+              study={study}
+              patient={patient}
+              renderingEngineRef={renderingEngineRef}
+              viewportId={viewportId}
+              onReturnToDetails={() => setActiveTab("Details")}
+            />
+          ) : (
+            <section className="dv-sidebar-section">
+              <button
+                className="dv-ai-button"
+                onClick={() => setActiveTab("AI Report")}
+              >
+                AI Report
+              </button>
+              <p className="dv-disclaimer">
+                Local LLM only. No patient data sent externally.
+              </p>
+
+              <h2 className="dv-section-title">Study</h2>
+              <div className="dv-info-table">
+                <div className="dv-info-row">
+                  <span className="dv-info-label">Patient</span>
+                  <span className="dv-info-value">{patient.name}</span>
+                </div>
+                <div className="dv-info-row">
+                  <span className="dv-info-label">Modality</span>
+                  <span className="dv-info-value">{study.mod}</span>
+                </div>
+                <div className="dv-info-row">
+                  <span className="dv-info-label">Date</span>
+                  <span className="dv-info-value">{study.date}</span>
+                </div>
+                <div className="dv-info-row">
+                  <span className="dv-info-label">Series</span>
+                  <span className="dv-info-value">{study.series}</span>
+                </div>
+                <div className="dv-info-row">
+                  <span className="dv-info-label">Instances</span>
+                  <span className="dv-info-value">{study.imageCount}</span>
+                </div>
               </div>
-              <div className="dv-info-row">
-                <span className="dv-info-label">Modality</span>
-                <span className="dv-info-value">{study.mod}</span>
-              </div>
-              <div className="dv-info-row">
-                <span className="dv-info-label">Date</span>
-                <span className="dv-info-value">{study.date}</span>
-              </div>
-              <div className="dv-info-row">
-                <span className="dv-info-label">Series</span>
-                <span className="dv-info-value">{study.series}</span>
-              </div>
-              <div className="dv-info-row">
-                <span className="dv-info-label">Instances</span>
-                <span className="dv-info-value">{study.imageCount}</span>
-              </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           <hr className="dv-sidebar-divider" />
-
-          <section className="dv-sidebar-section">
-            <h2 className="dv-section-title">AI Report</h2>
-            <button className="dv-ai-button">Generate AI draft</button>
-            <p className="dv-disclaimer">
-              Local LLM only. No patient data sent externally.
-            </p>
-          </section>
         </aside>
       </div>
     </div>

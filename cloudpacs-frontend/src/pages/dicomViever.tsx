@@ -136,8 +136,7 @@ export default function DicomViewer() {
       }
       if (cancelled) return;
 
-      const renderingEngine =
-        renderingEngineRef.current ?? new RenderingEngine(renderingEngineId);
+      const renderingEngine = renderingEngineRef.current ?? new RenderingEngine(renderingEngineId);
       renderingEngineRef.current = renderingEngine;
 
       const viewportInput = {

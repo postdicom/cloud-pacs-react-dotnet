@@ -26,6 +26,8 @@
                 ?? throw new InvalidOperationException("COSMOS_KEY not set");
             string jwt = Environment.GetEnvironmentVariable("Jwt__SecretKey")
                 ?? throw new InvalidOperationException("Couldnt read JWT key");
+            string blobConnectionString = Environment.GetEnvironmentVariable("BLOB_STORAGE_CONNECTION_STRING")
+                ?? throw new InvalidOperationException("Couldnt read the blob connection string");
 
             Console.WriteLine("Connecting to database");
 
@@ -38,14 +40,6 @@
             }
             var cosmosClientOptions = new CosmosClientOptions
             {
-                HttpClientFactory = () =>
-                {
-                    HttpMessageHandler httpMessageHandler = new HttpClientHandler()
-                    {
-                        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-                    };
-                    return new HttpClient(httpMessageHandler);
-                },
                 ConnectionMode = ConnectionMode.Gateway,
                 LimitToEndpoint = true,
             };
@@ -59,7 +53,7 @@
             builder.Services.AddScoped<IInstanceRepository, InstanceRepository>();
             builder.Services.AddScoped<IDicomViewRepository, DicomViewRepository>();
             builder.Services.AddScoped<IReportRepository, ReportRepository>();
-            builder.Services.AddSingleton(x => new BlobServiceClient("UseDevelopmentStorage=true"));
+            builder.Services.AddSingleton(x => new BlobServiceClient(blobConnectionString));
             builder.Services.AddScoped<ReportGenerationService>();
 
             builder.Services.AddCors(options =>

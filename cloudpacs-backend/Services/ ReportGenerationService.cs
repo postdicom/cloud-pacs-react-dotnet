@@ -24,7 +24,7 @@ namespace CloudPACS.Backend
 
         public async Task SetPrompt(byte[] byteArray)
         {
-            prompt = new ChatMessage(ChatRole.User, "Say hi");
+            prompt = new ChatMessage(ChatRole.User, "Explain and analyze this image.");
             prompt.Contents.Add(new DataContent(byteArray, "image/png"));
         }
 

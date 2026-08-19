@@ -1,7 +1,5 @@
 import { BlobServiceClient } from "@azure/storage-blob";
 
-const blobServiceClient = BlobServiceClient.fromConnectionString("UseDevelopmentStorage=true");
-
 await blobServiceClient.setProperties({
   cors: [
     {

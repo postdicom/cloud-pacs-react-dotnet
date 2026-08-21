@@ -1,0 +1,105 @@
+# ============================================================================
+# CI/CD — Backend (.NET 10 Web API) → Azure App Service
+#
+# SETUP REQUIRED (GitHub → Settings → Secrets and variables → Actions):
+#
+#   Secrets:
+#     AZURE_WEBAPP_PUBLISH_PROFILE
+#       Azure Portal → your Web App → Overview → Get publish profile
+#       → download the .publishsettings file → paste its FULL contents
+#
+#   Variables:
+#     WEBAPP_NAME
+#       Your Azure Web App name, e.g. CloudPacs
+#
+# Azure App Settings (one-time, Portal → Web App → Environment variables):
+#   ASPNETCORE_ENVIRONMENT        = Production
+#   COSMOS_ENDPOINT               = <Cosmos DB endpoint>
+#   COSMOS_KEY                    = <Cosmos DB primary key>
+#   BLOB_STORAGE_CONNECTION_STRING= <Blob Storage connection string>
+#   Jwt__SecretKey                = <JWT signing key, 32+ chars>
+#   CORS_ORIGINS                  = https://<swa-name>.azurestaticapps.net
+#
+# Flow:
+#   PR        → CI only (restore, build) — no deploy
+#   push      → CI (build + publish) → deploy artifact to Azure
+#   manual    → Actions tab → "Run workflow"
+# ============================================================================
+
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'cloudpacs-backend/**'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'cloudpacs-backend/**'
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '10.0.x' # ===== [1] CHANGE only if you upgrade .NET (must match <TargetFramework> in cloudpacs-backend.csproj) =====
+  PROJECT: cloudpacs-backend/cloudpacs-backend.csproj # no change needed unless project is renamed
+
+jobs:
+  # - CI -
+  build:
+    name: Build & Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore ${{ env.PROJECT }}
+
+      - name: Build
+        run: dotnet build ${{ env.PROJECT }} --configuration Release --no-restore
+
+      # NOTE: no test project exists yet. When you add one (xUnit/NUnit),
+      # add: dotnet test <TestProject>.csproj --no-build -c Release
+
+      - name: Publish
+        run: dotnet publish ${{ env.PROJECT }} --configuration Release --no-build --output ${{ github.workspace }}/publish
+
+      - name: Upload publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-publish
+          path: ${{ github.workspace }}/publish
+          retention-days: 1
+
+  # - Deploy -
+  deploy:
+    name: Deploy to Azure Web App
+    needs: build
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: backend-publish
+          path: publish
+
+      - name: Deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          # ===== [2] REQUIRED: create GitHub *variable* WEBAPP_NAME =====
+          # Repo → Settings → Secrets and variables → Actions → Variables tab → New variable
+          # Value = your Azure Web App name, e.g. CloudPacs
+          app-name: ${{ vars.WEBAPP_NAME }}
+          slot-name: production
+          # ===== [3] REQUIRED: create GitHub *secret* AZURE_WEBAPP_PUBLISH_PROFILE =====
+          # Repo → Settings → Secrets and variables → Actions → Secrets tab → New secret
+          # Value = Azure Portal → your Web App → Overview → "Get publish profile"
+          #         → download .publishsettings → paste the ENTIRE file contents as the secret
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: publish

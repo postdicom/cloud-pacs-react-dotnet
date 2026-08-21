@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import './App.css'
-import Navbar from './components/navbar'
 import Login from './pages/login'
 import Register from './pages/register'
 import DicomViewer from './pages/dicomViever'

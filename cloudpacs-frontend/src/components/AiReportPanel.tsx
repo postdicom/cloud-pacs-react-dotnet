@@ -4,10 +4,12 @@ import { useMutation } from "@tanstack/react-query";
 import api from "../queryClientProvider";
 import { API_BASE_URL } from "../config";
 import type { Report } from "../interfaces/Reports.tsx";
+import type { Study } from "../interfaces/Study.tsx";
+import type { Patient } from "../interfaces/Patient.tsx";
 
 interface AiReportPanelProps {
-  study: any;
-  patient: any;
+  study: Study;
+  patient: Patient;
   renderingEngineRef: React.RefObject<RenderingEngine | null>;
   viewportId: string;
   onReturnToDetails: () => void;

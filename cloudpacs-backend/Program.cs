@@ -26,6 +26,8 @@
                 ?? throw new InvalidOperationException("COSMOS_KEY not set");
             string jwt = Environment.GetEnvironmentVariable("Jwt__SecretKey")
                 ?? throw new InvalidOperationException("Couldnt read JWT key");
+            string corsOrigins = Environment.GetEnvironmentVariable("CORS_ORIGINS")
+                ?? "http://localhost:5173";
 
             Console.WriteLine("Connecting to database");
 
@@ -62,10 +64,13 @@
             builder.Services.AddSingleton(x => new BlobServiceClient("UseDevelopmentStorage=true"));
             builder.Services.AddScoped<ReportGenerationService>();
 
+            string[] corsOriginsList = corsOrigins
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
-                    policy.WithOrigins("http://localhost:5173")
+                    policy.WithOrigins(corsOriginsList)
                           .AllowAnyHeader()
                           .AllowAnyMethod());
             });

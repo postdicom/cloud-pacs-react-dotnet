@@ -1,7 +1,8 @@
 import axios from "axios";
+import { API_BASE_URL } from "./config";
 
 const api = axios.create({
-  baseURL: "https://localhost:5001/",
+  baseURL: `${API_BASE_URL}/`,
   headers: {
     "Authorizaiton": `Bearer ${localStorage.getItem('token')}`,
     "Content-Type": "application/json"

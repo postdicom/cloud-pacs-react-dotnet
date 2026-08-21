@@ -9,6 +9,7 @@ import {
   internal as dicomImageLoaderInternal,
 } from "@cornerstonejs/dicom-image-loader";
 import api from "../queryClientProvider";
+import { API_BASE_URL } from "../config";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { Series } from "../interfaces/Series";
 import * as cornerstoneTools from '@cornerstonejs/tools';
@@ -98,7 +99,7 @@ export default function DicomViewer() {
       setImageIds([]);
       return;
     }
-    const API_BASE = "https://localhost:5001";
+    const API_BASE = API_BASE_URL;
     const ids = instances.map(
       (inst) => `wadouri:${API_BASE}${inst.downloadUrl}`
     );

@@ -6,6 +6,7 @@ import { init as csToolsInit } from "@cornerstonejs/tools"
 import { init as dicomImageLoaderInit } from "@cornerstonejs/dicom-image-loader"
 import type { PublicViewportInput } from "@cornerstonejs/core/types"
 import api from "../queryClientProvider"
+import { API_BASE_URL } from "../config"
 
 
 volumeLoader.registerUnknownVolumeLoader(
@@ -30,7 +31,7 @@ function Cornerstone()
 
       let imageIds:string[] = [];
 
-      imageIds.push("wadouri:https://localhost:5001/api/v1/viewer/instance/1/metadata")
+      imageIds.push(`wadouri:${API_BASE_URL}/api/v1/viewer/instance/1/metadata`)
       // Get Cornerstone imageIds and fetch metadata into RAM
       // const imageIds = await createImageIdsAndCacheMetaData({
       //   StudyInstanceUID:

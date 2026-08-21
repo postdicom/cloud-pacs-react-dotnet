@@ -1,0 +1,109 @@
+# ============================================================================
+# CI/CD — Frontend (React + Vite) → Azure Static Web Apps
+#
+# SETUP REQUIRED (GitHub → Settings → Secrets and variables → Actions):
+#
+#   Secrets:
+#     AZURE_STATIC_WEB_APPS_API_TOKEN
+#       Azure Portal → your Static Web App → Overview → Manage deployment token
+#
+#   Variables:
+#     API_BASE_URL
+#       Your backend URL, e.g. https://<webapp>.azurewebsites.net
+#       (baked into the frontend at build time as VITE_API_BASE_URL)
+#
+# Flow:
+#   PR        → CI only (lint, typecheck, build) — no deploy
+#   push      → CI → deploy to Azure Static Web Apps
+#   manual    → Actions tab → "Run workflow"
+# ============================================================================
+
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'cloudpacs-frontend/**'
+      - '.github/workflows/frontend.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'cloudpacs-frontend/**'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20' # ===== [1] CHANGE if your local Node differs (`node -v`) =====
+  APP_DIR: cloudpacs-frontend
+
+jobs:
+  # ------------------------------------------------------------------ CI ----
+  build:
+    name: Build & Verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ env.APP_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ env.APP_DIR }}
+
+      - name: Lint
+        run: npm run lint
+        working-directory: ${{ env.APP_DIR }}
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+        working-directory: ${{ env.APP_DIR }}
+
+      - name: Build
+        run: npm run build
+        working-directory: ${{ env.APP_DIR }}
+        env:
+          # ===== [2] REQUIRED: create GitHub *variable* API_BASE_URL =====
+          # Repo → Settings → Secrets and variables → Actions → Variables tab → New variable
+          # Value = your deployed backend URL, e.g. https://cloudpacs.azurewebsites.net
+          VITE_API_BASE_URL: ${{ vars.API_BASE_URL }}
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: ${{ env.APP_DIR }}/dist
+          retention-days: 1
+
+  # -------------------------------------------------------------- Deploy ----
+  deploy:
+    name: Deploy to Azure Static Web Apps
+    needs: build
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: ${{ env.APP_DIR }}/dist
+
+      - name: Deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          # ===== [3] REQUIRED: create GitHub *secret* AZURE_STATIC_WEB_APPS_API_TOKEN =====
+          # Repo → Settings → Secrets and variables → Actions → Secrets tab → New secret
+          # Value = Azure Portal → your Static Web App → Overview → "Manage deployment token"
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # provided automatically, do not change
+          action: upload
+          app_location: /${{ env.APP_DIR }} # no change needed unless folder is renamed
+          output_location: dist # Vite output; no change needed
+          skip_app_build: true # dist is pre-built; do not rebuild here

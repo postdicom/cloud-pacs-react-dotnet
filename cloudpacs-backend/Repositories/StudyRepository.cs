@@ -107,5 +107,42 @@ namespace CloudPACS.Backend
                 return false;
             }
         }
+
+        public async Task<List<Study>> SearchStudyAsync(string keyword, string patientGuid)
+        {
+            try
+            {
+                var query = new QueryDefinition(
+                    "SELECT VALUE c FROM c WHERE c.Date LIKE @date OR c.Mod LIKE @mod")
+                    .WithParameter("@date", $"%{keyword}%")
+                    .WithParameter("@mod", $"%{keyword}%");
+
+                var requestOptions = new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(patientGuid)
+                };
+
+                var studyList = new List<Study>();
+                using var iterator = _container.GetItemQueryIterator<Study>(query, requestOptions: requestOptions);
+
+                while (iterator.HasMoreResults)
+                {
+                    var page = await iterator.ReadNextAsync();
+                    studyList.AddRange(page);
+                }
+                return studyList;
+            }
+            catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                Console.WriteLine("The study has not been found");
+                return new List<Study>();
+            }
+            catch (CosmosException ex)
+            {
+                Console.WriteLine($"Cosmos error while reading searched study list: {ex.StatusCode} — {ex.Message}");
+                throw;
+            }
+        }
+
     }
 }

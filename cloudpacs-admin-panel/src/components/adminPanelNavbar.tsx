@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import '../stylesheets/navbar.css';
-import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { useNavigate} from "react-router-dom";
+import '../stylesheets/adminPanelNavbar.css';
 
 const IconPlaceholder = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -19,18 +18,18 @@ const CloudPACS: React.FC = () => {
   }
 
   const navItems = [
-    { id: 'patientList', label: 'Patients' },
-    { id: 'upload', label: 'Upload' },
-    { id: 'settings', label: 'Settings' },
+    { id: 'Dashboard', label: 'Dashboard' },
+    { id: 'ClientAccounts', label: 'Client Accounts' },
   ];
 
   return (
     <div className="app-container">
-      <aside className="sidebar">
+      <aside className="adminSidebar">
         <div className="sidebar-top">
-          <div className="brand-logo">
-            <span className="logo-full">CloudPACS</span>
-            <span className="logo-collapsed">CP</span>
+          <div className="admin-brand-logo">
+            {/* <span className="logo-full">CloudPACS</span> */}
+            <span className="logo-collapsed">PostDICOM Console</span>
+            <span className="logo-collapsed adminText">Internal admin</span>
           </div>
 
           <nav className="nav-menu">
@@ -43,7 +42,7 @@ const CloudPACS: React.FC = () => {
                 title={item.label}
               >
                 <span className="icon">
-                  <IconPlaceholder />
+                  <IconPlaceholder/>
                 </span>
                 <span className="nav-text">{item.label}</span>
               </button>
@@ -54,10 +53,9 @@ const CloudPACS: React.FC = () => {
 
         <div className="sidebar-bottom">
           <div className="user-profile" title="Sign out">
-            <div className="avatar">JD</div>
+            <div className="avatar">JW</div>
             <div className="user-info">
-              <div className="user-name">John Doe</div>
-              <div className="user-role">Radiologist</div>
+              <div className="user-name">James Wilson</div>
             </div>
           </div>
         </div>

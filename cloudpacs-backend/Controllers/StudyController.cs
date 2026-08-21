@@ -5,6 +5,8 @@ namespace CloudPACS.Backend.Controllers
     using Microsoft.AspNetCore.Mvc;
     using CloudPACS.Backend;
     using Microsoft.AspNetCore.Authorization;
+    using System.Security.Claims;
+    using System.IdentityModel.Tokens.Jwt;
 
     [ApiController]
     [Route("api/v1")]
@@ -35,6 +37,24 @@ namespace CloudPACS.Backend.Controllers
                 return NotFound($"Study with the ID of {id} couldn't be found.");
             }
             return Ok(study);
+        }
+
+        [HttpGet("studies/search/{patientGuid}/{keyword}")]
+        [Authorize(Roles = "Radiologist,Admin")]
+        public async Task<IActionResult?> SearchForStudy(string keyword, string patientGuid)
+        {
+            try
+            {
+                List<Study> patientList = await _studyRepository.SearchStudyAsync(keyword, patientGuid);
+                return Ok(patientList);
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DATABASE ERROR: {ex.Message}");
+
+                return NotFound(new List<Study>());
+            }
         }
     }
 }

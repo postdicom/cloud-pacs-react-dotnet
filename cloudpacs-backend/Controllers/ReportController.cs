@@ -111,7 +111,7 @@ namespace CloudPACS.Backend.Controllers
                     AuditActions.GenerateReport,
                     ResourceType.Study,
                     instance.Id,
-                    $"AI report {created.Id} generated for instance {instance.Id}");
+                    $"AI report generated for instance");
 
                 var completeJson = JsonSerializer.Serialize(created, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
                 await Response.WriteAsync($"event: complete\ndata: {completeJson}\n\n");

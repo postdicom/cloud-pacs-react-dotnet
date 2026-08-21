@@ -42,6 +42,7 @@ function patientList() {
     }, []);
 
     async function search(keyword: string) {
+        setSearchedPatientList([])
         if (keyword) {
             const data = (await api.get(`api/Patients/search/${keyword}`));
             patients = data.data;

@@ -1,6 +1,7 @@
 ﻿namespace CloudPACS.Backend
 {
     using System;
+    using System.IO;
     using System.Threading.Tasks;
     using Data;
     using DotNetEnv;
@@ -19,7 +20,13 @@
     {
         static async Task Main(string[] args)
         {
-            Env.Load("keys.env");
+            // Only load keys.env locally — it won't exist on Azure, and Azure
+            // App Settings are injected as real environment variables instead.
+            if (File.Exists("keys.env"))
+            {
+                Env.Load("keys.env");
+            }
+
             string endpoint = Environment.GetEnvironmentVariable("COSMOS_ENDPOINT")
                 ?? throw new InvalidOperationException("COSMOS_ENDPOINT not set");
             string key = Environment.GetEnvironmentVariable("COSMOS_KEY")
@@ -28,6 +35,8 @@
                 ?? throw new InvalidOperationException("Couldnt read JWT key");
             string corsOrigins = Environment.GetEnvironmentVariable("CORS_ORIGINS")
                 ?? "http://localhost:5173";
+            string blobConnectionString = Environment.GetEnvironmentVariable("BLOB_STORAGE_CONNECTION_STRING")
+                ?? throw new InvalidOperationException("BLOB_STORAGE_CONNECTION_STRING not set");
 
             Console.WriteLine("Connecting to database");
 
@@ -61,7 +70,7 @@
             builder.Services.AddScoped<IInstanceRepository, InstanceRepository>();
             builder.Services.AddScoped<IDicomViewRepository, DicomViewRepository>();
             builder.Services.AddScoped<IReportRepository, ReportRepository>();
-            builder.Services.AddSingleton(x => new BlobServiceClient("UseDevelopmentStorage=true"));
+            builder.Services.AddSingleton(x => new BlobServiceClient(blobConnectionString));
             builder.Services.AddScoped<ReportGenerationService>();
 
             string[] corsOriginsList = corsOrigins
@@ -91,7 +100,7 @@
                     Scheme = "bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = jwt
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\""
                 });
 
                 options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
@@ -102,9 +111,9 @@
             builder.WebHost.ConfigureKestrel(options =>
             {
                 options.ConfigureEndpointDefaults(listenOptions =>
-            {
-                listenOptions.Protocols = HttpProtocols.Http1;
-            });
+                {
+                    listenOptions.Protocols = HttpProtocols.Http1;
+                });
             });
 
             builder.Services.AddHttpContextAccessor();
@@ -141,13 +150,14 @@
 
             Console.WriteLine($"Environment: {app.Environment.EnvironmentName}");
 
-            app.UseSwagger();//swager test
+            app.UseSwagger();
             app.UseSwaggerUI();
-            app.UseDeveloperExceptionPage();
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
 
             app.UseRouting();
-
-
 
             app.UseAuthentication();
             app.UseAuthorization();

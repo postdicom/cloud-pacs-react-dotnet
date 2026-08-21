@@ -22,9 +22,11 @@
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.79.0-alpha" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <None Include="keys.env" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="keys.env" Condition="Exists('keys.env')">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     <PackageReference Include="DotNetEnv" Version="3.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+  </None>
   </ItemGroup>
 
 </Project>

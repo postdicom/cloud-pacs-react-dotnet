@@ -19,7 +19,7 @@ function Login() {
         try {
             setCreditentialValidity(true);
             e.preventDefault();
-            const details = { email, password};
+            const details = { email, password };
 
             const response = await api.post("api/Auth/Login", {
                 "email": email,

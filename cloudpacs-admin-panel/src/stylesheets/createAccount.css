@@ -1,5 +1,11 @@
 .container {
     box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
+    width: 100vh;
+    background: #eef1f5;
 }
 
 .create-account-block {
@@ -12,7 +18,14 @@
     border: 2px solid rgb(232, 232, 232);
     margin-top: 20px;
     margin-bottom: 20px;
-    width: 40%;
+}
+
+.scroll{
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  table-layout: fixed;
+  overflow-y: scroll;
 }
 
 .create-account-header {
@@ -20,32 +33,32 @@
     border-bottom: 2px solid rgb(232, 232, 232);
 }
 
-.create-account-info{
+.create-account-info {
     font-size: 0.65rem;
     line-height: 15px;
     font-weight: 700;
     color: #94a3b8;
 }
 
-.create-account-details{
+.create-account-details {
     padding: 15px;
 }
 
-.create-account-title{
+.create-account-title {
     color: #4f46e5;
     font-weight: 700;
     font-size: 0.85rem;
     border-bottom: 1.5px solid #e2e8f0;
 }
 
-.create-account-subtitle{
+.create-account-subtitle {
     color: #475569;
     font-weight: 700;
     font-size: 0.78rem;
     margin-top: 10px;
 }
 
-.create-account-input{
+.create-account-input {
     background-color: transparent;
     border-radius: 5px;
     border: 1.5px solid #e2e8f0;
@@ -56,18 +69,18 @@
     height: 25px;
 }
 
-.plan-storage-section{
+.plan-storage-section {
     display: flex;
     flex-direction: row;
 }
 
-.plan-storage-section-component{
+.plan-storage-section-component {
     display: flex;
     flex-direction: column;
     margin-right: 25px;
 }
 
-.create-account-textarea{
+.create-account-textarea {
 
     background-color: transparent;
     color: #0f172a;
@@ -77,4 +90,39 @@
     border: 1.5px solid #e2e8f0;
     padding-top: 5px;
     padding-left: 8px;
+}
+
+#create-account-generate-password-button{
+    background-color: #f1f5f9;
+    border-radius: 4px;
+    border: 1.5px solid #e2e8f0;
+    padding: 5px;
+    margin-left: 10px;
+    font-weight: 900;
+    color: #475569;
+}
+
+.create-account-bottom{
+    background-color: #f8fafc;
+    border-top: 1.5px solid #e2e8f0;
+    padding: 15px;
+}
+
+#create-account-cancel-button{
+    background-color: white;
+    border-radius: 4px;
+    border: 1.5px solid #e2e8f0;
+    padding: 5px;
+    margin-left: 10px;
+    font-weight: 900;
+    color: #475569;
+}
+
+#create-account-button{
+    background-color: #4f46e5;
+    border-radius: 4px;
+    border: none;
+    padding: 5px;
+    margin-left: 10px;
+    font-weight: 900;
 }

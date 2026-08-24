@@ -7,7 +7,8 @@ namespace CloudPACS.Backend
     {
         Admin,
         Radiologist,
-        Viewer
+        Viewer,
+        SuperAdmin
     }
 
     public class User: Common

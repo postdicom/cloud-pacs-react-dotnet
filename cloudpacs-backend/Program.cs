@@ -68,10 +68,6 @@
                     policy.WithOrigins("http://localhost:5173")
                           .AllowAnyHeader()
                           .AllowAnyMethod());
-                options.AddPolicy("AllowAdminPanel", policy =>
-                     policy.WithOrigins("http://localhost:5174")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod());
             });
             builder.Services.AddEndpointsApiExplorer();
 
@@ -137,7 +133,6 @@
             var app = builder.Build();
 
             app.UseCors("AllowFrontend");
-            app.UseCors("AllowAdminPanel");
 
             Console.WriteLine($"Environment: {app.Environment.EnvironmentName}");
 

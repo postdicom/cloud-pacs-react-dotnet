@@ -39,13 +39,11 @@ namespace CloudPACS.Backend
             try
             {
                 var query = new QueryDefinition(
-                    "SELECT VALUE COUNT(1) FROM c WHERE c.Email = @email AND c.AccountId = @accountId")
+                    "SELECT VALUE 1 FROM c WHERE c.Email = @email AND c.AccountId = @accountId")
                     .WithParameter("@Email", email)
                     .WithParameter("@accountId", accountId);
 
-                using FeedIterator<int> iterator = container.GetItemQueryIterator<int>(
-                    query,
-                    requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(accountId) });
+                using FeedIterator<int> iterator = container.GetItemQueryIterator<int>(query);
 
                 if (iterator.HasMoreResults)
                 {

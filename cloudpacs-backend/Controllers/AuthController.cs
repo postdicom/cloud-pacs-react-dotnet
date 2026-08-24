@@ -34,21 +34,23 @@ namespace CloudPACS.Backend.Controllers
                 Console.WriteLine("Attempting to save user to Database...");
                 var account = new Account(
                     Guid.NewGuid().ToString(),
-                    Guid.NewGuid(),
-                    registerRequestDto.Name,
+                    registerRequestDto.AccountName,
+                    registerRequestDto.Slug,
                     Guid.NewGuid().ToString(),
                     BCrypt.HashPassword(registerRequestDto.Password),
                     DateTime.UtcNow,
-                    DateTime.UtcNow,
-                    Common.objectType.Account
+                    Common.objectType.Account,
+                    registerRequestDto.TotalStorage,
+                    registerRequestDto.InternalNotes,
+                    registerRequestDto.Email
                 );
 
                 var user = new User(
                     Guid.NewGuid().ToString(),
                     account.accountId,
-                    registerRequestDto.Name,
+                    registerRequestDto.UserName,
                     registerRequestDto.Email,
-                    UserRole.Radiologist, // Set to radiologist to be able to upload
+                    UserRole.Admin, // Set to radiologist to be able to upload
                     BCrypt.HashPassword(registerRequestDto.Password)
                 );
                 

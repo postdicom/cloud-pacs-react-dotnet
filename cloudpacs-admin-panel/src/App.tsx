@@ -7,6 +7,7 @@ import AdminLogin from './pages/adminLogin';
 import Dashboard from './pages/dashboard';
 import ClientAccounts from './pages/clientAccounts';
 import CreateAccount from './pages/createAccount';
+import AccountDetails from './pages/accountDetails';
 
 function App() {
   const [files, setFiles] = useState<File[]>([]);
@@ -18,6 +19,7 @@ function App() {
             <Route path="/DashBoard" element={<Dashboard />}></Route>
             <Route path="/ClientAccounts" element={<ClientAccounts />}></Route>
             <Route path="/CreateAccount" element={<CreateAccount />}></Route>
+            <Route path="/AccountDetails" element={<AccountDetails />}></Route>
           </Route>
           <Route path="/AdminLogin" element={<AdminLogin />}></Route>
           {/* <Route path="/UnAuthorized" element={<UnAuthorized />}></Route>

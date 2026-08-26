@@ -1,7 +1,6 @@
 import "../stylesheets/login.css"
 import { useState } from "react";
 import Alert from "@mui/material/Alert";
-import { usePatients } from "../hooks/usePatients";
 import { useNavigate } from "react-router-dom";
 import api from "../queryClientProvider";
 

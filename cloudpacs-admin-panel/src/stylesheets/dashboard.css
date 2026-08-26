@@ -172,21 +172,34 @@
   line-height: 1.4;
 }
 
-.register-layout .date-cell {
+.register-layout .dahboard-account-name {
   font-weight: 700;
   color: #14213d;
   line-height: 1.35;
   white-space: nowrap;
   width: 90px;
+  text-align: left;
+  white-space: pre-wrap;
 }
 
-.register-layout .desc-cell {
-  font-weight: 600;
-  color: #1c2437;
+.register-layout .dahboard-account-status {
+  font-weight: 700;
+  text-align: left;
 }
 
-.register-layout .number-cell {
-  color: #5b6577;
+.dahboard-progress-bar{
+  width: 100%;
+}
+
+.register-layout .dahboard-account-storage {
+  text-align: left;
+}
+
+.register-layout .dahboard-account-user-amount {
+  text-align: left;
+}
+
+.register-layout .dahboard-account-creation-date {
   text-align: left;
 }
 
@@ -276,11 +289,16 @@
   border: 2px solid rgb(227, 232, 239);
   background-color: white;
   width: 23%;
-  padding: 5px;
+  padding: 20px;
   text-align: left;
-  /* color: #1e1b4b;
-  font-weight: 900; */
   font-size: 0.9rem;
+}
+
+.header-items-value{
+  margin-right: 5px;
+  color: #0f2d5e;
+  font-weight: 700;
+  font-size: 1.2rem;
 }
 
 .account-table-wrapper {

@@ -1,0 +1,73 @@
+.dahboard-account-id{
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.dashboard-manage-button-column{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.dashboard-manage-button{
+    color: #4f46e5;
+    font-weight: 700 !important;
+    background-color: white;
+    border: 1.5px solid #c7d2fe;
+    border-radius: 4px;
+    padding: 3px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+td:nth-child(2) {
+    color: #4f46e5 !important;
+}
+
+#searchBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: center;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.patientTableButton {
+    width: 16%;
+    height: 39px;
+    border-radius: 7px;
+    padding: 4px;
+    font-size: 0.9rem;
+}
+
+#filtersButton {
+    background-color: white;
+    border: 2px solid rgb(227, 232, 239);
+}
+
+#searchButton {
+    color: #4f46e5;
+    font-weight: 700 !important;
+    background-color: white;
+    border: 1.5px solid #c7d2fe;
+    border-radius: 4px;
+    padding: 3px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+#input {
+    width: 80%;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 7px;
+    border: 2px solid rgb(227, 232, 239);
+    color: rgb(168, 168, 168);
+    padding-left: 0.7rem;
+    background-color: white;
+}
+
+#input::placeholder {
+    color: rgb(168, 168, 168);
+}

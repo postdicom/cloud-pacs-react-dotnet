@@ -25,7 +25,7 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpGet("studies/{id}/series")]
-        [Authorize(Roles = "Radiologist,Admin")]
+        [Authorize(Roles = "Radiologist,Admin,SuperAdmin")]
         public async Task<IActionResult?> GetSeries(string id)
         {
             try

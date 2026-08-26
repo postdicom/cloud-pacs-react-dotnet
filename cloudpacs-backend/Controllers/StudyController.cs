@@ -20,7 +20,7 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpGet("patients/{id}/studies")]
-        [Authorize(Roles = "Radiologist,Admin")]
+        [Authorize(Roles = "Radiologist,Admin,SuperAdmin")]
         public async Task<ActionResult<List<Study>>> GetStudiesForPatient(string id)
         {
             var studies = await _studyRepository.GetStudiesByPatientIdAsync(id);
@@ -28,7 +28,7 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpGet("studies/{id}")]
-        [Authorize(Roles = "Radiologist,Admin")]
+        [Authorize(Roles = "Radiologist,Admin,SuperAdmin")]
         public async Task<ActionResult<Study>> GetStudy(string id)
         {
             var study = await _studyRepository.GetStudyByStudyIdAsync(id);
@@ -40,7 +40,7 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpGet("studies/search/{patientGuid}/{keyword}")]
-        [Authorize(Roles = "Radiologist,Admin")]
+        [Authorize(Roles = "Radiologist,Admin,SuperAdmin")]
         public async Task<IActionResult?> SearchForStudy(string keyword, string patientGuid)
         {
             try

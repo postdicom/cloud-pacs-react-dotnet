@@ -32,7 +32,6 @@ function patientList() {
                 });
                 setNumberOfPatients(() => patients.length);
                 setSearchedPatientList(usablePatientsList);
-
             } catch (error) {
                 console.log("Error " + error);
             }

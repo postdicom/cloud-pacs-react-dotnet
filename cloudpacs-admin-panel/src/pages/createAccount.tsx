@@ -96,17 +96,14 @@ function createAccount() {
                 <div className="create-account-block scroll">
                     <div className="create-account-header">
                         <h4 style={{ color: 'black' }}>New Client Account</h4>
-                        {/* <div className='create-account-info'>Fields marked * are required. The client will receive a welcome email with login instructions.</div> */}
                     </div>
                     <div className="create-account-details">
                         <div className='create-account-title'>ACCOUNT DETAILS</div>
                         <div className='create-account-subtitle'>Account Name *</div>
                         <input className="create-account-input" type="text" onChange={handleAccountName} />
-                        {/* <div className='create-account-info'>The display name shown to all users in this account.</div> */}
 
                         <div className='create-account-subtitle'>Subdomain / Slug *</div>
                         <input className="create-account-input" type="text" readOnly value={slug} />
-                        {/*<div className='create-account-info'>Auto-generated from account name. Used in audit logs and the API path. Lowercase, hyphens only.</div> */}
 
                         <div className='plan-storage-section'>
                             <div className='plan-storage-section-component'>
@@ -125,10 +122,8 @@ function createAccount() {
 
                         <div className='create-account-subtitle'>Internal Notes</div>
                         <textarea className='create-account-textarea' placeholder='e.g. NHS trust, procurement contact: sarah.jones@nhs.uk' name="" id="" onChange={handleInternalNotes}></textarea>
-                        {/* <div className='create-account-info'>Visible to Console admins only — never shown to the client.</div> */}
 
                         <div className='create-account-title'>ACCOUNT ADMIN USER</div>
-                        {/* <div className='create-account-info'>This person will be the first user of the account, with Account Admin role. They can then invite additional users from CloudPACS.</div> */}
                         <div className='plan-storage-section'>
                             <div className='plan-storage-section-component'>
                                 <div className='create-account-subtitle'>First Name *</div>
@@ -141,7 +136,6 @@ function createAccount() {
                         </div>
                         <div className='create-account-subtitle'>Email Address *</div>
                         <input className="create-account-input" type="email" onChange={handleEmail} />
-                        {/* <div className='create-account-info'>Used as the login email in CloudPACS. Must be unique across all accounts.</div> */}
                         <div className='create-account-subtitle'>Temporary Password *</div>
                         <div className='plan-storage-section'>
                             <input className="create-account-input" type="text" value={password} readOnly />

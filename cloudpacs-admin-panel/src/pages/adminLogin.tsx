@@ -15,13 +15,12 @@ function Login() {
     };
 
     let handleSubmit = async (e: React.ChangeEvent<any>) => {
-        loggedIn();
-        /* try {
+        try {
             setCreditentialValidity(true);
             e.preventDefault();
             const details = { email, password };
 
-            const response = await api.post("api/Auth/Login", {
+            const response = await api.post("api/Auth/AdminLogin", {
                 "email": email,
                 "password": password
             });
@@ -38,7 +37,7 @@ function Login() {
         catch (error) {
             setCreditentialValidity(false);
             console.error(error);
-        } */
+        }
     }
 
     return <>

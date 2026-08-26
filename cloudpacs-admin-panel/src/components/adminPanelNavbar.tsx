@@ -27,7 +27,6 @@ const CloudPACS: React.FC = () => {
       <aside className="adminSidebar">
         <div className="sidebar-top">
           <div className="admin-brand-logo">
-            {/* <span className="logo-full">CloudPACS</span> */}
             <span className="logo-collapsed">PostDICOM Console </span>
             <span className="logo-collapsed adminText">Internal admin</span>
           </div>

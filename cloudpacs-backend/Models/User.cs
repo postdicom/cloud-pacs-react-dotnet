@@ -20,6 +20,7 @@ namespace CloudPACS.Backend
         public string Password { get; set; }
         public UserRole Role { get; set; }
         public DateTime? LastLoginAt { get; set; }
+        public string Status { get; set; }
 
         public User(string id, string accountId, string name, string email, UserRole role, string password)
         {
@@ -29,6 +30,7 @@ namespace CloudPACS.Backend
             Email = email;
             Role = role;
             Password = password;
+            Status = "Invited";
         }
     }
 }

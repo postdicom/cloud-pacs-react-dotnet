@@ -54,7 +54,7 @@ namespace CloudPACS.Backend
             this.userRepository = userRepository;
         }
     
-        [Authorize(Roles = "Radiologist,Admin")]
+        [Authorize(Roles = "Radiologist,Admin,SuperAdmin")]
         [HttpGet("generate-sas")]
         public async Task<IActionResult> GenerateSasUrlAsync([FromQuery] string fileName)
         {
@@ -84,7 +84,7 @@ namespace CloudPACS.Backend
         }
 
         [HttpPost("upload")]
-        [Authorize(Roles = "Radiologist,Admin")]
+        [Authorize(Roles = "Radiologist,Admin,SuperAdmin")]
         public async Task<IActionResult> UploadDicomFiles([FromBody] List<string> uploadedFileNames)
         {
             if (uploadedFileNames == null || uploadedFileNames.Count == 0)

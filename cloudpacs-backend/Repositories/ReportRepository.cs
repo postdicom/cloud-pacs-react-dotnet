@@ -6,7 +6,7 @@ namespace CloudPACS.Backend.Repositories
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos;
-    using global::CloudPACS.Backend.Interfaces;
+    using CloudPACS.Backend.Interfaces;
 
     public class ReportRepository : IReportRepository
     {

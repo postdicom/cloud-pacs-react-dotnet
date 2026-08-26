@@ -8,6 +8,7 @@ namespace CloudPACS.Backend.Controllers
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using System.Text;
+    using Microsoft.AspNetCore.Identity;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -84,6 +85,45 @@ namespace CloudPACS.Backend.Controllers
                     {
                         var token = await GenerateToken(user);
                         auditLogService.LogAsync(user.Id, user.Name, AuditActions.Login, ResourceType.Session, "User logged in", "");
+                        await _userRepository.UpdateUserAsync(user, user.Role, user.Email, user.Name, DateTime.UtcNow, user.Id, user.accountId);
+                        return Ok(token); //loginReponseDto
+                    }
+                    else
+                    {
+                        return NotFound("The password doesn't match.");
+                    }
+                }
+                return NotFound("The account doesn't exist.");
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DATABASE ERROR: {ex}");
+                return BadRequest();
+            }
+        }
+
+        [HttpPost]
+        [Route("AdminLogin")]
+        public async Task<ActionResult> AdminLogin([FromBody] LoginRequestDto loginRequestDto)
+        {
+            try
+            {
+                Console.WriteLine("Attempting to get user from Database...");
+                Console.WriteLine(loginRequestDto);
+                var user = await _userRepository.FindUserAsync(loginRequestDto.Email);
+
+                if (user != null)
+                {
+                    if (user.Role != UserRole.SuperAdmin)
+                    {
+                        return Unauthorized("Authorizaiton not met");
+                    }
+                    if (await _userRepository.IsPasswordValid(loginRequestDto, user.Password))
+                    {
+                        var token = await GenerateToken(user);
+                        auditLogService.LogAsync(user.Id, user.Name, AuditActions.Login, ResourceType.Session, "User logged in", "");
+                        await _userRepository.UpdateUserAsync(user, user.Role, user.Email, user.Name, DateTime.UtcNow, user.Id, user.accountId);
                         return Ok(token); //loginReponseDto
                     }
                     else

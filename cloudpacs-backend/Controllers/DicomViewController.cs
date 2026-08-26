@@ -7,7 +7,7 @@ namespace CloudPACS.Backend
     using System.Linq;
 
     [ApiController]
-    [Authorize(Roles = "Admin,Radiologist,Viewer")]
+    [Authorize(Roles = "Admin,Radiologist,Viewer,SuperAdmin")]
     [Route("api/v1/viewer")]
     public class ViewerController : ControllerBase
     {

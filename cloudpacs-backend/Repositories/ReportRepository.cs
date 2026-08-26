@@ -108,5 +108,23 @@ namespace CloudPACS.Backend.Repositories
             var response = await _container.UpsertItemAsync(report, new PartitionKey(report.studyId));
             return response.Resource;
         }
+
+        public async Task DeleteReportByAccountIdAsync(string accountId)
+        {
+            try
+            {
+                await _container.DeleteAllItemsByPartitionKeyStreamAsync(new PartitionKey(accountId));
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteLine("This user does not exist.");
+                return;
+            }
+            catch (CosmosException ex)
+            {
+                Console.WriteLine($"Cosmos error while deleting user: {ex.StatusCode} — {ex.Message}");
+                throw;
+            }
+        }
     }
 }

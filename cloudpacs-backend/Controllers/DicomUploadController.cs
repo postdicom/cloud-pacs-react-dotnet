@@ -98,6 +98,7 @@ namespace CloudPACS.Backend
 
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? string.Empty;
             string role = User.FindFirstValue(ClaimTypes.Role) ?? User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+            User user = await userRepository.FindUserByUserIdAsync(userId);
 
             if (string.IsNullOrEmpty(userId))
             {
@@ -154,6 +155,7 @@ namespace CloudPACS.Backend
                         continue;
                     }
 
+                    string? accountId = user.accountId; //Here
                     string? patientId = "UNKNOWN";
                     string? studyUid = "UNKNOWN";
                     string? seriesUid = "UNKNOWN";
@@ -299,7 +301,8 @@ namespace CloudPACS.Backend
                         documentId,
                         blobClient.Uri.ToString(),
                         DateTime.UtcNow,
-                        extractedMetadata
+                        extractedMetadata,
+                        accountId ?? "UNKNOWN"
                     );
                     var studyDoc = new Study(
                         studyInstanceUid ?? "UNKNOWN",
@@ -309,7 +312,8 @@ namespace CloudPACS.Backend
                         seriesNumber ?? "UNKNOWN",
                         currentImageCount,
                         Common.objectType.Study,
-                        studyInstanceUid ?? "UNKNOWN"
+                        studyInstanceUid ?? "UNKNOWN",
+                        accountId ?? "UNKNOWN"
                     );
                     var patientDoc = new Patient(
                         patientId ?? "UNKNOWN",
@@ -319,7 +323,8 @@ namespace CloudPACS.Backend
                         dateOfBirth ?? "UNKNOWN",
                         currentStudyCount,
                         Common.objectType.Patient,
-                        gender ?? "UNKNOWN"
+                        gender ?? "UNKNOWN",
+                        accountId ?? "UNKNOWN"
                     );
 
                     var seriesDoc = new Series(
@@ -331,7 +336,8 @@ namespace CloudPACS.Backend
                         studyInstanceUid ?? "UNKNOWN",
                         Common.objectType.Series,
                         seriesUid ?? "UNKNOWN",
-                        numberOfInstances
+                        numberOfInstances,
+                        accountId ?? "UNKNOWN"
                     );
                     try
                     {
@@ -386,7 +392,6 @@ namespace CloudPACS.Backend
                         status = "Saved to Azure and Cosmos DB"
                     });
 
-                    User user = await userRepository.FindUserByUserIdAsync(userId);
                     string userName = user.Name;
                     auditLogService.LogAsync(userId, userName, AuditActions.UploadDICOM, ResourceType.Session, "User uploaded instance/s", studyDoc.Mod);
                 }

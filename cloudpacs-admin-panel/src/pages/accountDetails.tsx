@@ -69,6 +69,14 @@ function accountDetails() {
         }
     }
 
+    async function DeleteAccount() {
+        try {
+            await api.delete(`api/Account/${account.accountId}/delete`);
+        } catch (error) {
+            console.log("Error " + error);
+        }
+    }
+
     const statusSettings = [
         { status: "Active", label: "Active", modColor: "#d1fae5", modText: "#065f46" },
         { status: "ViewOnly", label: "View-Only", modColor: "#fef3c7", modText: "#92400e" },
@@ -280,7 +288,7 @@ function accountDetails() {
                                     id='deletion-input'
                                     onChange={handleDeletionInput}
                                 />
-                                <button id='delete-account-button' disabled>Delete account permanently</button>
+                                <button id='delete-account-button' disabled onClick={() => DeleteAccount()}>Delete account permanently</button>
                             </div>
                         </>
                         }

@@ -12,5 +12,6 @@ namespace CloudPACS.Backend
         Task<bool> UpdateStudyAsync(string studyId, Study study);
         Task<bool> DeleteStudyAsync(string id);
         Task<List<Study>> SearchStudyAsync(string keyword, string patientGuid);
+        Task DeleteStudyByAccountIdAsync(string accountId);
     }
 }

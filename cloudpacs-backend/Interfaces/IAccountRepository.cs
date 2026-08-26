@@ -13,5 +13,6 @@ namespace CloudPACS.Backend
         Task UpdateAccountAsync(Account account, int newTotalStorage, AccountStatus newStatus, string newInternalNotes);
         Task<List<Account>> SearchAccountAsync(string keyword);
         Task<Account?> GetAccount(string accountId);
+        Task DeleteAccountByAccountIdAsync(string accountId);
     }
 }

@@ -207,5 +207,23 @@ namespace CloudPACS.Backend
                 throw;
             }
         }
+
+        public async Task DeleteUserByAccountIdAsync(string accountId)
+        {
+            try
+            {
+                await container.DeleteAllItemsByPartitionKeyStreamAsync(new PartitionKey(accountId));
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteLine("This user does not exist.");
+                return;
+            }
+            catch (CosmosException ex)
+            {
+                Console.WriteLine($"Cosmos error while deleting user: {ex.StatusCode} — {ex.Message}");
+                throw;
+            }
+        }
     }
 }

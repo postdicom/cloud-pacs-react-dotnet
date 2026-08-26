@@ -11,5 +11,6 @@ namespace CloudPACS.Backend
         Task DeletePatientAsync(PatientListDto patientListDto);
         Task<List<Patient>> FindPatientsAsync(string userId);
         Task<Patient?> GetPatientByMrn(PatientListDto patientListDto);
+        Task DeletePatientByAccountIdAsync(string accountId);
     }
 }

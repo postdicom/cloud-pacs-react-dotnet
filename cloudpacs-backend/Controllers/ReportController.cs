@@ -18,6 +18,7 @@ namespace CloudPACS.Backend.Controllers
     [Authorize(Roles = "Radiologist,Admin,SuperAdmin")]
     public class ReportController : ControllerBase
     {
+        private readonly IUserRepository _userRepository;
         private readonly IReportRepository _reportRepository;
         private readonly IStudyRepository _studyRepository;
         private readonly ReportGenerationService _reportGenerationService;
@@ -25,12 +26,14 @@ namespace CloudPACS.Backend.Controllers
         private readonly ILogger<ReportController> _logger;
 
         public ReportController(
+            IUserRepository userRepository,
             IReportRepository reportRepository,
             IStudyRepository studyRepository,
             ReportGenerationService reportGenerationService,
             AuditLogService auditLogService,
             ILogger<ReportController> logger)
         {
+            _userRepository = userRepository;
             _reportRepository = reportRepository;
             _studyRepository = studyRepository;
             _reportGenerationService = reportGenerationService;
@@ -95,13 +98,15 @@ namespace CloudPACS.Backend.Controllers
             }
             try
             {
+                User user = await _userRepository.FindUserByUserIdAsync(userId);
                 var report = new Report(
                     id: Guid.NewGuid().ToString(),
                     studyId: instance.StudyInstanceUid,
                     findings: findings,
                     createdByUserId: userId,
                     createdByUserName: userName ?? ",Unknown",
-                    createdAtUtc: DateTime.UtcNow);
+                    createdAtUtc: DateTime.UtcNow,
+                    user.accountId);
 
                 var created = await _reportRepository.CreateReportAsync(report);
 

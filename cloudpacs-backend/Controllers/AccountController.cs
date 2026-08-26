@@ -1,6 +1,7 @@
 namespace CloudPACS.Backend.Controllers
 {
     using System;
+    using System.ComponentModel.Design.Serialization;
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using System.Threading.Tasks;
@@ -21,9 +22,10 @@ namespace CloudPACS.Backend.Controllers
         private readonly ISeriesRepository seriesRepository;
         private readonly IInstanceRepository instanceRepository;
         private readonly IReportRepository reportRepository;
+        private readonly AuditLogService auditLogService;
         public AccountController(IAccountRepository accountRepository, IUserRepository userRepository, IPatientRepository patientRepository,
          IStudyRepository studyRepository, ISeriesRepository seriesRepository, IInstanceRepository instanceRepository, 
-         IReportRepository reportRepository)
+         IReportRepository reportRepository, AuditLogService auditLogService)
         {
             this.accountRepository = accountRepository;
             this.userRepository = userRepository;
@@ -32,6 +34,7 @@ namespace CloudPACS.Backend.Controllers
             this.seriesRepository = seriesRepository;
             this.instanceRepository = instanceRepository;
             this.reportRepository = reportRepository;
+            this.auditLogService = auditLogService;
         }
 
         [HttpGet]
@@ -69,22 +72,15 @@ namespace CloudPACS.Backend.Controllers
         {
             try
             {
-                List<User> userList = await userRepository.GetUsersByAccountIdAsync(accountId);
-                List<Patient> patientList = await patientRepository.FindPatientsAsync(accountId);
-                List<Study> studyList = [];
-                foreach (Patient patient in patientList)
-                {
-                    studyList.AddRange(await studyRepository.GetStudiesByPatientIdAsync(patient.Id));
-                }
-                List<Series> seriesList = [];
-                foreach (Study study in studyList)
-                {
-                    seriesList.AddRange(await seriesRepository.FindSeriesAsync(study.Id));
-                    /* List<Instance> instanceList = await instanceRepository.FindInstancesAsync(study); */
-                }
-                /* List<Instance> instanceList = await instanceRepository.FindInstancesAsync(study);
-                List<Instance> instanceList = await userRepository.GetUsersByAccountIdAsync(accountId); */
-                return Ok(userList);
+                await instanceRepository.DeleteInstanceAsync(accountId);
+                await userRepository.DeleteUserByAccountIdAsync(accountId);
+                await studyRepository.DeleteStudyByAccountIdAsync(accountId);
+                await seriesRepository.DeleteStudyByAccountIdAsync(accountId);
+                await accountRepository.DeleteAccountByAccountIdAsync(accountId);
+                await reportRepository.DeleteReportByAccountIdAsync(accountId);
+                await patientRepository.DeletePatientByAccountIdAsync(accountId);
+                await auditLogService.DeleteAduditLogByAccountIdAsync(accountId);
+                return Ok();
             }
             catch (Exception ex)
             {

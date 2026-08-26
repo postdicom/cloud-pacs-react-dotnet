@@ -14,5 +14,6 @@ namespace CloudPACS.Backend
         Task<bool> IsPasswordValid(LoginRequestDto loginRequestDto, string password);
         Task<User?> FindUserByUserIdAsync(string userId);
         Task<List<User>> GetUsersByAccountIdAsync(string accountId);
+        Task DeleteUserByAccountIdAsync(string accountId);
     }
 }

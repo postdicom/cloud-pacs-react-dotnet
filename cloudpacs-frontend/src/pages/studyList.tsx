@@ -23,6 +23,9 @@ function Register() {
     let [filteredAuditLog, setFilteredAuditLog] = useState<AuditLogEntry[]>(usableAuditLog);
     let [selectedFilter, setSelectedFilter] = useState("All Studies");
     let [existingMods, setExistingMods] = useState<string[]>([]);
+    const [keyword, setKeyword] = useState("");
+    const [searchedStudiesList, setSearchedStudiesList] = useState<Study[]>([]);
+    const [searchActive, setSearchActive] = useState(false);
 
     const modColours = {
         MR: "#F3E5F5",
@@ -82,6 +85,25 @@ function Register() {
         callApi();
     }, []);
 
+    async function search(keyword: string) {
+        setSearchedStudiesList([])
+        if (keyword) {
+            const data = (await api.get(`api/Studies/search/${patient.mrn}/${keyword}`));
+            studies = data.data;
+            if (studies.length === 0) {
+                setSearchedStudiesList([])
+            }
+            setSearchActive(true);
+            Array.from(studies).forEach(element => {
+                const study: Study = element;
+                setSearchedStudiesList((prev) => prev.some((s) => s.id === study.id) ? prev : [...prev, study]);
+            });
+        }
+        else {
+            setSearchActive(false);
+        }
+    }
+
     function filterAuditLog(value) {
         setSelectedFilter(value);
 
@@ -121,6 +143,11 @@ function Register() {
                     >
                         Access Log
                     </button>
+                    {activeTab === "Studies" &&
+                        <>
+                            <input id="input" type="text" placeholder='Search by mod or date' value={keyword} onChange={(e) => setKeyword(e.target.value)} />
+                            <button className="patientTableButton" id='searchButton' onClick={() => search(keyword)}>Search</button>
+                        </>}
                 </div>
 
                 {activeTab === "Studies" && (

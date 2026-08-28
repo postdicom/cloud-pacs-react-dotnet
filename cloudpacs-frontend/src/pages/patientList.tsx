@@ -32,7 +32,6 @@ function patientList() {
                 });
                 setNumberOfPatients(() => patients.length);
                 setSearchedPatientList(usablePatientsList);
-
             } catch (error) {
                 console.log("Error " + error);
             }
@@ -42,6 +41,7 @@ function patientList() {
     }, []);
 
     async function search(keyword: string) {
+        setSearchedPatientList([])
         if (keyword) {
             const data = (await api.get(`api/Patients/search/${keyword}`));
             patients = data.data;

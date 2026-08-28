@@ -1,7 +1,6 @@
 import "../stylesheets/login.css"
 import { useState } from "react";
 import Alert from "@mui/material/Alert";
-import { usePatients } from "../hooks/usePatients";
 import { useNavigate } from "react-router-dom";
 import api from "../queryClientProvider";
 
@@ -19,7 +18,7 @@ function Login() {
         try {
             setCreditentialValidity(true);
             e.preventDefault();
-            const details = { email, password};
+            const details = { email, password };
 
             const response = await api.post("api/Auth/Login", {
                 "email": email,

@@ -39,13 +39,11 @@ namespace CloudPACS.Backend
             try
             {
                 var query = new QueryDefinition(
-                    "SELECT VALUE COUNT(1) FROM c WHERE c.Email = @email AND c.AccountId = @accountId")
+                    "SELECT VALUE 1 FROM c WHERE c.Email = @email AND c.AccountId = @accountId")
                     .WithParameter("@Email", email)
                     .WithParameter("@accountId", accountId);
 
-                using FeedIterator<int> iterator = container.GetItemQueryIterator<int>(
-                    query,
-                    requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(accountId) });
+                using FeedIterator<int> iterator = container.GetItemQueryIterator<int>(query);
 
                 if (iterator.HasMoreResults)
                 {
@@ -61,13 +59,18 @@ namespace CloudPACS.Backend
                 throw;
             }
         }
-        public async Task UpdateUserAsync(User user, UserRole newRole, string newEmail, string newUsername, string newPhoneNumber, string userId, string accountId)
+        public async Task UpdateUserAsync(User user, UserRole newRole, string newEmail, string newUsername, DateTime newLastLogin, string userId, string accountId)
         {
             try
             {
                 user.Email = newEmail;
                 user.Name = newUsername;
                 user.Role = newRole;
+                user.LastLoginAt = newLastLogin;
+                if (user.Status.Equals("Invited"))
+                {
+                    user.Status = "Active";
+                }
                 await container.ReplaceItemAsync(user, userId, new PartitionKey(accountId));
             }
             catch (CosmosException ex)
@@ -166,6 +169,60 @@ namespace CloudPACS.Backend
             {
                 Console.WriteLine("This user does not exist.");
                 return null;
+            }
+        }
+
+        public async Task<List<User>> GetUsersByAccountIdAsync(string accountId)
+        {
+            try
+            {
+                var query = new QueryDefinition(
+                    "SELECT VALUE c FROM c WHERE c.accountId = @accountId")
+                    .WithParameter("@accountId", accountId);
+
+                var requestOptions = new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(accountId)
+                };
+
+                var userList = new List<User>();
+                using var iterator = container.GetItemQueryIterator<User>(query, requestOptions: requestOptions);
+
+                while (iterator.HasMoreResults)
+                {
+                    var page = await iterator.ReadNextAsync();
+                    userList.AddRange(page);
+                }
+                return userList;
+            }
+
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteLine("The user list has not been found");
+                return [];
+            }
+            catch (CosmosException ex)
+            {
+                Console.WriteLine($"Cosmos error while reading user list: {ex.StatusCode} — {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task DeleteUserByAccountIdAsync(string accountId)
+        {
+            try
+            {
+                await container.DeleteAllItemsByPartitionKeyStreamAsync(new PartitionKey(accountId));
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteLine("This user does not exist.");
+                return;
+            }
+            catch (CosmosException ex)
+            {
+                Console.WriteLine($"Cosmos error while deleting user: {ex.StatusCode} — {ex.Message}");
+                throw;
             }
         }
     }

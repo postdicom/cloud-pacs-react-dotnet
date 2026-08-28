@@ -13,7 +13,9 @@ namespace CloudPACS.Backend
         public string LastStudy { get; set; }
         public int NumOfStudies {get; set;}
         public string Gender {get; set;}
-        public Patient(string Id, string userId, string Mrn, string Name, string DoB, int NumOfStudies, objectType objectType, string Gender)
+        public string accountId { get; set; }
+        public Patient(string Id, string userId, string Mrn, string Name, string DoB, int NumOfStudies, objectType objectType,
+        string Gender, string accountId)
         {
             this.Id = Id;
             this.userId = userId;
@@ -23,6 +25,7 @@ namespace CloudPACS.Backend
             this.NumOfStudies = NumOfStudies;
             ObjectType = objectType;
             this.Gender = Gender;
+            this.accountId = accountId;
         }
 
         public static implicit operator Patient(List<Patient> v)

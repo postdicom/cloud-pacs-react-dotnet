@@ -5,6 +5,8 @@ namespace CloudPACS.Backend.Controllers
     using Microsoft.AspNetCore.Mvc;
     using CloudPACS.Backend;
     using Microsoft.AspNetCore.Authorization;
+    using System.Security.Claims;
+    using System.IdentityModel.Tokens.Jwt;
 
     [ApiController]
     [Route("api/v1")]
@@ -18,7 +20,7 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpGet("patients/{id}/studies")]
-        [Authorize(Roles = "Radiologist,Admin")]
+        [Authorize(Roles = "Radiologist,Admin,SuperAdmin")]
         public async Task<ActionResult<List<Study>>> GetStudiesForPatient(string id)
         {
             var studies = await _studyRepository.GetStudiesByPatientIdAsync(id);
@@ -26,7 +28,7 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpGet("studies/{id}")]
-        [Authorize(Roles = "Radiologist,Admin")]
+        [Authorize(Roles = "Radiologist,Admin,SuperAdmin")]
         public async Task<ActionResult<Study>> GetStudy(string id)
         {
             var study = await _studyRepository.GetStudyByStudyIdAsync(id);
@@ -35,6 +37,24 @@ namespace CloudPACS.Backend.Controllers
                 return NotFound($"Study with the ID of {id} couldn't be found.");
             }
             return Ok(study);
+        }
+
+        [HttpGet("studies/search/{patientGuid}/{keyword}")]
+        [Authorize(Roles = "Radiologist,Admin,SuperAdmin")]
+        public async Task<IActionResult?> SearchForStudy(string keyword, string patientGuid)
+        {
+            try
+            {
+                List<Study> patientList = await _studyRepository.SearchStudyAsync(keyword, patientGuid);
+                return Ok(patientList);
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DATABASE ERROR: {ex.Message}");
+
+                return NotFound(new List<Study>());
+            }
         }
     }
 }

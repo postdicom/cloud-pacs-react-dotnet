@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import '../stylesheets/navbar.css';
+import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material';
 
 const IconPlaceholder = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

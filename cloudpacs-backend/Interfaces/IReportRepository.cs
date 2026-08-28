@@ -9,5 +9,6 @@ namespace CloudPACS.Backend.Interfaces
         Task<Report> GetReportByReportId(string id);
         Task<Report> CreateReportAsync(Report report);
         Task<Report> UpdateReportAsync(Report report);
+        Task DeleteReportByAccountIdAsync(string accountId);
     }
 }

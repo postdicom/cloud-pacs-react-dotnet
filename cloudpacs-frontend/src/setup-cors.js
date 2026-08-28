@@ -5,7 +5,7 @@ const blobServiceClient = BlobServiceClient.fromConnectionString("UseDevelopment
 await blobServiceClient.setProperties({
   cors: [
     {
-      allowedOrigins: "http://localhost:5173",
+      allowedOrigins: "http://localhost:5173,http://localhost:5174",
       allowedMethods: "GET,PUT,POST,DELETE,HEAD,OPTIONS,MERGE",
       allowedHeaders: "*",
       exposedHeaders: "*",

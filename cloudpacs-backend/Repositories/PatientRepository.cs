@@ -82,10 +82,10 @@ namespace CloudPACS.Backend
             try
             {
                 var query = new QueryDefinition(
-                    "SELECT VALUE c FROM c WHERE c.Name = @Name OR c.Mrn = @mrn OR c.DoB = @dob")
-                    .WithParameter("@Name", keyword)
-                    .WithParameter("@mrn", keyword)
-                    .WithParameter("@dob", keyword);
+                    "SELECT VALUE c FROM c WHERE c.Name LIKE @Name OR c.Mrn LIKE @mrn OR c.DoB LIKE @dob")
+                    .WithParameter("@Name", $"%{keyword}%")
+                    .WithParameter("@mrn", $"%{keyword}%")
+                    .WithParameter("@dob", $"%{keyword}%");
 
                 var requestOptions = new QueryRequestOptions
                 {
@@ -189,6 +189,24 @@ namespace CloudPACS.Backend
             {
                 Console.WriteLine("This user does not exist.");
                 return null;
+            }
+        }
+
+        public async Task DeletePatientByAccountIdAsync(string accountId)
+        {
+            try
+            {
+                await container.DeleteAllItemsByPartitionKeyStreamAsync(new PartitionKey(accountId));
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteLine("This user does not exist.");
+                return;
+            }
+            catch (CosmosException ex)
+            {
+                Console.WriteLine($"Cosmos error while deleting user: {ex.StatusCode} — {ex.Message}");
+                throw;
             }
         }
     }

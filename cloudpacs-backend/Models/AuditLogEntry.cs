@@ -34,5 +34,6 @@ namespace CloudPACS.Backend
         public DateTimeOffset Timestamp { get; init; }
         public string IpAddress { get; init; } = String.Empty;
         public string StudyDetail { get; init; } = String.Empty;
+        public string accountId { get; set; }
     }
 }

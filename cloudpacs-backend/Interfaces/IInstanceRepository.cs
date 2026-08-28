@@ -9,7 +9,7 @@ namespace CloudPACS.Backend
         Task AddInstanceAsync(Instance instance);
         Task<bool> IsInstanceExistsAsync(string id, string seriesGuid);
         Task UpdateInstanceAsync(Instance instance, string id, string seriesGuid, string seriesInstanceUid, string studyInstanceUid, string sopInstanceUid);
-        Task DeleteInstanceAsync(string id, string seriesGuid);
+        Task DeleteInstanceAsync(string accountId);
         Task<List<Instance>> FindInstancesAsync(string studyGuid);
     }
 }

@@ -15,9 +15,10 @@ namespace CloudPACS.Backend.Controllers
 
     [ApiController]
     [Route("api/v1/reports")]
-    [Authorize(Roles = "Radiologist,Admin")]
+    [Authorize(Roles = "Radiologist,Admin,SuperAdmin")]
     public class ReportController : ControllerBase
     {
+        private readonly IUserRepository _userRepository;
         private readonly IReportRepository _reportRepository;
         private readonly IStudyRepository _studyRepository;
         private readonly ReportGenerationService _reportGenerationService;
@@ -25,12 +26,14 @@ namespace CloudPACS.Backend.Controllers
         private readonly ILogger<ReportController> _logger;
 
         public ReportController(
+            IUserRepository userRepository,
             IReportRepository reportRepository,
             IStudyRepository studyRepository,
             ReportGenerationService reportGenerationService,
             AuditLogService auditLogService,
             ILogger<ReportController> logger)
         {
+            _userRepository = userRepository;
             _reportRepository = reportRepository;
             _studyRepository = studyRepository;
             _reportGenerationService = reportGenerationService;
@@ -95,13 +98,15 @@ namespace CloudPACS.Backend.Controllers
             }
             try
             {
+                User user = await _userRepository.FindUserByUserIdAsync(userId);
                 var report = new Report(
                     id: Guid.NewGuid().ToString(),
                     studyId: instance.StudyInstanceUid,
                     findings: findings,
                     createdByUserId: userId,
                     createdByUserName: userName ?? ",Unknown",
-                    createdAtUtc: DateTime.UtcNow);
+                    createdAtUtc: DateTime.UtcNow,
+                    user.accountId);
 
                 var created = await _reportRepository.CreateReportAsync(report);
 
@@ -111,7 +116,7 @@ namespace CloudPACS.Backend.Controllers
                     AuditActions.GenerateReport,
                     ResourceType.Study,
                     instance.Id,
-                    $"AI report {created.Id} generated for instance {instance.Id}");
+                    $"AI report generated for instance");
 
                 var completeJson = JsonSerializer.Serialize(created, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
                 await Response.WriteAsync($"event: complete\ndata: {completeJson}\n\n");

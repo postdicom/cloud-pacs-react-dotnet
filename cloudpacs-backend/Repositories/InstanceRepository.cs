@@ -3,7 +3,7 @@ namespace CloudPACS.Backend
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos;
 
-    public class InstanceRepository: IInstanceRepository
+    public class InstanceRepository : IInstanceRepository
     {
         private readonly Container _instanceContainer;
 
@@ -19,7 +19,7 @@ namespace CloudPACS.Backend
                 new PartitionKey(instance.seriesGuid)
             );
         }
-        
+
         public async Task AddInstanceAsync(Instance instance)
         {
             try
@@ -85,11 +85,11 @@ namespace CloudPACS.Backend
             }
         }
 
-        public async Task DeleteInstanceAsync(string id, string seriesGuid)
+        public async Task DeleteInstanceAsync(string accountId)
         {
             try
             {
-                await _instanceContainer.DeleteItemAsync<Instance>(id, new PartitionKey(seriesGuid));
+                ResponseMessage response = await _instanceContainer.DeleteAllItemsByPartitionKeyStreamAsync(new PartitionKey(accountId));
             }
             catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {

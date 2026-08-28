@@ -1,7 +1,6 @@
 namespace CloudPACS.Backend
 {
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos;
 
     public interface IPatientRepository
     {
@@ -12,5 +11,6 @@ namespace CloudPACS.Backend
         Task DeletePatientAsync(PatientListDto patientListDto);
         Task<List<Patient>> FindPatientsAsync(string userId);
         Task<Patient?> GetPatientByMrn(PatientListDto patientListDto);
+        Task DeletePatientByAccountIdAsync(string accountId);
     }
 }

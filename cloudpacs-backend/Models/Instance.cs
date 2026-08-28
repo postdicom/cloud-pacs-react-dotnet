@@ -16,8 +16,9 @@ namespace CloudPACS.Backend
         public double FileSize { get; set; }
         public DateTime UploadDate { get; set; } = default(DateTime);  //public instance to get rid of this
         public Dictionary<string, string> Metadata { get; set; }
+        public string accountId { get; set; }
         public Instance(string id, string seriesGuid, string SeriesInstanceUid, string StudyInstanceUid, string SopInstanceUid,
-        string FilePath, DateTime UploadDate, Dictionary<string, string> Metadata)
+        string FilePath, DateTime UploadDate, Dictionary<string, string> Metadata, string accountId)
         {
             this.Id = id;
             this.seriesGuid = seriesGuid;
@@ -27,6 +28,7 @@ namespace CloudPACS.Backend
             this.FilePath = FilePath;
             this.UploadDate = UploadDate;
             this.Metadata = Metadata;
+            this.accountId = accountId;
         }
     }
 }

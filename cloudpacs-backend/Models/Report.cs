@@ -12,7 +12,9 @@ namespace CloudPACS.Backend
         public string CreatedByUserName { get; set; }
         public DateTime CreatedAtUtc { get; set; }
         public DateTime? UpdatedAtUtc { get; set; }
-        public Report(string id, string studyId, string findings, string createdByUserId, string createdByUserName, DateTime createdAtUtc)
+        public string accountId { get; set; }
+        public Report(string id, string studyId, string findings, string createdByUserId, string createdByUserName, DateTime createdAtUtc,
+        string accountId)
         {
             Id = id;
             this.studyId = studyId;
@@ -20,6 +22,7 @@ namespace CloudPACS.Backend
             CreatedByUserId = createdByUserId;
             CreatedByUserName = createdByUserName;
             CreatedAtUtc = createdAtUtc;
+            this.accountId = accountId;
         }
     }
 }

@@ -14,6 +14,7 @@
     using CloudPACS.Backend.Interfaces;
     using CloudPACS.Backend.Repositories;
     using Microsoft.AspNetCore.Server.Kestrel.Core;
+    using System.Text.Json.Serialization;
 
     public class Program
     {
@@ -70,7 +71,7 @@
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
-                    policy.WithOrigins(corsOriginsList)
+                    policy.WithOrigins("http://localhost:5174", "http://localhost:5173")
                           .AllowAnyHeader()
                           .AllowAnyMethod());
             });
@@ -110,7 +111,10 @@
             builder.Services.AddHttpContextAccessor();
 
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
             builder.Services.AddSingleton<AuditLogService>();
 

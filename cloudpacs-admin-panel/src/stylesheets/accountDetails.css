@@ -1,0 +1,253 @@
+.container {
+    width: 100%;
+}
+
+.account-details-main-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.account-details-top-bar {
+    background-color: white;
+}
+
+.navigation-to-client-accounts {
+    color: #4f46e5;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-align: left;
+    margin-top: 30px;
+    margin-left: 30px;
+}
+
+.side-by-side {
+    display: flex;
+    flex-direction: row;
+    text-align: left;
+    margin-top: 10px;
+    margin-left: 30px;
+}
+
+.client-account-name {
+    color: #0f172a;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-right: 10px;
+}
+
+.up-down {
+    display: flex;
+    flex-direction: column;
+}
+
+.tabs-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 28px;
+    background: #ffffff;
+    padding: 0 28px;
+    border-bottom: 1px solid #e6e9ee;
+    width: 100%;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 14px 2px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #9aa3b2;
+    margin-bottom: -1px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tab-btn:hover {
+    color: #5b6577;
+}
+
+.tab-btn.active {
+    color: #4f46e5;
+    border-bottom-color: #4f46e5;
+}
+
+.overview-section {
+    background-color: white;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    height: fit-content;
+    margin: 10px;
+    padding: 10px;
+    width: 100%;
+}
+
+.account-details {
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    margin: 20px;
+}
+
+.account-detail-subtitle {
+    color: #475569;
+    font-weight: 700;
+    text-align: left;
+}
+
+.storage-plan-section {
+    display: flex;
+    flex-direction: row;
+}
+
+.plan-option-selection {
+    display: flex;
+    flex-direction: column;
+}
+
+.status-option-selection {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start !important;
+}
+
+.storage-section-top{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 5px;
+}
+
+.plan-text{
+    font-size: 0.8rem;
+}
+
+#storage-progress-bar{
+    width: 100%;
+}
+
+.storage-section-bottom{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+#storage-input{
+    background-color: white;
+    color: #0f172a;
+    border: 2px solid #e2e8f0;
+    border-radius: 5px;
+    width: 3rem;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.save-storage-button{
+    background-color: white;
+    color: #4f46e5;
+    font-size: 0.8rem;
+    border: 2px solid rgb(199, 210, 254);
+    border-radius: 5px;
+    margin-left: 5px;
+    padding: 3px;
+}
+
+#status-change-button{
+    background-color: #4f46e5;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+}
+
+.overview-internal-notes-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.overview-internal-notes-input {
+    background-color: white;
+    color: #0f172a;
+    border: 2px solid #e2e8f0;
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.save-notes-button {
+    background-color: white;
+    color: #4f46e5;
+    font-size: 0.8rem;
+    border: 2px solid rgb(199, 210, 254);
+    border-radius: 5px;
+    width: 5rem;
+    padding: 1px;
+}
+
+
+
+
+
+
+.deletion-box{
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(252, 244, 245);
+    color: #7f1d1d;
+    border: 1.5px solid #fca5a5;
+    border-radius: 10px;
+    text-align: left;
+    padding: 20px;
+}
+
+.delete-header{
+    color: #991b1b;
+    font-weight: 700;
+}
+
+#deletion-info-list{
+    text-indent: 10px;
+    list-style-type: none
+}
+
+#delete-instruction{
+    color: #991b1b;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+#deletion-input{
+    background-color: white;
+    color: #0f172a;
+    border: 1.5px solid #fca5a5;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 0.7rem;
+    margin-bottom: 10px;
+}
+
+#delete-account-button{
+    background-color: rgb(189, 50, 48);
+    color: white;
+    font-weight: 700;
+    padding: 10px;
+    border-radius: 7px;
+    border: none;
+}
+
+#delete-account-button:disabled{
+    background-color: rgb(228, 157, 156);
+    color: white;
+    font-weight: 700;
+    padding: 10px;
+    border-radius: 7px;
+    border: none;
+}

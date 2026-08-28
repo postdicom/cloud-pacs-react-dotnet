@@ -14,7 +14,9 @@ namespace CloudPACS.Backend
         public string SeriesNumber { get; set; }
         public int NumberOfInstances { get; set; }
         public string SeriesInstanceUid { get; set; }
-        public Series(string id, string patientId, string patientName, string userId, string seriesId, string studyGuid, objectType objectType, string seriesInstanceUid, int numberOfInstances)
+        public string accountId { get; set; }
+        public Series(string id, string patientId, string patientName, string userId, string seriesId, string studyGuid,
+         objectType objectType, string seriesInstanceUid, int numberOfInstances, string accountId)
         {
             Id = id;
             PatientId = patientId;
@@ -25,6 +27,7 @@ namespace CloudPACS.Backend
             ObjectType = objectType;
             SeriesInstanceUid = seriesInstanceUid;
             NumberOfInstances = numberOfInstances;
+            this.accountId = accountId;
         }
     }
 }

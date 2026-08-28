@@ -18,7 +18,7 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Radiologist,Admin")]
+        [Authorize(Roles = "Radiologist,Admin,SuperAdmin")]
         public async Task<IActionResult?> GetPatients()
         {
             try

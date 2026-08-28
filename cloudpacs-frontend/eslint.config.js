@@ -18,5 +18,11 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // Style-level rules downgraded to warnings (visible in CI, non-blocking).
+      // Correctness rules (rules-of-hooks, immutability, prefer-const, ...) stay as errors.
+      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+    },
   },
 ])

@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import type { RenderingEngine } from "@cornerstonejs/core";
 import { useMutation } from "@tanstack/react-query";
 import api from "../queryClientProvider";
+import { API_BASE_URL } from "../config";
 import type { Report } from "../interfaces/Reports.tsx";
+import type { Study } from "../interfaces/Study.tsx";
+import type { Patient } from "../interfaces/Patient.tsx";
 
 interface AiReportPanelProps {
-  study: any;
-  patient: any;
+  study: Study;
+  patient: Patient;
   renderingEngineRef: React.RefObject<RenderingEngine | null>;
   viewportId: string;
   onReturnToDetails: () => void;
@@ -70,7 +73,7 @@ export default function AiReportPanel({
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://localhost:5001/api/v1/reports/generate", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/reports/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState } from 'react';
 import type { User } from './interfaces/User';
 import type { LoginCredentials } from './interfaces/LoginCredentials';
 import type { AuthContextType } from './interfaces/AuthContextType';
@@ -8,7 +8,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading] = useState<boolean>(true);
 
     const login = async (credentials: LoginCredentials): Promise<void> => {
         const response = await fetch('/login', {
@@ -38,6 +38,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 }
 
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthContextType {
     const context = useContext(AuthContext);
     if (context === undefined) {

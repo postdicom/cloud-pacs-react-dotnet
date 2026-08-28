@@ -24,7 +24,7 @@ namespace CloudPACS.Backend.Controllers
         private readonly IReportRepository reportRepository;
         private readonly AuditLogService auditLogService;
         public AccountController(IAccountRepository accountRepository, IUserRepository userRepository, IPatientRepository patientRepository,
-         IStudyRepository studyRepository, ISeriesRepository seriesRepository, IInstanceRepository instanceRepository, 
+         IStudyRepository studyRepository, ISeriesRepository seriesRepository, IInstanceRepository instanceRepository,
          IReportRepository reportRepository, AuditLogService auditLogService)
         {
             this.accountRepository = accountRepository;
@@ -72,11 +72,11 @@ namespace CloudPACS.Backend.Controllers
         {
             try
             {
+                await accountRepository.DeleteAccountByAccountIdAsync(accountId);
                 await instanceRepository.DeleteInstanceAsync(accountId);
                 await userRepository.DeleteUserByAccountIdAsync(accountId);
                 await studyRepository.DeleteStudyByAccountIdAsync(accountId);
                 await seriesRepository.DeleteSeriesByAccountIdAsync(accountId);
-                await accountRepository.DeleteAccountByAccountIdAsync(accountId);
                 await reportRepository.DeleteReportByAccountIdAsync(accountId);
                 await patientRepository.DeletePatientByAccountIdAsync(accountId);
                 await auditLogService.DeleteAduditLogByAccountIdAsync(accountId);

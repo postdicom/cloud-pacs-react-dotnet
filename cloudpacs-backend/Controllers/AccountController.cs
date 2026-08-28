@@ -75,7 +75,7 @@ namespace CloudPACS.Backend.Controllers
                 await instanceRepository.DeleteInstanceAsync(accountId);
                 await userRepository.DeleteUserByAccountIdAsync(accountId);
                 await studyRepository.DeleteStudyByAccountIdAsync(accountId);
-                await seriesRepository.DeleteStudyByAccountIdAsync(accountId);
+                await seriesRepository.DeleteSeriesByAccountIdAsync(accountId);
                 await accountRepository.DeleteAccountByAccountIdAsync(accountId);
                 await reportRepository.DeleteReportByAccountIdAsync(accountId);
                 await patientRepository.DeletePatientByAccountIdAsync(accountId);
@@ -106,7 +106,7 @@ namespace CloudPACS.Backend.Controllers
         }
 
         [HttpPost("{accountId}/updateInternalNotes/{newInternalNotes}")]
-        public async Task<IActionResult?> UpdateStorageLimit(string accountId, string newInternalNotes)
+        public async Task<IActionResult?> UpdateInternalNotes(string accountId, string newInternalNotes)
         {
             Account account = await accountRepository.GetAccount(accountId);
             await accountRepository.UpdateAccountAsync(account, account.TotalStorage, account.Status, newInternalNotes);

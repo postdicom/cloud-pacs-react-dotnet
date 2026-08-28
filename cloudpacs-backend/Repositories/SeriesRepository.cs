@@ -132,7 +132,7 @@ namespace CloudPACS.Backend
             }
         }
 
-        public async Task DeleteStudyByAccountIdAsync(string accountId)
+        public async Task DeleteSeriesByAccountIdAsync(string accountId)
         {
             try
             {

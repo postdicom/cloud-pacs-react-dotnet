@@ -10,6 +10,6 @@ namespace CloudPACS.Backend
         Task UpdateSeriesAsync(Series series, string id, string studyGuid, string userId, string patientId, string patientName);
         Task DeleteSeriesAsync(string id, string studyGuid);
         Task<List<Series>> FindSeriesAsync(string studyGuid);
-        Task DeleteStudyByAccountIdAsync(string accountId);
+        Task DeleteSeriesByAccountIdAsync(string accountId);
     }
 }

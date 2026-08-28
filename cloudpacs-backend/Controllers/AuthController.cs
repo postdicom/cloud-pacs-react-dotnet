@@ -90,7 +90,7 @@ namespace CloudPACS.Backend.Controllers
                     }
                     else
                     {
-                        return NotFound("The password doesn't match.");
+                        return NotFound("The email or password is wrong.");
                     }
                 }
                 return NotFound("The account doesn't exist.");

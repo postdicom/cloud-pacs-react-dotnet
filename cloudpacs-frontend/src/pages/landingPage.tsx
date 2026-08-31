@@ -20,7 +20,7 @@ export default function LandingPage() {
     const rootRef = useRef<HTMLDivElement>(null);
 
     // ─── Embla carousel setup ───
-    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 14 }); // was default (25) — now faster
+    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 14 });
     const [selectedIndex, setSelectedIndex] = useState(0);
 
     const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);

@@ -1,0 +1,163 @@
+.settings-container {
+    display: flex;
+    flex-flow: row wrap;
+    position: fixed;
+    width: 100%;
+    left: 0;
+    top: 0;
+    background-color: rgb(248, 250, 252);
+}
+
+.settings-main-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: row;
+    min-width: 0;
+    min-height: 0;
+}
+
+.settings-navigation {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 30%;
+    border-right: 1px solid #e2e8f0;
+    background-color: #f1f5f9;
+    padding: 20px;
+}
+
+.settings-pages {
+    width: 100%;
+    margin: 20px;
+}
+
+#settings-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+
+.settings-tab {
+    text-align: left;
+    border: none;
+    margin-top: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color: #475569;
+    background-color: transparent;
+}
+
+.profile-security-box {
+    margin: 10px;
+}
+
+.profile-security-box-title {
+    color: #0f2d5e;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.profile-security-box-input-box {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    padding: 20px;
+}
+
+.profile-security-box-subtitle {
+    color: #475569;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.profile-security-box-input {
+    border-radius: 5px;
+    border: 2px solid #e2e8f0;
+    margin-bottom: 10px;
+    padding: 3px;
+    text-indent: 5px;
+    font-size: 0.9rem;
+}
+
+.profile-security-box-input::placeholder {
+    color: rgb(168, 168, 168);
+}
+
+.profile-security-box-input:read-only {
+    border-radius: 5px;
+    border: 2px solid #e2e8f0;
+    margin-bottom: 10px;
+    padding: 3px;
+    background-color: #f1f5f9;
+    color: #94a3b8;
+}
+
+.profile-security-box-button {
+    background-color: #0ea5e9;
+    color: white;
+    font-weight: 700 !important;
+    border: none;
+    border-radius: 5px;
+    padding: 3px;
+    width: 30%;
+}
+
+
+
+
+.users-title {
+    color: #0f2d5e;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+.invite-new-user-box {
+    background-color: white;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    padding: 20px;
+}
+
+.new-user-detail-selection {
+    display: flex;
+    flex-direction: row;
+}
+
+#invite-user-title {
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 9px;
+}
+
+.user-addition-section {
+    margin-right: 15px;
+}
+
+.invite-user-subtitle {
+    color: #475569;
+    font-weight: 700;
+    font-size: 0.92rem;
+}
+
+.role-selection {
+    border-radius: 5px;
+    border: 2px solid #e2e8f0;
+    height: 31.5px;
+    margin-right: 10px;
+}
+
+#send-invitation-button {
+    background-color: #0ea5e9;
+    color: white;
+    font-weight: 700 !important;
+    border: none;
+    border-radius: 5px;
+    height: 30px;
+    padding-left: 5px;
+    padding-right: 5px;
+}

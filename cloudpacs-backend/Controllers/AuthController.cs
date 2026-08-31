@@ -54,13 +54,13 @@ namespace CloudPACS.Backend.Controllers
                     UserRole.Admin, // Set to radiologist to be able to upload
                     BCrypt.HashPassword(registerRequestDto.Password)
                 );
-                
+
                 await _accountRepository.AddAccountAsync(account);
-     
+
                 await _userRepository.AddUserAsync(user);
                 Console.WriteLine("Successfully saved!");
 
-                return Ok(new { success = true, message = "Account created."});
+                return Ok(new { success = true, message = "Account created." });
             }
             catch (Exception ex)
             {
@@ -93,7 +93,7 @@ namespace CloudPACS.Backend.Controllers
                         return NotFound("The email or password is wrong.");
                     }
                 }
-                return NotFound("The account doesn't exist.");
+                return NotFound("An account with this e-mail doesn't exist.");
             }
 
             catch (Exception ex)
@@ -131,7 +131,7 @@ namespace CloudPACS.Backend.Controllers
                         return NotFound("The password doesn't match.");
                     }
                 }
-                return NotFound("The account doesn't exist.");
+                return NotFound("An account with this e-mail doesn't exist.");
             }
 
             catch (Exception ex)
@@ -140,7 +140,6 @@ namespace CloudPACS.Backend.Controllers
                 return BadRequest();
             }
         }
-
         private async Task<string> GenerateToken(User user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("Jwt__SecretKey")));
@@ -163,10 +162,9 @@ namespace CloudPACS.Backend.Controllers
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(480),
                 signingCredentials: credentials);
-                
+
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
 
         [HttpGet]
         [Route("auditLog")]
@@ -185,6 +183,5 @@ namespace CloudPACS.Backend.Controllers
                 return null;
             }
         }
-
     }
 }

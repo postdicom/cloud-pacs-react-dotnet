@@ -1,0 +1,454 @@
+/* ─────────────────────────────────────────────────────────────
+   Scoped under .cloudpacs-landing — add this class to the root
+   <div> in LandingPage.tsx:
+     <div ref={rootRef} className="cloudpacs-landing">
+   No selector in this file targets the page outside that wrapper.
+   ───────────────────────────────────────────────────────────── */
+
+.cloudpacs-landing {
+  --sky:        #0ea5e9;
+  --sky-dark:   #0284c7;
+  --sky-light:  #38bdf8;
+  --sky-50:     #f0f9ff;
+  --sky-100:    #e0f2fe;
+  --navy:       #0f2d5e;
+  --heading:    #0f172a;
+  --body:       #475569;
+  --muted:      #64748b;
+  --border:     #e2e8f0;
+  --bg:         #ffffff;
+  --bg-subtle:  #f8fafc;
+  --bg-muted:   #f1f5f9;
+  --card-bg:    #ffffff;
+  --hero-bg:    #080e1c;
+
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--heading);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.cloudpacs-landing, .cloudpacs-landing *, .cloudpacs-landing *::before, .cloudpacs-landing *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+}
+.cloudpacs-landing a { text-decoration: none; color: inherit; }
+
+/* Note: `scroll-behavior: smooth` normally lives on <html> so anchor
+   links (#features, #team, etc.) scroll the whole page smoothly.
+   Scoping it to the wrapper won't affect page-level anchor scrolling.
+   If you want smooth anchor scrolling, add this once, globally, in
+   your app's base stylesheet instead:
+     html { scroll-behavior: smooth; }
+   That's a intentionally page-wide concern, not a landing-page style. */
+
+/* ─── NAV ─── */
+.cloudpacs-landing nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2.5rem; height: 64px;
+  background: rgba(8,14,28,0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.cloudpacs-landing .nav-brand {
+  font-size: 1.05rem; font-weight: 800; color: var(--sky);
+  letter-spacing: -0.3px; display: flex; align-items: center; gap: 0.5rem;
+}
+.cloudpacs-landing .nav-brand-dot {
+  width: 8px; height: 8px; border-radius: 100%;
+  background: var(--sky); display: inline-block;
+}
+.cloudpacs-landing .nav-brand span { color: rgba(255,255,255,0.35); font-weight: 400; font-size: 0.75rem; }
+.cloudpacs-landing .nav-links { display: flex; gap: 2rem; }
+.cloudpacs-landing .nav-links a { font-size: 0.82rem; color: rgba(255,255,255,0.55); font-weight: 500; transition: color 0.15s; }
+.cloudpacs-landing .nav-links a:hover { color: #fff; }
+.cloudpacs-landing .nav-github {
+  display: flex; align-items: center; gap: 0.4rem;
+  background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85);
+  font-size: 0.82rem; font-weight: 600;
+  padding: 0.45rem 1.1rem; border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.14);
+  transition: all 0.15s;
+}
+.cloudpacs-landing .nav-github:hover { background: rgba(255,255,255,0.16); color: #fff; border-color: rgba(255,255,255,0.25); }
+
+/* ─── HERO ─── */
+.cloudpacs-landing .hero {
+  padding: 5rem 2rem 5rem;
+  text-align: center;
+  background: var(--hero-bg);
+  position: relative; overflow: hidden;
+}
+.cloudpacs-landing .hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(14,165,233,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14,165,233,0.13) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 10%, black 0%, transparent 72%);
+  pointer-events: none;
+}
+.cloudpacs-landing .hero-glow {
+  position: absolute; top: -160px; left: 50%; transform: translateX(-50%);
+  width: 900px; height: 600px;
+  background: radial-gradient(ellipse at 50% 30%, rgba(14,165,233,0.22) 0%, rgba(14,165,233,0.06) 45%, transparent 70%);
+  pointer-events: none;
+}
+.cloudpacs-landing .hero-inner { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; }
+
+.cloudpacs-landing .hero-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.28);
+  color: var(--sky-light); font-size: 0.7rem; font-weight: 700;
+  padding: 0.32rem 0.9rem; border-radius: 100px;
+  text-transform: uppercase; letter-spacing: 0.09em;
+  margin-bottom: 1.75rem;
+}
+.cloudpacs-landing .hero-badge::before { content: ''; width: 6px; height: 6px; background: var(--sky-light); border-radius: 100%; }
+
+.cloudpacs-landing h1 {
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 900; line-height: 1.1; letter-spacing: -1.5px;
+  color: #ffffff; margin-bottom: 1.25rem;
+}
+.cloudpacs-landing h1 em { font-style: normal; color: var(--sky); }
+
+.cloudpacs-landing .hero-sub {
+  font-size: 1.05rem; color: rgba(255,255,255,0.58); max-width: 560px;
+  margin: 0 auto 2.25rem; line-height: 1.75; font-weight: 400;
+}
+
+/* intern author pills */
+.cloudpacs-landing .hero-authors {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2.25rem;
+}
+.cloudpacs-landing .hero-author {
+  display: flex; align-items: center; gap: 0.65rem;
+  background: var(--bg-subtle); border: 1px solid var(--border);
+  border-radius: 100px; padding: 0.35rem 1rem 0.35rem 0.35rem;
+}
+.cloudpacs-landing .author-avatar {
+  width: 44px; height: 44px; border-radius: 100%;
+  object-fit: cover; object-position: center top;
+  border: 2px solid var(--sky-100);
+  flex-shrink: 0; display: block;
+  box-shadow: 0 0 0 3px var(--sky-50);
+}
+.cloudpacs-landing .author-name { font-size: 0.78rem; font-weight: 700; color: var(--heading); line-height: 1.2; display: flex; align-items: center; gap: 0.4rem; }
+.cloudpacs-landing .author-uni  { font-size: 0.64rem; color: var(--muted); }
+.cloudpacs-landing .hero-authors-sep { color: #cbd5e1; font-size: 1.2rem; font-weight: 300; }
+.cloudpacs-landing .author-linkedin {
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--muted); transition: color 0.15s;
+}
+.cloudpacs-landing .author-linkedin:hover { color: #0a66c2; }
+
+.cloudpacs-landing .hero-btns { display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 4rem; flex-wrap: wrap; }
+.cloudpacs-landing .btn-primary {
+  background: var(--sky); color: white; font-size: 0.88rem; font-weight: 700;
+  padding: 0.72rem 1.6rem; border-radius: 8px; border: none; cursor: pointer;
+  transition: all 0.15s; display: inline-flex; align-items: center; gap: 0.4rem;
+  box-shadow: 0 1px 3px rgba(14,165,233,0.3), 0 4px 12px rgba(14,165,233,0.2);
+}
+.cloudpacs-landing .btn-primary:hover { background: var(--sky-dark); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(14,165,233,0.35); }
+.cloudpacs-landing .btn-secondary {
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85);
+  font-size: 0.88rem; font-weight: 600;
+  padding: 0.72rem 1.6rem; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15); cursor: pointer;
+  transition: all 0.15s;
+}
+.cloudpacs-landing .btn-secondary:hover { background: rgba(255,255,255,0.14); color: #fff; border-color: rgba(255,255,255,0.28); }
+
+/* ─── TECH STACK STRIP ─── */
+.cloudpacs-landing .stack-strip {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
+  padding: 1rem 2rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 0.4rem 0.5rem;
+}
+.cloudpacs-landing .stack-label { font-size: 0.65rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-right: 0.4rem; white-space: nowrap; }
+.cloudpacs-landing .stack-badge {
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--body); font-size: 0.7rem; font-weight: 500;
+  padding: 0.2rem 0.65rem; border-radius: 100px; white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+  position: relative;
+}
+.cloudpacs-landing .stack-badge:hover { border-color: var(--sky); color: var(--sky); background: var(--sky-50); }
+
+/* ─── SECTION LAYOUT ─── */
+.cloudpacs-landing .section { padding: 5.5rem 2rem; max-width: 1100px; margin: 0 auto; }
+.cloudpacs-landing .section-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--sky); margin-bottom: 0.65rem; }
+.cloudpacs-landing .section-title { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.6px; color: var(--heading); margin-bottom: 0.75rem; line-height: 1.2; }
+.cloudpacs-landing .section-sub   { font-size: 0.95rem; color: var(--body); line-height: 1.75; }
+
+/* ─── FEATURES ─── */
+.cloudpacs-landing #features { border-top: 1px solid var(--border); background: var(--bg); }
+.cloudpacs-landing .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin-top: 3rem; }
+.cloudpacs-landing .feat-card {
+  background: var(--bg-subtle); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.75rem;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  position: relative; overflow: hidden;
+}
+.cloudpacs-landing .feat-card::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--sky), transparent);
+  opacity: 0; transition: opacity 0.2s;
+}
+.cloudpacs-landing .feat-card:hover { border-color: rgba(14,165,233,0.35); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(14,165,233,0.07); }
+.cloudpacs-landing .feat-card:hover::after { opacity: 1; }
+.cloudpacs-landing .feat-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--sky-50); border: 1px solid var(--sky-100);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 1.1rem;
+}
+.cloudpacs-landing .feat-title { font-size: 0.98rem; font-weight: 700; color: var(--heading); margin-bottom: 0.5rem; }
+.cloudpacs-landing .feat-desc  { font-size: 0.82rem; color: var(--body); line-height: 1.72; margin-bottom: 1rem; }
+.cloudpacs-landing .feat-tags  { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.cloudpacs-landing .feat-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.63rem;
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--muted); padding: 0.15rem 0.5rem; border-radius: 4px;
+}
+
+/* ─── ARCHITECTURE ─── */
+.cloudpacs-landing #architecture { background: var(--bg-subtle); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.cloudpacs-landing #architecture .section-sub { max-width: none; }
+.cloudpacs-landing .arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: start; margin-top: 3rem; }
+.cloudpacs-landing .arch-diagram {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.cloudpacs-landing .arch-layer {
+  border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 0.55rem;
+  display: flex; align-items: center; gap: 0.75rem;
+  border: 1px solid transparent;
+}
+.cloudpacs-landing .arch-layer:last-child { margin-bottom: 0; }
+.cloudpacs-landing .arch-layer-icon {
+  width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.cloudpacs-landing .arch-layer-name { font-weight: 600; color: var(--heading); font-size: 0.8rem; }
+.cloudpacs-landing .arch-layer-tech { font-size: 0.67rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 0.1rem; }
+.cloudpacs-landing .arch-arrow { text-align: center; color: var(--muted); font-size: 0.7rem; margin: 0.15rem 0; }
+.cloudpacs-landing .layer-fe  { background: rgba(14,165,233,0.06); border-color: rgba(14,165,233,0.2); }
+.cloudpacs-landing .layer-be  { background: rgba(99,102,241,0.06); border-color: rgba(99,102,241,0.2); }
+.cloudpacs-landing .layer-db  { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.2); }
+.cloudpacs-landing .layer-ai  { background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.2); }
+.cloudpacs-landing .layer-ci  { background: rgba(239,68,68,0.04); border-color: rgba(239,68,68,0.15); }
+.cloudpacs-landing .icon-fe   { background: rgba(14,165,233,0.1); }
+.cloudpacs-landing .icon-be   { background: rgba(99,102,241,0.1); }
+.cloudpacs-landing .icon-db   { background: rgba(16,185,129,0.1); }
+.cloudpacs-landing .icon-ai   { background: rgba(245,158,11,0.1); }
+.cloudpacs-landing .icon-ci   { background: rgba(239,68,68,0.08); }
+.cloudpacs-landing .arch-points { display: flex; flex-direction: column; gap: 1.75rem; padding-top: 0.25rem; }
+.cloudpacs-landing .arch-point { border-left: 2px solid var(--sky-100); padding-left: 1rem; }
+.cloudpacs-landing .arch-point-title { font-size: 0.95rem; font-weight: 700; color: var(--heading); margin-bottom: 0.3rem; }
+.cloudpacs-landing .arch-point-desc  { font-size: 0.82rem; color: var(--body); line-height: 1.65; }
+
+/* ─── STATS ─── */
+.cloudpacs-landing #stats { background: var(--bg); border-top: 1px solid var(--border); }
+.cloudpacs-landing .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-top: 3rem; }
+.cloudpacs-landing .stat-card {
+  background: var(--bg-subtle); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.75rem; text-align: center;
+  border-top: 3px solid var(--sky-100);
+  transition: border-top-color 0.2s, transform 0.2s;
+}
+.cloudpacs-landing .stat-card:hover { border-top-color: var(--sky); transform: translateY(-2px); }
+.cloudpacs-landing .stat-num   { font-size: 2.8rem; font-weight: 900; color: var(--sky); letter-spacing: -2px; line-height: 1; margin-bottom: 0.5rem; }
+.cloudpacs-landing .stat-label { font-size: 0.8rem; font-weight: 600; color: var(--heading); line-height: 1.4; margin-bottom: 0.3rem; }
+.cloudpacs-landing .stat-sub   { font-size: 0.68rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; line-height: 1.5; }
+
+/* ─── SKILLS ─── */
+.cloudpacs-landing #skills { background: var(--bg-subtle); border-top: 1px solid var(--border); }
+.cloudpacs-landing .learn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-top: 3rem; }
+.cloudpacs-landing .learn-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.6rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.cloudpacs-landing .learn-card-title {
+  font-size: 0.88rem; font-weight: 700; color: var(--heading);
+  margin-bottom: 1rem; padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.cloudpacs-landing .learn-card-title::before {
+  content: ''; width: 8px; height: 8px; border-radius: 100%;
+  background: var(--sky); flex-shrink: 0;
+}
+.cloudpacs-landing .learn-card-items { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+.cloudpacs-landing .learn-card-items li { font-size: 0.78rem; color: var(--body); display: flex; align-items: baseline; gap: 0.45rem; line-height: 1.4; }
+.cloudpacs-landing .learn-card-items li::before { content: '→'; color: var(--sky); font-weight: 700; font-size: 0.7rem; flex-shrink: 0; }
+
+/* ─── FOOTER ─── */
+.cloudpacs-landing footer {
+  border-top: 1px solid var(--border);
+  background: var(--bg-subtle);
+  padding: 2rem 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 1rem;
+}
+.cloudpacs-landing .footer-brand { font-size: 0.88rem; font-weight: 800; color: var(--sky); margin-bottom: 0.2rem; }
+.cloudpacs-landing .footer-sub   { font-size: 0.72rem; color: var(--muted); }
+.cloudpacs-landing .footer-stack { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end; align-items: center; }
+.cloudpacs-landing .footer-tag   { font-size: 0.65rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.cloudpacs-landing .footer-tag::after { content: ' ·'; }
+.cloudpacs-landing .footer-tag:last-child::after { content: ''; }
+
+/* ─── CAROUSEL ─── */
+.cloudpacs-landing .carousel-wrapper { position: relative; max-width: 900px; margin: 0 auto; }
+.cloudpacs-landing .carousel-viewport {
+  overflow: hidden; border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.3),
+              0 20px 60px rgba(0,0,0,0.5),
+              0 0 80px rgba(14,165,233,0.14);
+  text-align: left;
+}
+.cloudpacs-landing .carousel-track { display: flex; transition: transform 0.45s cubic-bezier(0.4,0,0.2,1); will-change: transform; }
+.cloudpacs-landing .carousel-slide { flex: 0 0 100%; min-width: 100%; }
+.cloudpacs-landing .carousel-screenshot {
+  display: block; width: 100%; aspect-ratio: 16 / 9;
+  object-fit: cover; object-position: top center;
+  background: #0a0f1a;
+}
+.cloudpacs-landing .carousel-nav {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.85rem; margin-top: 1.1rem;
+}
+.cloudpacs-landing .carousel-dots { display: flex; gap: 0.4rem; align-items: center; }
+.cloudpacs-landing .carousel-dot {
+  width: 8px; height: 8px; border-radius: 100%;
+  background: rgba(255,255,255,0.2); border: none; cursor: pointer; padding: 0;
+  transition: all 0.25s; flex-shrink: 0;
+}
+.cloudpacs-landing .carousel-dot.active { background: var(--sky); width: 24px; border-radius: 4px; }
+.cloudpacs-landing .carousel-dot:hover:not(.active) { background: rgba(255,255,255,0.4); }
+.cloudpacs-landing .carousel-btn {
+  width: 30px; height: 30px; border-radius: 100%;
+  border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.55); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; transition: all 0.15s;
+}
+.cloudpacs-landing .carousel-btn:hover { border-color: var(--sky); color: var(--sky); background: rgba(14,165,233,0.1); }
+.cloudpacs-landing .carousel-label {
+  text-align: center; margin-top: 0.55rem;
+  font-size: 0.7rem; color: rgba(255,255,255,0.35); font-weight: 500;
+  min-height: 1.1em;
+}
+
+/* ─── HERO → LIGHT TRANSITION ─── */
+.cloudpacs-landing .hero-fade {
+  height: 80px;
+  background: linear-gradient(to bottom, var(--hero-bg) 0%, var(--bg-subtle) 100%);
+}
+
+/* ─── STACK BADGE TOOLTIPS ─── */
+.cloudpacs-landing .stack-badge[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 7px); left: 50%;
+  transform: translateX(-50%); white-space: nowrap;
+  background: #0f172a; color: #f1f5f9;
+  font-size: 0.62rem; font-family: 'Inter', sans-serif; font-weight: 500;
+  padding: 0.32rem 0.65rem; border-radius: 6px;
+  pointer-events: none; opacity: 0; z-index: 50;
+  transition: opacity 0.15s;
+}
+.cloudpacs-landing .stack-badge[data-tip]::before {
+  content: '';
+  position: absolute; bottom: calc(100% + 3px); left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent; border-top-color: #0f172a;
+  pointer-events: none; opacity: 0;
+  transition: opacity 0.15s;
+}
+.cloudpacs-landing .stack-badge[data-tip]:hover::after,
+.cloudpacs-landing .stack-badge[data-tip]:hover::before { opacity: 1; }
+
+/* ─── SCROLL REVEAL ─── */
+.cloudpacs-landing .reveal {
+  opacity: 0; transform: translateY(22px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.cloudpacs-landing .reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ─── TEAM SECTION ─── */
+.cloudpacs-landing #team { background: var(--bg); border-top: 1px solid var(--border); }
+.cloudpacs-landing .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 3rem; }
+.cloudpacs-landing .team-card {
+  background: var(--bg-subtle); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.75rem;
+}
+.cloudpacs-landing .team-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+.cloudpacs-landing .team-photo {
+  width: 60px; height: 60px; border-radius: 100%;
+  object-fit: cover; object-position: center top;
+  border: 2px solid var(--sky-100);
+  box-shadow: 0 0 0 3px var(--sky-50);
+  flex-shrink: 0;
+}
+.cloudpacs-landing .team-name { font-size: 0.92rem; font-weight: 700; color: var(--heading); margin-bottom: 0.15rem; }
+.cloudpacs-landing .team-uni  { font-size: 0.7rem; color: var(--muted); margin-bottom: 0.35rem; }
+.cloudpacs-landing .team-linkedin {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.68rem; font-weight: 600; color: var(--muted); transition: color 0.15s;
+}
+.cloudpacs-landing .team-linkedin:hover { color: #0a66c2; }
+.cloudpacs-landing .team-quote { border-left: 3px solid var(--sky-100); padding-left: 1rem; margin: 0; }
+.cloudpacs-landing .team-quote p { font-size: 0.85rem; color: var(--body); line-height: 1.75; font-style: italic; }
+.cloudpacs-landing .team-quote-note { font-size: 0.65rem; color: var(--muted); margin-top: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+
+/* ─── MENTOR BLOCK ─── */
+.cloudpacs-landing .mentor-block {
+  margin-top: 3rem; background: var(--sky-50);
+  border: 1px solid var(--sky-100); border-radius: 16px;
+  padding: 2.5rem; text-align: center;
+}
+.cloudpacs-landing .mentor-quote-mark {
+  display: block; font-size: 4.5rem; line-height: 0.85;
+  color: var(--sky-100); font-family: Georgia, serif; font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.cloudpacs-landing .mentor-quote-text {
+  font-size: 1.05rem; font-weight: 500; color: var(--heading);
+  line-height: 1.8; max-width: 680px; margin: 0 auto 1.75rem;
+  font-style: italic;
+}
+.cloudpacs-landing .mentor-attribution {
+  display: inline-flex; align-items: center; gap: 0.75rem;
+}
+.cloudpacs-landing .mentor-avatar {
+  width: 44px; height: 44px; border-radius: 100%;
+  background: var(--sky-100); border: 2px solid rgba(14,165,233,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 900; color: var(--sky-dark);
+  flex-shrink: 0; letter-spacing: -0.5px;
+}
+.cloudpacs-landing .mentor-name  { font-size: 0.88rem; font-weight: 700; color: var(--heading); text-align: left; }
+.cloudpacs-landing .mentor-title { font-size: 0.7rem; color: var(--muted); text-align: left; }
+
+@media (max-width: 768px) {
+  .cloudpacs-landing h1 { font-size: 2.3rem; letter-spacing: -1px; }
+  .cloudpacs-landing .features-grid { grid-template-columns: 1fr; }
+  .cloudpacs-landing .arch-grid { grid-template-columns: 1fr; }
+  .cloudpacs-landing .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .cloudpacs-landing .learn-grid { grid-template-columns: 1fr; }
+  .cloudpacs-landing .team-grid { grid-template-columns: 1fr; }
+  .cloudpacs-landing .nav-links { display: none; }
+  .cloudpacs-landing footer { flex-direction: column; align-items: flex-start; }
+  .cloudpacs-landing .footer-stack { justify-content: flex-start; }
+  .cloudpacs-landing .hero-authors { flex-direction: column; }
+  .cloudpacs-landing .hero-authors-sep { display: none; }
+}

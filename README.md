@@ -3,21 +3,22 @@ Mini Cloud PACS is a production-grade cloud medical imaging platform designed fo
 CloudPACS: A clinical interface for managing patients, studies, series, and instances, featuring an interactive in-browser DICOM viewer and AI-assisted reporting. 
 
 PostDICOM Console: A dedicated internal administration tool used to manage client accounts, monitor storage quotas, and handle user access across the platform. Built with strict adherence to IEC 62304 (Software as a Medical Device) and GDPR standards, this project prioritizes data privacy, role-based access control, and complete audit traceability.
-![App screenshot](Images/adminPanel.jpg)
+![App screenshot](Images/AdminPanel.jpg)
 
 Key Features:
 Interactive DICOM Viewer: Integrates Cornerstone3D for advanced in-browser rendering of `.dcm` files, supporting interactive window/level adjustments, zoom, pan, and series navigation without leaving the application. The data shown below is anonimized in order to comply with GDPR and HIPAA
-![App screenshot](Images/dicomViewer.png)
+![App screenshot](Images/DicomViewer.png)
 
 Privacy-First AI Reporting: Utilizes a local LLM (llama3.3:70b) via Ollama and Microsoft Semantic Kernel to generate structured radiology report drafts. Clinical context is processed entirely on-premise, ensuring zero patient identifiers are sent to external AI services.
 ![App screenshot](Images/AIReport.png)
 
 Robust DICOM Pipeline: Features a drag-and-drop upload interface that leverages `fo-dicom` to parse raw binary files and extract DICOM tags. Structured metadata is indexed in Azure CosmosDB, while binary blobs are securely stored in Azure Blob Storage and accessed via time-limited SAS URLs.
+![App screenshot](Images/Upload.png)
 
 Multi-Tenant Architecture: Employs CosmosDB partition keys (e.g., partitioning by `accountId` or `customerId`) to isolate tenant data efficiently, preventing cross-tenant data leakage while maintaining sub-millisecond query performance.
-![App screenshot](partitionKeys.png)
 
 IEC 62304 & GDPR Compliance: Implements rigorous Role-Based Access Control (Admin, Radiologist, Viewer) via JWT claims and comprehensive audit logging. Every image view, file upload, deletion, and AI report generation is tracked with user IDs, timestamps, and IP addresses.
+![App screenshot](Images/UnauthorizedPage.png)
 
 Tech Stack
 Frontend: React 18, TypeScript, Vite, Material UI (MUI v5), TanStack Query, React Hook Form, Cornerstone3D.

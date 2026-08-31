@@ -12,7 +12,7 @@ import NotFound from './pages/pageNotFound';
 import UnAuthorized from './pages/unAuthorizedWarning';
 import AdminLogin from './pages/adminPanel/adminLogin';
 import Dashboard from './pages/adminPanel/dashboard';
-
+import LandingPage from './pages/landingPage';
 function App() {
   const [files, setFiles] = useState<File[]>([]);
   return (
@@ -30,9 +30,11 @@ function App() {
           </Route>
           <Route path="/Register" element={<Register />}></Route>
           <Route path="/Login" element={<Login />}></Route>
+          <Route path="/" element={<LandingPage />}></Route>
           <Route path="/UnAuthorized" element={<UnAuthorized />}></Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
+        
 
     </>
   )
